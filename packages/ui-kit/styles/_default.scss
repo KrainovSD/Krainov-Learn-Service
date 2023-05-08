@@ -1,0 +1,117 @@
+* {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+*,
+*::before,
+*::after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+:focus,
+:active {
+  outline: none;
+}
+a:focus,
+a:active {
+  outline: none;
+}
+nav,
+footer,
+header,
+aside {
+  display: block;
+}
+html,
+body {
+  height: 100%;
+  width: 100%;
+  font-size: 100%;
+  line-height: 1;
+  font-size: 14px;
+  -ms-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+input,
+button,
+textarea {
+  font-family: inherit;
+}
+input::-ms-clear {
+  display: none;
+}
+button {
+  cursor: pointer;
+}
+button::-moz-focus-inner {
+  padding: 0;
+  border: 0;
+}
+a,
+a:visited {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: none;
+}
+ul li {
+  list-style: none;
+}
+img {
+  vertical-align: top;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: 400;
+}
+/*
+  1. Убирает все лишние отсупы у всех тегов
+  2. Расчет алгаритма ширины блока включает значение полей(padding), границ(border), но не отступов(margin)
+  3. Убирает обводку при фокусе и нажатии
+  4. Убирает обводку у ссылки при фокусе и нажатии
+  5. Делает теги блочным элементом
+  6. Устанавливает для страницы: полный размер, размер текста, расстояние между строк установлено по размеру шрифта, отключает на мобильных браузеров автоматическое масштабирование текста на маленьких экранах
+  7. Наследует шрифт у родителя в тегах ввода
+  8. Убирает в IE крестик при вводе информации в input
+  9. Устанавливает для всех кнопок иной курсор
+  10. Убирает в Mozzila отступы у кнопок
+  11,12. Убирает у ссылок подчеркивание
+  13. Убирает у маркированного списка стиль маркера
+  14. Выравнивает картинку по верхнему краю
+  15. Обнуляет стили заголовков
+  */
+body {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* Отключает возможность выделения элементов страницы*/
+
+a {
+  color: inherit;
+}
+body {
+  overflow-x: hidden;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  transition: background-color 0s ease-in-out 5000s;
+}
+/* отключение стиля авто заполнения в браузере */

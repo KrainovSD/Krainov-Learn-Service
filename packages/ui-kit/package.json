@@ -1,0 +1,41 @@
+{
+  "name": "@krainov/ui-kit",
+  "version": "0.0.1",
+  "description": "Krainov Service UI-kit",
+  "private": true,
+  "author": "KrainovSD <denislosev48@gmail.com>",
+  "license": "ISC",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "storybook dev -p 6006",
+    "build": "storybook build",
+    "next": "next dev"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "^7.0.9",
+    "@storybook/addon-interactions": "^7.0.9",
+    "@storybook/addon-links": "^7.0.9",
+    "@storybook/blocks": "^7.0.9",
+    "@storybook/nextjs": "^7.0.9",
+    "@storybook/react": "^7.0.9",
+    "@types/node": "^20.1.0",
+    "@types/react": "^18.2.6",
+    "@types/react-dom": "^18.2.4",
+    "eslint": "^8.40.0",
+    "eslint-config-next": "^13.4.1",
+    "eslint-plugin-storybook": "^0.6.12",
+    "sass": "^1.62.1",
+    "sass-loader": "^13.2.2",
+    "storybook": "^7.0.9",
+    "storybook-addon-next": "^1.8.0",
+    "storybook-dark-mode": "^3.0.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "clsx": "^1.2.1",
+    "dayjs": "^1.11.7",
+    "next": "^13.4.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "@krainov/site",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Krainov Service для изучения английского языка",
+  "author": "KrainovSD <denislosev48@gmail.com>",
+  "license": "ISC",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@krainov/ui-kit": "^0.0.1",
+    "@krainov/utils": "^0.0.1",
+    "@reduxjs/toolkit": "^1.9.5",
+    "axios": "^1.4.0",
+    "clsx": "^1.2.1",
+    "dayjs": "^1.11.7",
+    "next": "^13.4.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.0.5",
+    "sass": "^1.62.1",
+    "sass-loader": "^13.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.1.0",
+    "@types/react": "^18.2.6",
+    "@types/react-dom": "^18.2.4",
+    "eslint": "^8.40.0",
+    "eslint-config-next": "^13.4.1",
+    "typescript": "^5.0.4"
+  }
+}

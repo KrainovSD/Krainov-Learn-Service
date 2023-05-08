@@ -1,0 +1,22 @@
+{
+  "name": "krainov",
+  "private": true,
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "start:ui-kit": "lerna run --scope @krainov/ui-kit --stream dev",
+    "start:site": "lerna run --scope @krainov/site --stream dev",
+    "build:ui-kit": "lerna run --scope @krainov/ui-kit --stream build",
+    "build:site": "lerna run --scope @krainov/site --stream build",
+    "start:ui-kit-next": "lerna run --scope @krainov/ui-kit --stream next",
+    "start:utils-next": "lerna run --scope @krainov/utils --stream next",
+    "start:api-dev": "lerna run --scope @krainov/api --stream start:dev",
+    "start:api": "lerna run --scope @krainov/api --stream start",
+    "build:api": "lerna run --scope @krainov/api --stream build"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "lerna": "^6.6.1"
+  }
+}
