@@ -1,6 +1,9 @@
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { AppModule } from './app.module'
+import { ValidationPipe } from './utils/pipes/validation.pipe'
+import { TrimPipe } from './utils/pipes/trim.pipe'
+import cookieParser from 'cookie-parser'
 
 async function start() {
   const PORT = process.env.PORT || 3000
@@ -14,6 +17,9 @@ async function start() {
 
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api/docs', app, document)
+
+  app.useGlobalPipes(new TrimPipe(), new ValidationPipe())
+  app.use(cookieParser())
 
   await app.listen(PORT, () => console.log(`server started at port = ${PORT}`))
 }
