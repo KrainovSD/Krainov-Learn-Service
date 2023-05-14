@@ -1,7 +1,6 @@
 import { User } from './../users/users.model'
 import { ApiProperty } from '@nestjs/swagger'
 import {
-  BelongsTo,
   Column,
   DataType,
   ForeignKey,
@@ -10,7 +9,7 @@ import {
 } from 'sequelize-typescript'
 
 type StatisticCreationArgs = {
-  userID: number
+  userId: number
 }
 
 @Table({ tableName: 'statistics', createdAt: false, updatedAt: false })
@@ -33,7 +32,7 @@ export class Statistic extends Model<Statistic, StatisticCreationArgs> {
     type: DataType.INTEGER,
     allowNull: false,
   })
-  userID!: number
+  userId!: number
 
   @ApiProperty({
     example: 10,

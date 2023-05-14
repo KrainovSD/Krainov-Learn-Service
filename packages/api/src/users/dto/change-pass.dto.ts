@@ -1,15 +1,15 @@
-import { IsNotEmpty, IsString, Length } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
+import { IsNotEmpty, IsString, Length } from 'class-validator'
 
-export class LoginDto {
+export class ChangePassDto {
   @ApiProperty({
-    example: 'Krainov',
-    description: 'Адрес электронной почты или псевдоним',
+    example: '242452',
+    description: 'Уникальный ключ',
     required: true,
   })
   @IsNotEmpty({ message: 'Не должно быть пустым' })
   @IsString({ message: 'Должно быть строкой' })
-  readonly login!: string
+  readonly key!: string
 
   @ApiProperty({
     example: '123425',

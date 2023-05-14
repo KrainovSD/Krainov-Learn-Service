@@ -1,3 +1,4 @@
+import { SettingsModule } from './settings/settings.module'
 import { StatisticsModule } from './statistics/statistics.module'
 import { UsersModule } from './users/users.module'
 import { AuthModule } from './auth/auth.module'
@@ -6,10 +7,12 @@ import { ConfigModule } from '@nestjs/config'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { User } from './users/users.model'
 import { Statistic } from './statistics/statistics.model'
+import { Settings } from './settings/settings.model'
 
 @Module({
   controllers: [],
   imports: [
+    SettingsModule,
     StatisticsModule,
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`,
@@ -21,7 +24,7 @@ import { Statistic } from './statistics/statistics.model'
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [User, Statistic],
+      models: [User, Statistic, Settings],
       autoLoadModels: true,
     }),
     UsersModule,

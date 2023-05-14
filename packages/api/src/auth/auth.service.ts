@@ -6,7 +6,6 @@ import {
 import { JwtService } from '@nestjs/jwt'
 import { CreateUserDto } from 'src/users/dto/create-user.dto'
 import { UsersService } from 'src/users/users.service'
-import { HasPropertyException } from 'src/utils/exceptions/hasProperty.exception'
 import * as bcrypt from 'bcryptjs'
 import { getRandomString } from 'src/utils/helpers'
 import { ConfirmDto } from './dto/confirm.dto'
@@ -14,9 +13,12 @@ import { MailerService } from '@nestjs-modules/mailer'
 import { LoginDto } from './dto/login.dto'
 import { User } from 'src/users/users.model'
 import {
+  ERROR_MESSAGES,
   EXPIRES_ACCESS_TOKEN,
   EXPIRES_REFRESH_TOKEN,
-  LINK_TO_CONFIRM,
+  MAIL_MESSAGES_OPTION,
+  REQUEST_MESSAGES,
+  SALT_ROUNDS,
 } from '../const'
 
 export type UserInfo = {
@@ -36,20 +38,20 @@ export class AuthService {
   async register(userDto: CreateUserDto) {
     await this.checkUniqueEmailAndNickName(userDto)
     const createUserDto = await this.getCreateUserDto(userDto)
-    const user = await this.userService.createUser(createUserDto)
+    await this.userService.createUser(createUserDto)
     await this.sendMail(
-      'Активация аккаунта',
-      'Чтобы подтвердить свой Email на Krainov Learn Service и активировать аккаунт, пройдите по ссылке',
-      `${LINK_TO_CONFIRM}/${createUserDto.emailChangeKey}`,
+      MAIL_MESSAGES_OPTION.regiser.title,
+      MAIL_MESSAGES_OPTION.regiser.message,
+      createUserDto.emailChangeKey,
       createUserDto.emailToChange,
     )
-    return user
+    return REQUEST_MESSAGES.sendEmail
   }
   private async checkUniqueEmailAndNickName(userDto: CreateUserDto) {
     const userByEmail = await this.userService.getUserByEmail(userDto.email)
     if (userByEmail) {
       if (userByEmail.confirmed) {
-        throw new HasPropertyException('адрес электронной почты')
+        throw new BadRequestException(ERROR_MESSAGES.hasEmail)
       }
       await this.userService.deleteUserById(userByEmail.id)
     }
@@ -58,13 +60,13 @@ export class AuthService {
     )
     if (userByNickName) {
       if (userByNickName.confirmed) {
-        throw new HasPropertyException('псевдоним')
+        throw new BadRequestException(ERROR_MESSAGES.hasNickName)
       }
       await this.userService.deleteUserById(userByNickName.id)
     }
   }
   private async getCreateUserDto(userDto: CreateUserDto) {
-    const hash = await bcrypt.hash(userDto.password, 10)
+    const hash = await bcrypt.hash(userDto.password, SALT_ROUNDS)
     const registrationDate = new Date()
     const emailChangeTime = new Date()
     emailChangeTime.setFullYear(emailChangeTime.getFullYear() + 1)
@@ -88,9 +90,7 @@ export class AuthService {
       (user && user?.emailChangeTime && user.emailChangeTime < new Date()) ||
       !user?.emailToChange
     )
-      throw new BadRequestException(
-        'Ключ не корректен или истекло время операции',
-      )
+      throw new BadRequestException(ERROR_MESSAGES.badKeyOrTime)
     user.confirmed = true
     user.email = user.emailToChange.toLowerCase()
     user.emailToChange = null
@@ -98,7 +98,7 @@ export class AuthService {
     user.emailChangeKey = null
     user.emailChangeTime = null
     await user.save()
-    return user
+    return REQUEST_MESSAGES.success
   }
 
   async login(loginDto: LoginDto) {
@@ -146,15 +146,15 @@ export class AuthService {
   private async sendMail(
     subject: string,
     text: string,
-    link: string,
+    code: string,
     email: string,
   ) {
     await this.mailerService.sendMail({
       to: email,
       from: process.env.MAIL_LOGIN,
       subject,
-      text: `${text.trim()}: ${link.trim()}`,
-      html: `${text.trim()}: <a href=${link.trim()}>Подтвердить</a>`,
+      text: `${text.trim()}: ${code.trim()}`,
+      html: `${text.trim()}: ${code.trim()}`,
     })
   }
   private async generateToken(user: User, type: 'refresh' | 'access') {

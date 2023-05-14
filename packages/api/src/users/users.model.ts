@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Column, DataType, HasOne, Model, Table } from 'sequelize-typescript'
+import { Settings } from 'src/settings/settings.model'
 import { Statistic } from 'src/statistics/statistics.model'
 
 export interface UserCreationArgs {
@@ -220,4 +221,7 @@ export class User extends Model<User, UserCreationArgs> {
 
   @HasOne(() => Statistic)
   statistic!: Statistic
+
+  @HasOne(() => Settings)
+  settings!: Settings
 }
