@@ -8,9 +8,7 @@ export function getRandomString() {
   return text
 }
 
-type TObject = {
-  [key: string]: any
-}
+type TObject = Record<string, any>
 
 export const checkTypes = {
   isObject: (obj: any): obj is TObject => {
@@ -20,8 +18,13 @@ export const checkTypes = {
     return false
   },
   isString: (value: any): value is string => {
-    if (value && typeof value === 'string' && value !== '') return true
-    return false
+    return value && typeof value === 'string' && value !== ''
+  },
+  isNumber: (value: any): value is number => {
+    return value && typeof value === 'number'
+  },
+  isBoolean: (value: any): value is boolean => {
+    return value && typeof value === 'boolean'
   },
   custom: <T>(value: any, condition: boolean): value is T => {
     return condition

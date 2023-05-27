@@ -1,14 +1,11 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import { Observable } from 'rxjs'
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common'
+import { UserInfo } from 'src/auth/auth.service'
+import { ForbiddenException } from '../exceptions/forbidden.exception'
+import { JwtService } from '@nestjs/jwt'
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class SubscribeGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
   canActivate(
     context: ExecutionContext,
@@ -22,13 +19,19 @@ export class AuthGuard implements CanActivate {
       const bearer = authInfo[0]
       const token = authInfo[1]
       if (bearer !== 'Bearer') throw new Error()
-      const user = this.jwtService.verify(token, {
+      const user = this.jwtService.verify<UserInfo>(token, {
         secret: process.env.ACCESS_TOKEN_SECRET,
       })
+      console.log(user)
+      if (
+        !user.subscription ||
+        (user.subscription && user.subscription < new Date())
+      )
+        throw new Error()
       req.user = user
       return true
     } catch (e) {
-      throw new UnauthorizedException()
+      throw new ForbiddenException()
     }
   }
 }

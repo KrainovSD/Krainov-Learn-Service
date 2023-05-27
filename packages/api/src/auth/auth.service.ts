@@ -24,7 +24,7 @@ import {
 export type UserInfo = {
   id: number
   role: string
-  subscription: string
+  subscription: Date
 }
 
 @Injectable()

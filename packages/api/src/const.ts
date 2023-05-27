@@ -34,6 +34,7 @@ export const ERROR_MESSAGES = {
   hasNickName: 'Указанный вами псевдоним уже используется другим пользователем',
   hasEmail:
     'Указанный вами адрес электронной почты уже используется другим пользователем',
+  changeNickName: 'Менять псевдоним можно не чаще, чем раз в месяц',
 }
 export const MAIL_MESSAGES_OPTION = {
   changePassword: {

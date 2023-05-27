@@ -219,6 +219,17 @@ export class User extends Model<User, UserCreationArgs> {
   })
   emailToChange!: string | null
 
+  @ApiProperty({
+    example: '2004-10-19 10:23:54+02',
+    description: 'Дата последней смены псевдонима пользователя',
+  })
+  @Column({
+    type: DataType.DATE,
+    defaultValue: null,
+    allowNull: true,
+  })
+  nickNameChangeDate!: Date | null
+
   @HasOne(() => Statistic)
   statistic!: Statistic
 

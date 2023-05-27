@@ -41,6 +41,7 @@ export class UsersService {
     'passwordChangeDate',
     'emailChangeDate',
     'emailToChange',
+    'nickNameChangeDate',
   ]
 
   async callChangePass(email: string) {
@@ -95,7 +96,7 @@ export class UsersService {
   }
 
   async callChangeEmail(userId: number) {
-    const user = await this.getUserById(userId, true)
+    const user = await this.getUserUserByIdService(userId)
 
     if (!user) throw new BadRequestException('Пользователь не найден')
 
@@ -156,6 +157,23 @@ export class UsersService {
     return REQUEST_MESSAGES.sendNewEmail
   }
 
+  async changeNickName(nickName: string, userId: number) {
+    const user = await this.getUserUserByIdService(userId)
+    if (!user) throw new BadRequestException('Пользователь не найден')
+    if (user.nickNameChangeDate) {
+      const lastDateChange = user.nickNameChangeDate
+      lastDateChange.setMonth(lastDateChange.getMonth() + 1)
+      if (lastDateChange > new Date())
+        throw new BadRequestException(ERROR_MESSAGES.changeNickName)
+    }
+    await this.checkUniqueNickName(nickName)
+
+    user.nickName = nickName
+    user.nickNameChangeDate = new Date()
+    await user.save()
+    return REQUEST_MESSAGES.success
+  }
+
   async createUser(dto: UserCreationArgs) {
     const user = await this.userRepo.create(dto)
     const statistic = await this.statisticService.createStatistic(user.id)
@@ -173,12 +191,17 @@ export class UsersService {
     const user = await this.userRepo.findOne({ where: { nickName } })
     return user
   }
+  async getUserUserByIdService(id: number) {
+    const user = await this.userRepo.findByPk(id, {
+      include: [Settings, Statistic],
+    })
+    return user
+  }
   async getUserById(id: number, privateFields: boolean = false) {
     const user = await this.userRepo.findByPk(id, {
       attributes: {
         exclude: privateFields
-          ? //FIXME: Исправить после отладки  ? this.forbiddenFields (при смене email нужны эти филды)
-            []
+          ? this.forbiddenFields
           : [...this.forbiddenFields, ...this.privateFields],
       },
       include: [Settings, Statistic],

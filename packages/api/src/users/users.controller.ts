@@ -15,6 +15,8 @@ import { UserInfo } from 'src/auth/auth.service'
 import { CallChangePassDto } from './dto/call-change-pass.dto'
 import { ChangePassDto } from './dto/change-pass.dto'
 import { ChangeEmailDto } from './dto/change-email.dto'
+import { ChangeNickNameDto } from './dto/change-nick-name.dto'
+import { SubscribeGuard } from 'src/utils/guards/subscription.guard'
 
 @Controller('/api/user')
 export class UsersController {
@@ -53,5 +55,14 @@ export class UsersController {
     @Req() request: Request & { user: UserInfo },
   ) {
     return this.userServise.changeEmail(dto, request.user.id)
+  }
+
+  @UseGuards(SubscribeGuard)
+  @Put('/nickName')
+  changeNickName(
+    @Body() dto: ChangeNickNameDto,
+    @Req() request: Request & { user: UserInfo },
+  ) {
+    return this.userServise.changeNickName(dto.nickName, request.user.id)
   }
 }
