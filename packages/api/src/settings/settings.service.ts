@@ -6,7 +6,7 @@ import {
 import { InjectModel } from '@nestjs/sequelize'
 import { Settings } from './settings.model'
 import { UpdateSettingsDto } from './dto/update-settings.dto'
-import { ERROR_MESSAGES, REQUEST_MESSAGES } from 'src/const'
+import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { checkTypes, _ } from 'src/utils/helpers'
 
 @Injectable()
@@ -30,7 +30,7 @@ export class SettingsService {
       throw new BadRequestException('Неизвестные настройки')
     }
     await settings.save()
-    return REQUEST_MESSAGES.success
+    return RESPONSE_MESSAGES.success
   }
 
   async createSettings(userId: number) {

@@ -7,12 +7,13 @@ import { StatisticsService } from 'src/statistics/statistics.service'
 import { SettingsService } from 'src/settings/settings.service'
 import { Settings } from 'src/settings/settings.model'
 import { MailerService } from '@nestjs-modules/mailer'
-import { getRandomString } from 'src/utils/helpers'
+import { fsAsync, getRandomString } from 'src/utils/helpers'
 import {
   ERROR_MESSAGES,
   MAIL_MESSAGES_OPTION,
-  REQUEST_MESSAGES,
+  RESPONSE_MESSAGES,
   SALT_ROUNDS,
+  UPLOAD_PATH,
 } from 'src/const'
 import { ChangePassDto } from './dto/change-pass.dto'
 import bcrypt from 'bcryptjs'
@@ -72,7 +73,7 @@ export class UsersService {
     //   email,
     // )
 
-    return REQUEST_MESSAGES.sendEmail
+    return RESPONSE_MESSAGES.sendEmail
   }
   async changePass(dto: ChangePassDto) {
     const user = await this.getUserByPasswordChangeKey(dto.key)
@@ -92,7 +93,7 @@ export class UsersService {
     user.passwordChangeTime = null
     await user.save()
 
-    return REQUEST_MESSAGES.success
+    return RESPONSE_MESSAGES.success
   }
 
   async callChangeEmail(userId: number) {
@@ -123,7 +124,7 @@ export class UsersService {
     //   user.email,
     // )
 
-    return REQUEST_MESSAGES.sendEmail
+    return RESPONSE_MESSAGES.sendEmail
   }
   async changeEmail(dto: ChangeEmailDto, userId: number) {
     const user = await this.getUserByEmailChangeKey(dto.key)
@@ -154,7 +155,7 @@ export class UsersService {
     //   user.emailToChange,
     // )
 
-    return REQUEST_MESSAGES.sendNewEmail
+    return RESPONSE_MESSAGES.sendNewEmail
   }
 
   async changeNickName(nickName: string, userId: number) {
@@ -171,7 +172,41 @@ export class UsersService {
     user.nickName = nickName
     user.nickNameChangeDate = new Date()
     await user.save()
-    return REQUEST_MESSAGES.success
+    return RESPONSE_MESSAGES.success
+  }
+
+  async clearAvatar(userId: number) {
+    const user = await this.getUserById(userId)
+    if (!user || !user.avatar)
+      throw new BadRequestException(ERROR_MESSAGES.userNotFound)
+    await fsAsync.removeFile(UPLOAD_PATH, user.avatar)
+    user.avatar = null
+    await user.save()
+    return RESPONSE_MESSAGES.success
+  }
+  async updateAvatar(file: Express.Multer.File, userId: number) {
+    const user = await this.getUserById(userId)
+    if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
+    user.avatar = file.filename
+    await user.save()
+    return RESPONSE_MESSAGES.success
+  }
+
+  async clearWallpaper(userId: number) {
+    const user = await this.getUserById(userId)
+    if (!user || !user.wallpaper)
+      throw new BadRequestException(ERROR_MESSAGES.userNotFound)
+    await fsAsync.removeFile(UPLOAD_PATH, user.wallpaper)
+    user.wallpaper = null
+    await user.save()
+    return RESPONSE_MESSAGES.success
+  }
+  async updateWallpaper(file: Express.Multer.File, userId: number) {
+    const user = await this.getUserById(userId)
+    if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
+    user.wallpaper = file.filename
+    await user.save()
+    return RESPONSE_MESSAGES.success
   }
 
   async createUser(dto: UserCreationArgs) {
@@ -207,6 +242,12 @@ export class UsersService {
       include: [Settings, Statistic],
     })
     return user
+  }
+  async getAllUser(userId: number) {
+    // const user = await this.userRepo.findAll({where: {
+    //   id:
+    // }})
+    //TODO: Узнать как искать по НЕ РАВНО
   }
   async getUserByEmailChangeKey(key: string) {
     const user = await this.userRepo.findOne({ where: { emailChangeKey: key } })

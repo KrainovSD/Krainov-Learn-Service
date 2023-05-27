@@ -17,7 +17,7 @@ import {
   EXPIRES_ACCESS_TOKEN,
   EXPIRES_REFRESH_TOKEN,
   MAIL_MESSAGES_OPTION,
-  REQUEST_MESSAGES,
+  RESPONSE_MESSAGES,
   SALT_ROUNDS,
 } from '../const'
 
@@ -26,6 +26,8 @@ export type UserInfo = {
   role: string
   subscription: Date
 }
+
+export type TRequest = Request & { user: UserInfo }
 
 @Injectable()
 export class AuthService {
@@ -48,7 +50,7 @@ export class AuthService {
     //   createUserDto.emailChangeKey,
     //   createUserDto.emailToChange,
     // )
-    return REQUEST_MESSAGES.sendEmail
+    return RESPONSE_MESSAGES.sendEmail
   }
 
   async confirm(confirmDto: ConfirmDto) {
@@ -66,7 +68,7 @@ export class AuthService {
     user.emailChangeKey = null
     user.emailChangeTime = null
     await user.save()
-    return REQUEST_MESSAGES.success
+    return RESPONSE_MESSAGES.success
   }
 
   async login(loginDto: LoginDto) {

@@ -4,6 +4,10 @@ export const EXPIRES_REFRESH_TOKEN = '24d'
 
 export const EXPIRES_COOKIES = 1000 * 60 * 60 * 24 * 24
 
+export const MAX_SIZE_FILE = 1.4 * 1024 * 1024
+export const MIME_TYPE_FILE = /\/(png|jpeg|jpg|gif)$/
+export const UPLOAD_PATH = '/upload'
+
 export const SALT_ROUNDS = 10
 
 export const SETTINGS_DEFAULT = {
@@ -14,7 +18,7 @@ export const SETTINGS_DEFAULT = {
   relevanceObserveCount: 3,
 }
 
-export const REQUEST_MESSAGES = {
+export const RESPONSE_MESSAGES = {
   success: { message: 'Успешно' },
   sendEmail: {
     message:

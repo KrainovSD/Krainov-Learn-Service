@@ -13,7 +13,7 @@ import { ConfirmDto } from './dto/confirm.dto'
 import { ApiTags } from '@nestjs/swagger'
 import { LoginDto } from './dto/login.dto'
 import { Request, Response } from 'express'
-import { EXPIRES_COOKIES, REQUEST_MESSAGES } from 'src/const'
+import { EXPIRES_COOKIES, RESPONSE_MESSAGES } from 'src/const'
 import { AuthGuard } from 'src/utils/guards/auth.guard'
 
 type CookieOptions = {
@@ -70,6 +70,6 @@ export class AuthController {
   ) {
     await this.authService.logout(request.cookies['token'], request.user)
     response.clearCookie('token', this.getCookieOptions('delete'))
-    return REQUEST_MESSAGES.success
+    return RESPONSE_MESSAGES.success
   }
 }
