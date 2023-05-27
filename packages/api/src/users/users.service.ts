@@ -16,6 +16,7 @@ import {
 } from 'src/const'
 import { ChangePassDto } from './dto/change-pass.dto'
 import bcrypt from 'bcryptjs'
+import { ChangeEmailDto } from './dto/change-email.dto'
 
 @Injectable()
 export class UsersService {
@@ -93,6 +94,68 @@ export class UsersService {
     return REQUEST_MESSAGES.success
   }
 
+  async callChangeEmail(userId: number) {
+    const user = await this.getUserById(userId, true)
+
+    if (!user) throw new BadRequestException('Пользователь не найден')
+
+    if (user.emailChangeDate) {
+      const lastDateChange = user.emailChangeDate
+      lastDateChange.setDate(lastDateChange.getDate() + 1)
+      if (lastDateChange > new Date())
+        throw new BadRequestException(ERROR_MESSAGES.oftenChage)
+    }
+    if (user.emailChangeTime && user.emailChangeTime > new Date())
+      throw new BadRequestException(ERROR_MESSAGES.oftenTryChange)
+
+    const emailChangeKey = getRandomString()
+    const emailChangeTime = new Date()
+    emailChangeTime.setMinutes(emailChangeTime.getMinutes() + 5)
+    user.emailChangeKey = emailChangeKey
+    user.emailChangeTime = emailChangeTime
+    await user.save()
+    // TODO: Починить почту
+    // await this.sendMail(
+    //   MAIL_MESSAGES_OPTION.callChangeEmail.title,
+    //   MAIL_MESSAGES_OPTION.callChangeEmail.message,
+    //   passwordChangeKey,
+    //   user.email,
+    // )
+
+    return REQUEST_MESSAGES.sendEmail
+  }
+  async changeEmail(dto: ChangeEmailDto, userId: number) {
+    const user = await this.getUserByEmailChangeKey(dto.key)
+    if (
+      !user ||
+      (user && user.emailChangeTime && user.emailChangeTime < new Date()) ||
+      (user && !user.emailChangeTime) ||
+      (user && user.id !== userId) ||
+      user.emailToChange
+    )
+      throw new BadRequestException(ERROR_MESSAGES.badKeyOrTime)
+
+    await this.checkUniqueEmail(dto.email)
+
+    user.emailToChange = dto.email
+    const emailChangeKey = getRandomString()
+    const emailChangeTime = new Date()
+    emailChangeTime.setMinutes(emailChangeTime.getMinutes() + 5)
+    user.emailChangeKey = emailChangeKey
+    user.emailChangeTime = emailChangeTime
+    await user.save()
+
+    //TODO: Починить email
+    // await this.sendMail(
+    //   MAIL_MESSAGES_OPTION.regiser.title,
+    //   MAIL_MESSAGES_OPTION.regiser.message,
+    //   user.emailChangeKey,
+    //   user.emailToChange,
+    // )
+
+    return REQUEST_MESSAGES.sendNewEmail
+  }
+
   async createUser(dto: UserCreationArgs) {
     const user = await this.userRepo.create(dto)
     const statistic = await this.statisticService.createStatistic(user.id)
@@ -114,7 +177,7 @@ export class UsersService {
     const user = await this.userRepo.findByPk(id, {
       attributes: {
         exclude: privateFields
-          ? //FIXME: Исправить после отладки  ? this.forbiddenFields
+          ? //FIXME: Исправить после отладки  ? this.forbiddenFields (при смене email нужны эти филды)
             []
           : [...this.forbiddenFields, ...this.privateFields],
       },
@@ -160,6 +223,24 @@ export class UsersService {
     return user
   }
 
+  async checkUniqueEmail(email: string) {
+    const userByEmail = await this.getUserByEmail(email)
+    if (userByEmail) {
+      if (userByEmail.confirmed) {
+        throw new BadRequestException(ERROR_MESSAGES.hasEmail)
+      }
+      await this.deleteUserById(userByEmail.id)
+    }
+  }
+  async checkUniqueNickName(nickName: string) {
+    const userByNickName = await this.getUserByNickName(nickName)
+    if (userByNickName) {
+      if (userByNickName.confirmed) {
+        throw new BadRequestException(ERROR_MESSAGES.hasNickName)
+      }
+      await this.deleteUserById(userByNickName.id)
+    }
+  }
   private async sendMail(
     subject: string,
     text: string,

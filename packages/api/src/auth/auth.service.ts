@@ -36,51 +36,19 @@ export class AuthService {
   ) {}
 
   async register(userDto: CreateUserDto) {
-    await this.checkUniqueEmailAndNickName(userDto)
+    await this.userService.checkUniqueEmail(userDto.email)
+    await this.userService.checkUniqueNickName(userDto.nickName)
     const createUserDto = await this.getCreateUserDto(userDto)
     await this.userService.createUser(createUserDto)
-    await this.sendMail(
-      MAIL_MESSAGES_OPTION.regiser.title,
-      MAIL_MESSAGES_OPTION.regiser.message,
-      createUserDto.emailChangeKey,
-      createUserDto.emailToChange,
-    )
-    return REQUEST_MESSAGES.sendEmail
-  }
-  private async checkUniqueEmailAndNickName(userDto: CreateUserDto) {
-    const userByEmail = await this.userService.getUserByEmail(userDto.email)
-    if (userByEmail) {
-      if (userByEmail.confirmed) {
-        throw new BadRequestException(ERROR_MESSAGES.hasEmail)
-      }
-      await this.userService.deleteUserById(userByEmail.id)
-    }
-    const userByNickName = await this.userService.getUserByNickName(
-      userDto.nickName,
-    )
-    if (userByNickName) {
-      if (userByNickName.confirmed) {
-        throw new BadRequestException(ERROR_MESSAGES.hasNickName)
-      }
-      await this.userService.deleteUserById(userByNickName.id)
-    }
-  }
-  private async getCreateUserDto(userDto: CreateUserDto) {
-    const hash = await bcrypt.hash(userDto.password, SALT_ROUNDS)
-    const registrationDate = new Date()
-    const emailChangeTime = new Date()
-    emailChangeTime.setFullYear(emailChangeTime.getFullYear() + 1)
-    const emailChangeKey = getRandomString()
 
-    return {
-      userName: userDto.userName,
-      nickName: userDto.nickName,
-      hash,
-      registrationDate,
-      emailChangeKey,
-      emailChangeTime,
-      emailToChange: userDto.email.toLowerCase(),
-    }
+    //TODO: Починить email
+    // await this.sendMail(
+    //   MAIL_MESSAGES_OPTION.regiser.title,
+    //   MAIL_MESSAGES_OPTION.regiser.message,
+    //   createUserDto.emailChangeKey,
+    //   createUserDto.emailToChange,
+    // )
+    return REQUEST_MESSAGES.sendEmail
   }
 
   async confirm(confirmDto: ConfirmDto) {
@@ -194,6 +162,23 @@ export class AuthService {
       return decoded
     } catch (e) {
       return null
+    }
+  }
+  private async getCreateUserDto(userDto: CreateUserDto) {
+    const hash = await bcrypt.hash(userDto.password, SALT_ROUNDS)
+    const registrationDate = new Date()
+    const emailChangeTime = new Date()
+    emailChangeTime.setFullYear(emailChangeTime.getFullYear() + 1)
+    const emailChangeKey = getRandomString()
+
+    return {
+      userName: userDto.userName,
+      nickName: userDto.nickName,
+      hash,
+      registrationDate,
+      emailChangeKey,
+      emailChangeTime,
+      emailToChange: userDto.email.toLowerCase(),
     }
   }
 }
