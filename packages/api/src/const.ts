@@ -35,6 +35,7 @@ export const ERROR_MESSAGES = {
   hasEmail:
     'Указанный вами адрес электронной почты уже используется другим пользователем',
   changeNickName: 'Менять псевдоним можно не чаще, чем раз в месяц',
+  userNotFound: 'Информация о пользователе не найдена',
 }
 export const MAIL_MESSAGES_OPTION = {
   changePassword: {

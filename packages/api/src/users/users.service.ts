@@ -98,7 +98,7 @@ export class UsersService {
   async callChangeEmail(userId: number) {
     const user = await this.getUserUserByIdService(userId)
 
-    if (!user) throw new BadRequestException('Пользователь не найден')
+    if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
 
     if (user.emailChangeDate) {
       const lastDateChange = user.emailChangeDate
@@ -159,7 +159,7 @@ export class UsersService {
 
   async changeNickName(nickName: string, userId: number) {
     const user = await this.getUserUserByIdService(userId)
-    if (!user) throw new BadRequestException('Пользователь не найден')
+    if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
     if (user.nickNameChangeDate) {
       const lastDateChange = user.nickNameChangeDate
       lastDateChange.setMonth(lastDateChange.getMonth() + 1)

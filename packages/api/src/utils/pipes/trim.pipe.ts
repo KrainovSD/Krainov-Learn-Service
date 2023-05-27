@@ -1,8 +1,6 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common'
 
-type TObject = {
-  [key: string]: any
-}
+type TObject = Record<string, any>
 
 @Injectable()
 export class TrimPipe implements PipeTransform {
@@ -12,8 +10,8 @@ export class TrimPipe implements PipeTransform {
     return !this.except.includes(value)
   }
 
-  private isObject(obj: any): obj is TObject {
-    if (typeof obj === 'object' && !Array.isArray(obj)) {
+  private isSimpleObject(obj: any): obj is TObject {
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
       return Object.keys(obj).every((key) => typeof key === 'string')
     }
     return false
@@ -28,7 +26,7 @@ export class TrimPipe implements PipeTransform {
       const value = obj[key]
       if (this.isNotExcept(key) && this.isString(value))
         obj[key] = obj[key].trim()
-      if (this.isObject(obj[key])) {
+      if (this.isSimpleObject(obj[key])) {
         obj[key] = this.trim(obj[key])
       }
     }
@@ -36,7 +34,7 @@ export class TrimPipe implements PipeTransform {
   }
 
   transform(value: any, metadata: ArgumentMetadata): any {
-    if (metadata.type === 'body' && this.isObject(value)) {
+    if (metadata.type === 'body' && this.isSimpleObject(value)) {
       return this.trim(value)
     }
     return value

@@ -85,7 +85,7 @@ export class Settings extends Model<Settings, SettingCreationArgs> {
   @ApiProperty({
     example: 3,
     description:
-      'Количество встреч со словом, которое высчитывается за промежток дней',
+      'Количество встреч со словом, которое высчитывается за промежуток дней',
   })
   @Column({
     type: DataType.INTEGER,

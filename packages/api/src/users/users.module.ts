@@ -14,7 +14,7 @@ import { AuthModule } from 'src/auth/auth.module'
   imports: [
     SequelizeModule.forFeature([User, Statistic, Settings]),
     StatisticsModule,
-    SettingsModule,
+    forwardRef(() => SettingsModule),
     forwardRef(() => AuthModule),
   ],
   controllers: [UsersController],

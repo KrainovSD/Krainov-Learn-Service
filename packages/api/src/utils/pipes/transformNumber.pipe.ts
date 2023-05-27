@@ -11,7 +11,7 @@ export class TransformToNumberPipe implements PipeTransform {
   transform(obj: any, metadata: ArgumentMetadata): any {
     if (
       (metadata.type === 'param' || metadata.type === 'query') &&
-      checkTypes.isObject(obj)
+      checkTypes.isSimpleObject(obj)
     ) {
       for (const key in obj) {
         const value = obj[key]
