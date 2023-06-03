@@ -13,7 +13,7 @@ import { ConfirmDto } from './dto/confirm.dto'
 import { ApiTags } from '@nestjs/swagger'
 import { LoginDto } from './dto/login.dto'
 import { Request, Response } from 'express'
-import { EXPIRES_COOKIES, RESPONSE_MESSAGES } from 'src/const'
+import { API_VERSION, EXPIRES_COOKIES, RESPONSE_MESSAGES } from 'src/const'
 import { AuthGuard } from 'src/utils/guards/auth.guard'
 
 type CookieOptions = {
@@ -24,7 +24,7 @@ type CookieOptions = {
 }
 
 @ApiTags('Авторизация')
-@Controller('api/auth')
+@Controller(`${API_VERSION.v1}/auth`)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

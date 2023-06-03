@@ -7,6 +7,9 @@ export const EXPIRES_COOKIES = 1000 * 60 * 60 * 24 * 24
 export const MAX_SIZE_FILE = 1.4 * 1024 * 1024
 export const MIME_TYPE_FILE = /\/(png|jpeg|jpg|gif)$/
 export const UPLOAD_PATH = '/upload'
+export const API_VERSION = {
+  v1: 'api/v1',
+}
 
 export const SALT_ROUNDS = 10
 
@@ -40,6 +43,9 @@ export const ERROR_MESSAGES = {
     'Указанный вами адрес электронной почты уже используется другим пользователем',
   changeNickName: 'Менять псевдоним можно не чаще, чем раз в месяц',
   userNotFound: 'Информация о пользователе не найдена',
+  infoNotFound: 'Служебная информация не найдена',
+  hasCategory: 'Категория с таким именем уже существует',
+  isLearnCategory: 'Категория в режиме изучения',
 }
 export const MAIL_MESSAGES_OPTION = {
   changePassword: {

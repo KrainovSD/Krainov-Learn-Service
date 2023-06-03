@@ -3,8 +3,9 @@ import { UpdateSettingsDto } from './dto/update-settings.dto'
 import { UserInfo } from 'src/auth/auth.service'
 import { AuthGuard } from 'src/utils/guards/auth.guard'
 import { SettingsService } from './settings.service'
+import { API_VERSION } from 'src/const'
 
-@Controller('api/settings')
+@Controller(`${API_VERSION.v1}/settings`)
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 

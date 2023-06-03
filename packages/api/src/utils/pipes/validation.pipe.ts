@@ -11,7 +11,10 @@ export class ValidationPipe implements PipeTransform<any> {
   async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
     if (metadata.metatype) {
       const obj = plainToInstance(metadata.metatype, value)
-      const errors = await validate(obj)
+      const errors = await validate(obj, {
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      })
 
       if (errors.length) {
         const messages = errors.reduce(

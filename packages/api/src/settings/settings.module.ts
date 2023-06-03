@@ -5,10 +5,10 @@ import { SettingsService } from './settings.service'
 
 import { Module } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
-import { AuthModule } from 'src/auth/auth.module'
+import { JwtModule } from '@nestjs/jwt'
 
 @Module({
-  imports: [SequelizeModule.forFeature([Settings, User]), AuthModule],
+  imports: [SequelizeModule.forFeature([Settings, User]), JwtModule],
   controllers: [SettingsController],
   providers: [SettingsService],
   exports: [SettingsService],

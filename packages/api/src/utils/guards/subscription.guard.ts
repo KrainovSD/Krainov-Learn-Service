@@ -22,7 +22,6 @@ export class SubscribeGuard implements CanActivate {
       const user = this.jwtService.verify<UserInfo>(token, {
         secret: process.env.ACCESS_TOKEN_SECRET,
       })
-      console.log(user)
       if (
         !user.subscription ||
         (user.subscription && user.subscription < new Date())

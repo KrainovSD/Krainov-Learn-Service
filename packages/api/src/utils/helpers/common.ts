@@ -1,3 +1,5 @@
+import { typings } from './index'
+
 //TODO: Переименовать в random key
 export function getRandomString(
   lenght: number = 8,
@@ -19,4 +21,10 @@ export function getUniqueId() {
       'QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm',
     )}`
   )
+}
+
+export function checkIrregularVerb(word: string) {
+  const splitWord = word.split('--').filter((item) => typings.isString(item))
+  if (splitWord.length === 3) return true
+  return false
 }

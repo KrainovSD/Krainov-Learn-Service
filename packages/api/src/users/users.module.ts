@@ -9,13 +9,15 @@ import { StatisticsModule } from 'src/statistics/statistics.module'
 import { Settings } from 'src/settings/settings.model'
 import { SettingsModule } from 'src/settings/settings.module'
 import { AuthModule } from 'src/auth/auth.module'
+import { JwtModule } from '@nestjs/jwt'
 
 @Module({
   imports: [
     SequelizeModule.forFeature([User, Statistic, Settings]),
     StatisticsModule,
-    forwardRef(() => SettingsModule),
+    SettingsModule,
     forwardRef(() => AuthModule),
+    JwtModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

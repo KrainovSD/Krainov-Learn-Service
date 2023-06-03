@@ -29,6 +29,6 @@ import { ConfigModule } from '@nestjs/config'
   ],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService, JwtModule, MailerModule],
+  exports: [AuthService, MailerModule],
 })
 export class AuthModule {}

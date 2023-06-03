@@ -7,7 +7,7 @@ import { InjectModel } from '@nestjs/sequelize'
 import { Settings } from './settings.model'
 import { UpdateSettingsDto } from './dto/update-settings.dto'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { checkTypes, _ } from 'src/utils/helpers'
+import { typings, _ } from 'src/utils/helpers'
 
 @Injectable()
 export class SettingsService {
@@ -18,7 +18,7 @@ export class SettingsService {
   async updateSettings(dto: UpdateSettingsDto, userId: number) {
     const settings = await this.getSettingsByUserId(userId)
     if (!settings) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
-    if (!checkTypes.isSimpleObject(settings))
+    if (!typings.isSimpleObject(settings))
       throw new InternalServerErrorException('')
     for (const settingField in dto) {
       if (_.get(settings, settingField, null)) {

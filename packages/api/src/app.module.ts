@@ -1,3 +1,5 @@
+import { LearnsModule } from './words/learns/learns.module'
+import { CategoriesModule } from './words/categories/categories.module'
 import { SettingsModule } from './settings/settings.module'
 import { StatisticsModule } from './statistics/statistics.module'
 import { UsersModule } from './users/users.module'
@@ -8,10 +10,13 @@ import { SequelizeModule } from '@nestjs/sequelize'
 import { User } from './users/users.model'
 import { Statistic } from './statistics/statistics.model'
 import { Settings } from './settings/settings.model'
+import { Category } from './words/categories/categories.model'
 
 @Module({
   controllers: [],
   imports: [
+    LearnsModule,
+    CategoriesModule,
     SettingsModule,
     StatisticsModule,
     ConfigModule.forRoot({
@@ -24,7 +29,7 @@ import { Settings } from './settings/settings.model'
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [User, Statistic, Settings],
+      models: [User, Statistic, Settings, Category],
       autoLoadModels: true,
     }),
     UsersModule,

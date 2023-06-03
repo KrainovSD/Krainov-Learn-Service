@@ -17,7 +17,6 @@ export const checkOrCreateFolder = (dir: string) => {
 export const removeFile = (dir: string, fileName: string) => {
   return new Promise<boolean>((resolve, reject) => {
     const fullDir = path.join('.', dir, fileName)
-    console.log(fullDir)
     unlink(fullDir, (err) => {
       if (err) resolve(false)
       resolve(true)

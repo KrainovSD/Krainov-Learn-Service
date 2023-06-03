@@ -21,8 +21,9 @@ import { ChangeNickNameDto } from './dto/change-nick-name.dto'
 import { SubscribeGuard } from 'src/utils/guards/subscription.guard'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { multerOptions } from 'src/multer.config'
+import { API_VERSION } from 'src/const'
 
-@Controller('/api/user')
+@Controller(`${API_VERSION.v1}/user`)
 export class UsersController {
   constructor(private readonly userServise: UsersService) {}
 
