@@ -11,6 +11,7 @@ import { User } from './users/users.model'
 import { Statistic } from './statistics/statistics.model'
 import { Settings } from './settings/settings.model'
 import { Category } from './words/categories/categories.model'
+import { Learns } from './words/learns/learns.model'
 
 @Module({
   controllers: [],
@@ -29,7 +30,7 @@ import { Category } from './words/categories/categories.model'
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [User, Statistic, Settings, Category],
+      models: [User, Statistic, Settings, Category, Learns],
       autoLoadModels: true,
     }),
     UsersModule,

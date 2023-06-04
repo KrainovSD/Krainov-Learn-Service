@@ -44,4 +44,10 @@ export class CategoriesController {
   getAllCategories(@Req() request: TRequest) {
     return this.categoriesService.getAllCategories(request.user.id)
   }
+
+  @UseGuards(AuthGuard)
+  @Post('/start')
+  startLearnCategory(@Body() dto: CategoryIdDto, @Req() request: TRequest) {
+    return this.categoriesService.startLearnCategory(dto, request.user.id)
+  }
 }

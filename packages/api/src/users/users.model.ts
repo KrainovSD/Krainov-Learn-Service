@@ -230,9 +230,9 @@ export class User extends Model<User, UserCreationArgs> {
   })
   nickNameChangeDate!: Date | null
 
-  @HasOne(() => Statistic)
+  @HasOne(() => Statistic, { onDelete: 'CASCADE' })
   statistic!: Statistic
 
-  @HasOne(() => Settings)
+  @HasOne(() => Settings, { onDelete: 'CASCADE' })
   settings!: Settings
 }

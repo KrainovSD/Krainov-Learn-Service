@@ -12,6 +12,7 @@ export const API_VERSION = {
 }
 
 export const SALT_ROUNDS = 10
+export const ALLOW_WORDS_TO_START_CATEGORY = 2
 
 export const SETTINGS_DEFAULT = {
   knownWordsCount: 50,
@@ -46,6 +47,7 @@ export const ERROR_MESSAGES = {
   infoNotFound: 'Служебная информация не найдена',
   hasCategory: 'Категория с таким именем уже существует',
   isLearnCategory: 'Категория в режиме изучения',
+  lowWordsInCategory: `Для начала изучения категории, она должна содержать не менее ${ALLOW_WORDS_TO_START_CATEGORY} слов`,
 }
 export const MAIL_MESSAGES_OPTION = {
   changePassword: {

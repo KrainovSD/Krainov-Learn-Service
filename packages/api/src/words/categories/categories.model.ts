@@ -3,10 +3,12 @@ import {
   Column,
   DataType,
   ForeignKey,
+  HasMany,
   Model,
   Table,
 } from 'sequelize-typescript'
 import { User } from 'src/users/users.model'
+import { Learns } from '../learns/learns.model'
 
 export interface CategoryCreationArgs {
   userId: number
@@ -156,4 +158,7 @@ export class Category extends Model<Category, CategoryCreationArgs> {
     allowNull: true,
   })
   learnStartDate!: Date | null
+
+  @HasMany(() => Learns, { onDelete: 'CASCADE' })
+  learns!: Learns[]
 }

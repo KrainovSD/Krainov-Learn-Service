@@ -7,9 +7,14 @@ import { InjectModel } from '@nestjs/sequelize'
 import { Category } from './categories.model'
 import { CreateCategoryDto } from './dto/create-category-dto'
 import { UpdateCategoryDto } from './dto/update-category-dro'
-import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
+import {
+  ALLOW_WORDS_TO_START_CATEGORY,
+  ERROR_MESSAGES,
+  RESPONSE_MESSAGES,
+} from 'src/const'
 import { _ } from 'src/utils/helpers'
 import { CategoryIdDto } from './dto/category-id-dto'
+import { Learns } from '../learns/learns.model'
 
 @Injectable()
 export class CategoriesService {
@@ -40,12 +45,22 @@ export class CategoriesService {
     return RESPONSE_MESSAGES.success
   }
   async deleteCategory(dto: CategoryIdDto, userId: number) {
-    await this.categoryRepo.destroy({
-      where: {
-        id: dto.id,
-        userId,
-      },
-    })
+    const category = await this.getCategoryById(dto.id)
+    if (!category || (category && category.userId !== userId))
+      throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+    await this.deleteCategoryById(dto.id)
+    return RESPONSE_MESSAGES.success
+  }
+  async startLearnCategory(dto: CategoryIdDto, userId: number) {
+    const category = await this.getCategoryById(dto.id)
+    if (!category || (category && category.userId !== userId))
+      throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+    if (category.learns.length < ALLOW_WORDS_TO_START_CATEGORY)
+      throw new BadRequestException(ERROR_MESSAGES.lowWordsInCategory)
+    if (category.isLearn)
+      throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
+    category.isLearn = true
+    await category.save()
     return RESPONSE_MESSAGES.success
   }
   async getAllCategories(userId: number) {
@@ -64,8 +79,13 @@ export class CategoriesService {
     return category
   }
   async getCategoryById(id: number) {
-    const category = await this.categoryRepo.findByPk(id)
+    const category = await this.categoryRepo.findByPk(id, {
+      include: [Learns],
+    })
     return category
+  }
+  async deleteCategoryById(id: number) {
+    await this.categoryRepo.destroy({ where: { id } })
   }
   private async isHasNameCategory(
     name: string,
