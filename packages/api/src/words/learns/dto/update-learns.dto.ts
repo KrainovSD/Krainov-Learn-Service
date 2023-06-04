@@ -11,7 +11,15 @@ import {
   ValidateIf,
 } from 'class-validator'
 
-export class CreateLearnDto {
+export class UpdateLearnsDto {
+  @ApiProperty({
+    example: 4,
+    description: 'Уникальный идентификатор',
+    required: true,
+  })
+  @IsNumber({}, { message: 'Неверный формат уникального идентификатора' })
+  id!: number
+
   @ApiProperty({
     example: 4,
     description: 'Уникальный идентификатор категории',

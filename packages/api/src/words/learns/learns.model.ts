@@ -6,11 +6,9 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript'
-import { User } from 'src/users/users.model'
 import { Category } from '../categories/categories.model'
 
 export interface LearnCreationArgs {
-  userId: number
   categoryId: number
   word: string
   translate: string
@@ -27,17 +25,6 @@ export class Learns extends Model<Learns, LearnCreationArgs> {
     primaryKey: true,
   })
   id!: number
-
-  @ApiProperty({
-    example: 1,
-    description: 'Уникальный идентификатор пользователя',
-  })
-  @ForeignKey(() => User)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
-  userId!: number
 
   @ApiProperty({
     example: 1,

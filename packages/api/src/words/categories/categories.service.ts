@@ -12,7 +12,7 @@ import {
   ERROR_MESSAGES,
   RESPONSE_MESSAGES,
 } from 'src/const'
-import { _ } from 'src/utils/helpers'
+import { _, updateNewValue } from 'src/utils/helpers'
 import { CategoryIdDto } from './dto/category-id-dto'
 import { Learns } from '../learns/learns.model'
 
@@ -35,12 +35,7 @@ export class CategoriesService {
     if (category.isLearn)
       throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
 
-    for (const field in dto) {
-      const categoryValue = _.get(category, field, null)
-      const dtoValue = _.get(dto, field, null)
-      if (categoryValue !== dtoValue) _.set(category, field, dtoValue)
-    }
-
+    updateNewValue(category, dto, ['id'])
     await category.save()
     return RESPONSE_MESSAGES.success
   }
@@ -64,7 +59,7 @@ export class CategoriesService {
     return RESPONSE_MESSAGES.success
   }
   async getAllCategories(userId: number) {
-    const categories = await this.categoryRepo.findAll({ where: { userId } })
+    const categories = await this.getCategoriesByUserId(userId)
     if (!categories) throw new NotFoundException(ERROR_MESSAGES.infoNotFound)
     return categories
   }
@@ -83,6 +78,13 @@ export class CategoriesService {
       include: [Learns],
     })
     return category
+  }
+  async getCategoriesByUserId(userId: number, learns: boolean = false) {
+    const categories = await this.categoryRepo.findAll({
+      where: { userId },
+      include: learns ? [Learns] : [],
+    })
+    return categories
   }
   async deleteCategoryById(id: number) {
     await this.categoryRepo.destroy({ where: { id } })
