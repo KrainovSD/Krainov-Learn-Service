@@ -55,6 +55,8 @@ export class CategoriesService {
     if (category.isLearn)
       throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
     category.isLearn = true
+    //FIXME:  NEXT repeat?
+
     await category.save()
     return RESPONSE_MESSAGES.success
   }

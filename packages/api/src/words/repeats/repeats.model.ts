@@ -12,8 +12,8 @@ export interface RepeatsCreationArgs {
   userId: number
   word: string
   translate: string
-  transcription: string
-  description: string
+  transcription: string | null
+  description: string | null
   example: string[]
   isIrregularVerb: boolean
   nextRepeat: Date
@@ -22,7 +22,7 @@ export interface RepeatsCreationArgs {
 }
 
 @Table({ tableName: 'repeats', createdAt: false, updatedAt: false })
-export class Repeat extends Model<Repeat, RepeatsCreationArgs> {
+export class Repeats extends Model<Repeats, RepeatsCreationArgs> {
   @ApiProperty({ example: '1', description: 'Уникальный идентификатор' })
   @Column({
     type: DataType.INTEGER,

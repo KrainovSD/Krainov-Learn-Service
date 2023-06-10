@@ -1,3 +1,5 @@
+import { RepeatsModule } from './words/repeats/repeats.module'
+import { KnownsModule } from './words/knowns/knowns.module'
 import { LearnsModule } from './words/learns/learns.module'
 import { CategoriesModule } from './words/categories/categories.module'
 import { SettingsModule } from './settings/settings.module'
@@ -12,10 +14,14 @@ import { Statistic } from './statistics/statistics.model'
 import { Settings } from './settings/settings.model'
 import { Category } from './words/categories/categories.model'
 import { Learns } from './words/learns/learns.model'
+import { Knowns } from './words/knowns/knowns.model'
+import { Repeats } from './words/repeats/repeats.model'
 
 @Module({
   controllers: [],
   imports: [
+    RepeatsModule,
+    KnownsModule,
     LearnsModule,
     CategoriesModule,
     SettingsModule,
@@ -30,7 +36,7 @@ import { Learns } from './words/learns/learns.model'
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [User, Statistic, Settings, Category, Learns],
+      models: [User, Statistic, Settings, Category, Learns, Knowns, Repeats],
       autoLoadModels: true,
     }),
     UsersModule,

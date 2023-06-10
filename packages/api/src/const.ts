@@ -1,7 +1,5 @@
 export const EXPIRES_ACCESS_TOKEN = '24d'
-
 export const EXPIRES_REFRESH_TOKEN = '24d'
-
 export const EXPIRES_COOKIES = 1000 * 60 * 60 * 24 * 24
 
 export const MAX_SIZE_FILE = 1.4 * 1024 * 1024
@@ -10,6 +8,7 @@ export const UPLOAD_PATH = '/upload'
 export const API_VERSION = {
   v1: 'api/v1',
 }
+export const ROLE_DECORATOR_KEY = 'roles'
 
 export const SALT_ROUNDS = 10
 export const ALLOW_WORDS_TO_START_CATEGORY = 2
@@ -34,7 +33,6 @@ export const RESPONSE_MESSAGES = {
       'На указанную вами электронную почту был отправлен уникальный ключ для завершения операции',
   },
 }
-
 export const ERROR_MESSAGES = {
   badKeyOrTime: 'Неверный формат уникального ключа или истекло время операции',
   oftenChage: 'Менять данные можно не чаще, чем раз в 24 часа',

@@ -12,8 +12,8 @@ export interface KnownsCreationArgs {
   userId: number
   word: string
   translate: string
-  transcription: string
-  description: string
+  transcription: string | null
+  description: string | null
   example: string[]
   isIrregularVerb: boolean
   mistakes: number
@@ -112,7 +112,7 @@ export class Knowns extends Model<Knowns, KnownsCreationArgs> {
     description: 'Количество последнего цикла ошибок в слове',
   })
   @Column({
-    type: DataType.NUMBER,
+    type: DataType.INTEGER,
     defaultValue: 0,
     allowNull: false,
   })
@@ -123,7 +123,7 @@ export class Knowns extends Model<Knowns, KnownsCreationArgs> {
     description: 'Общее количество ошибок в слове',
   })
   @Column({
-    type: DataType.NUMBER,
+    type: DataType.INTEGER,
     defaultValue: 0,
     allowNull: false,
   })
