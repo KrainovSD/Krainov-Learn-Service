@@ -4,7 +4,8 @@
   "description": "Krainov Service utils",
   "author": "KrainovSD <denislosev48@gmail.com>",
   "license": "ISC",
-  "main": "./src/index.ts",
+  "main": "./dist/bundle.js",
+  "types": "./dist/index.d.ts",
   "private": true,
   "scripts": {
     "build": "webpack --config ./webpack.config.js --mode production",

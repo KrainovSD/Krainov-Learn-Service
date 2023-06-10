@@ -7,12 +7,14 @@ import { SequelizeModule } from '@nestjs/sequelize'
 import { User } from 'src/users/users.model'
 import { Repeats } from './repeats.model'
 import { SettingsModule } from 'src/settings/settings.module'
+import { UsersModule } from 'src/users/users.module'
 
 @Module({
   imports: [
     JwtModule,
     SequelizeModule.forFeature([Repeats, User]),
     SettingsModule,
+    UsersModule,
   ],
   controllers: [RepeatsController],
   providers: [RepeatsService],

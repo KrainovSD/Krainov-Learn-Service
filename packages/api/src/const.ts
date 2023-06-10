@@ -47,6 +47,8 @@ export const ERROR_MESSAGES = {
   hasCategory: 'Категория с таким именем уже существует',
   isLearnCategory: 'Категория в режиме изучения',
   lowWordsInCategory: `Для начала изучения категории, она должна содержать не менее ${ALLOW_WORDS_TO_START_CATEGORY} слов`,
+  hasWord: 'Добавляемое слово уже существует',
+  hasRelevanceWord: 'Добавляемое слово уже существует в актуализаторе',
 }
 export const MAIL_MESSAGES_OPTION = {
   changePassword: {

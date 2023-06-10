@@ -5,18 +5,21 @@ import { Repeats } from './repeats.model'
 import { CreateRepeatDto } from './dto/create-repeat-dto'
 import { utils } from 'src/utils/helpers'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
+import { UsersService } from 'src/users/users.service'
 
 @Injectable()
 export class RepeatsService {
   constructor(
     @InjectModel(Repeats) private readonly repeatRepo: typeof Repeats,
     private readonly settingsService: SettingsService,
+    private readonly userService: UsersService,
   ) {}
 
   async createRepeat(dto: CreateRepeatDto) {
-    const repeat = await this.getRepeatByUserId(dto.userId)
-    if (!repeat) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
-
+    const user = await this.userService.getUserById(dto.userId)
+    if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
+    const repeat = await this.getRepeatByWord(dto.word)
+    if (repeat) throw new BadRequestException(ERROR_MESSAGES.hasWord)
     const nextRepeat = new Date()
     const nextReverseRepeat = new Date()
     nextRepeat.setDate(nextRepeat.getDate() + 1)
@@ -38,5 +41,8 @@ export class RepeatsService {
     const repeat = await this.repeatRepo.findAll({ where: { userId } })
     return repeat
   }
-  async getRepeatByWord(word: string) {}
+  async getRepeatByWord(word: string) {
+    const repeat = await this.repeatRepo.findOne({ where: { word } })
+    return repeat
+  }
 }
