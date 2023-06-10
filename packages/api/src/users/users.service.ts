@@ -7,7 +7,7 @@ import { StatisticsService } from 'src/statistics/statistics.service'
 import { SettingsService } from 'src/settings/settings.service'
 import { Settings } from 'src/settings/settings.model'
 import { MailerService } from '@nestjs-modules/mailer'
-import { fsAsync, getRandomString } from 'src/utils/helpers'
+import { fsAsync, utils } from 'src/utils/helpers'
 import {
   ERROR_MESSAGES,
   MAIL_MESSAGES_OPTION,
@@ -59,7 +59,7 @@ export class UsersService {
     if (user.passwordChangeTime && user.passwordChangeTime > new Date())
       throw new BadRequestException(ERROR_MESSAGES.oftenTryChange)
 
-    const passwordChangeKey = getRandomString()
+    const passwordChangeKey = utils.getRandomString()
     const passwordChangeTime = new Date()
     passwordChangeTime.setMinutes(passwordChangeTime.getMinutes() + 5)
     user.passwordChangeKey = passwordChangeKey
@@ -110,7 +110,7 @@ export class UsersService {
     if (user.emailChangeTime && user.emailChangeTime > new Date())
       throw new BadRequestException(ERROR_MESSAGES.oftenTryChange)
 
-    const emailChangeKey = getRandomString()
+    const emailChangeKey = utils.getRandomString()
     const emailChangeTime = new Date()
     emailChangeTime.setMinutes(emailChangeTime.getMinutes() + 5)
     user.emailChangeKey = emailChangeKey
@@ -140,7 +140,7 @@ export class UsersService {
     await this.checkUniqueEmail(dto.email)
 
     user.emailToChange = dto.email
-    const emailChangeKey = getRandomString()
+    const emailChangeKey = utils.getRandomString()
     const emailChangeTime = new Date()
     emailChangeTime.setMinutes(emailChangeTime.getMinutes() + 5)
     user.emailChangeKey = emailChangeKey

@@ -8,7 +8,7 @@ import {
   ERROR_MESSAGES,
   RESPONSE_MESSAGES,
 } from 'src/const'
-import { checkIrregularVerb, updateNewValue } from 'src/utils/helpers'
+import { utils } from 'src/utils/helpers'
 import { UpdateLearnsDto } from './dto/update-learns.dto'
 import { LearnIdDto } from './dto/learn-id-dto'
 
@@ -25,7 +25,7 @@ export class LearnsService {
       throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
 
     //FIXME: Проверка на наличие такого слова тут и в изученных и отдельно в актуализаторе
-    const isIrregularVerb = checkIrregularVerb(dto.word)
+    const isIrregularVerb = utils.checkIrregularVerb(dto.word)
     await this.learnsRepo.create({ ...dto, isIrregularVerb })
 
     return RESPONSE_MESSAGES.success
@@ -56,10 +56,10 @@ export class LearnsService {
 
     //FIXME: Проверка на наличие такого слова тут и в изученных и отдельно в актуализаторе
 
-    const isIrregularVerb = checkIrregularVerb(dto.word)
+    const isIrregularVerb = utils.checkIrregularVerb(dto.word)
     learn.isIrregularVerb = isIrregularVerb
 
-    updateNewValue(learn, dto, ['id'])
+    utils.updateNewValue(learn, dto, ['id'])
     await learn.save()
     return RESPONSE_MESSAGES.success
   }

@@ -2,7 +2,7 @@ import { InjectModel } from '@nestjs/sequelize'
 import { Injectable } from '@nestjs/common'
 import { Knowns } from './knowns.model'
 import { CreateKnownsDto } from './dto/create-knowns-dto'
-import { checkIrregularVerb } from 'src/utils/helpers'
+import { utils } from 'src/utils/helpers'
 
 @Injectable()
 export class KnownsService {
@@ -10,7 +10,7 @@ export class KnownsService {
 
   async createKnown(dto: CreateKnownsDto) {
     //FIXME: Проверка на слово
-    const isIrregularVerb = checkIrregularVerb(dto.word)
+    const isIrregularVerb = utils.checkIrregularVerb(dto.word)
     const dateCreate = new Date()
     const known = await this.knownRepo.create({
       ...dto,

@@ -12,7 +12,7 @@ import {
   ERROR_MESSAGES,
   RESPONSE_MESSAGES,
 } from 'src/const'
-import { _, updateNewValue } from 'src/utils/helpers'
+import { _, utils } from 'src/utils/helpers'
 import { CategoryIdDto } from './dto/category-id-dto'
 import { Learns } from '../learns/learns.model'
 
@@ -35,7 +35,7 @@ export class CategoriesService {
     if (category.isLearn)
       throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
 
-    updateNewValue(category, dto, ['id'])
+    utils.updateNewValue(category, dto, ['id'])
     await category.save()
     return RESPONSE_MESSAGES.success
   }

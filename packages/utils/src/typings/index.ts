@@ -1,4 +1,4 @@
-type TObject = Record<string, any>
+export type TObject = Record<string, any>
 
 export function isSimpleObject(obj: any): obj is TObject {
   if (obj && typeof obj === 'object' && !Array.isArray(obj)) {

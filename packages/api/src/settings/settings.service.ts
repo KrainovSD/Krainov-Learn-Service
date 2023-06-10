@@ -7,7 +7,7 @@ import { InjectModel } from '@nestjs/sequelize'
 import { Settings } from './settings.model'
 import { UpdateSettingsDto } from './dto/update-settings.dto'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { typings, _, updateNewValue } from 'src/utils/helpers'
+import { typings, _, utils } from 'src/utils/helpers'
 
 @Injectable()
 export class SettingsService {
@@ -19,7 +19,7 @@ export class SettingsService {
     const settings = await this.getSettingsByUserId(userId)
     if (!settings) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
 
-    updateNewValue(settings, dto)
+    utils.updateNewValue(settings, dto)
     await settings.save()
     return RESPONSE_MESSAGES.success
   }

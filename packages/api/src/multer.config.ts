@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common'
 import { diskStorage } from 'multer'
-import { fsAsync, getUniqueId } from './utils/helpers'
+import { fsAsync, utils } from './utils/helpers'
 import { extname } from 'path'
 import { MAX_SIZE_FILE, MIME_TYPE_FILE, UPLOAD_PATH } from './const'
 
@@ -32,7 +32,7 @@ export const multerOptions = {
       }
     },
     filename: (req: any, file: Express.Multer.File, cb: any) => {
-      cb(null, `${getUniqueId()}${extname(file.originalname)}`)
+      cb(null, `${utils.getUniqueId()}${extname(file.originalname)}`)
     },
   }),
 }

@@ -1,11 +1,11 @@
-# `utils`
+# `@krainov/utils`
 
 > TODO: description
 
 ## Usage
 
 ```
-const utils = require('utils');
+const utils = require('@krainov/utils');
 
 // TODO: DEMONSTRATE API
 ```

@@ -1,26 +1,17 @@
 {
   "name": "@krainov/utils",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Krainov Service utils",
-  "private": true,
   "author": "KrainovSD <denislosev48@gmail.com>",
   "license": "ISC",
   "main": "src/index.ts",
-  "scripts": {
-    "next": "next dev"
+  "private": true,
+  "devDependencies": {
+    "@types/lodash": "^4.14.195",
+    "typescript": "^5.1.3"
   },
   "dependencies": {
-    "dayjs": "^1.11.7",
-    "next": "^13.4.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.1.0",
-    "@types/react": "^18.2.6",
-    "@types/react-dom": "^18.2.4",
-    "eslint": "^8.40.0",
-    "eslint-config-next": "^13.4.1",
-    "typescript": "^5.0.4"
+    "dayjs": "^1.11.8",
+    "lodash": "^4.17.21"
   }
 }

@@ -7,7 +7,7 @@ import { JwtService } from '@nestjs/jwt'
 import { CreateUserDto } from 'src/users/dto/create-user.dto'
 import { UsersService } from 'src/users/users.service'
 import * as bcrypt from 'bcryptjs'
-import { getRandomString } from 'src/utils/helpers'
+import { utils } from 'src/utils/helpers'
 import { ConfirmDto } from './dto/confirm.dto'
 import { MailerService } from '@nestjs-modules/mailer'
 import { LoginDto } from './dto/login.dto'
@@ -171,7 +171,7 @@ export class AuthService {
     const registrationDate = new Date()
     const emailChangeTime = new Date()
     emailChangeTime.setFullYear(emailChangeTime.getFullYear() + 1)
-    const emailChangeKey = getRandomString()
+    const emailChangeKey = utils.getRandomString()
 
     return {
       userName: userDto.userName,
