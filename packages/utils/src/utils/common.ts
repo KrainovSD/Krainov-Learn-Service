@@ -1,4 +1,4 @@
-import { typings, _ } from '../index.js'
+import { typings, _ } from '..'
 
 //TODO: Переименовать в random key
 export function getRandomString(

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@krainov/ui-kit": "^0.0.1",
+    "@krainov/utils": "*",
     "@reduxjs/toolkit": "^1.9.5",
     "axios": "^1.4.0",
     "clsx": "^1.2.1",
