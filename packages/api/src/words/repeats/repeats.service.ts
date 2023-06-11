@@ -18,7 +18,7 @@ export class RepeatsService {
   async createRepeat(dto: CreateRepeatDto) {
     const user = await this.userService.getUserById(dto.userId)
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
-    const repeat = await this.getRepeatByWord(dto.word)
+    const repeat = await this.getRepeatByWordAndUserId(dto.word, dto.userId)
     if (repeat) throw new BadRequestException(ERROR_MESSAGES.hasWord)
 
     const nextRepeat = new Date()
@@ -42,8 +42,8 @@ export class RepeatsService {
     const repeat = await this.repeatRepo.findAll({ where: { userId } })
     return repeat
   }
-  async getRepeatByWord(word: string) {
-    const repeat = await this.repeatRepo.findOne({ where: { word } })
+  async getRepeatByWordAndUserId(word: string, userId: number) {
+    const repeat = await this.repeatRepo.findOne({ where: { userId, word } })
     return repeat
   }
   async deleteRepeat(id: number) {

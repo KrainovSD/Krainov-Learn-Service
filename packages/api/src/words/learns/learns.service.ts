@@ -70,6 +70,7 @@ export class LearnsService {
   }
 
   async getLearnsByUserId(userId: number) {
+    //FIXME: Исправить
     const categories = await this.categoryService.getCategoriesByUserId(
       userId,
       true,
@@ -84,6 +85,18 @@ export class LearnsService {
     const learn = await this.learnsRepo.findByPk(id)
     return learn
   }
+  async getLearnsByWordAndUserId(word: string, userId: number) {
+    //FIXME: Исправить
+    const learns = await this.getLearnsByUserId(userId)
+    return learns.reduce((result: Learns | null, learn) => {
+      if (learn.word === word) {
+        result = learn
+        return result
+      }
+      return result
+    }, null)
+  }
+
   private async getOwnCategory(categoryId: number, userId: number) {
     const category = await this.categoryService.getCategoryById(categoryId)
     if (!category || (category && category.userId !== userId))

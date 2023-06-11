@@ -19,4 +19,9 @@ export class KnownsService {
     })
     return known
   }
+
+  async getKnownByWordAndUserId(word: string, userId: number) {
+    const known = await this.knownRepo.findOne({ where: { userId, word } })
+    return known
+  }
 }

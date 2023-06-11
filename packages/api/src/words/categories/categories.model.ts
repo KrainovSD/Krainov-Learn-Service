@@ -45,7 +45,6 @@ export class Category extends Model<Category, CategoryCreationArgs> {
   })
   @Column({
     type: DataType.STRING,
-    unique: true,
     allowNull: false,
   })
   name!: string

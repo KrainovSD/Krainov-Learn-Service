@@ -12,7 +12,7 @@ export interface RelevanceCreationArgs {
   userId: number
   word: string
   isIrregularVerb: boolean
-  dateCreate: Date
+  dateDetected: Date[]
 }
 
 @Table({ tableName: 'relevances', createdAt: false, updatedAt: false })
@@ -46,6 +46,16 @@ export class Relevance extends Model<Relevance, RelevanceCreationArgs> {
     allowNull: false,
   })
   word!: string
+
+  @ApiProperty({
+    example: false,
+    description: 'Является ли слово неправильным глаголом',
+  })
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+  })
+  isIrregularVerb!: boolean
 
   @ApiProperty({
     example: ['2004-10-19 10:23:54+02'],

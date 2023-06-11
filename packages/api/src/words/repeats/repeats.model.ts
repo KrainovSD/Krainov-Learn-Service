@@ -21,7 +21,12 @@ export interface RepeatsCreationArgs {
   dateCreate: Date
 }
 
-@Table({ tableName: 'repeats', createdAt: false, updatedAt: false })
+@Table({
+  tableName: 'repeats',
+  createdAt: false,
+  updatedAt: false,
+  indexes: [{ name: 'repeat_word_index', using: 'BTREE', fields: ['word'] }],
+})
 export class Repeats extends Model<Repeats, RepeatsCreationArgs> {
   @ApiProperty({ example: '1', description: 'Уникальный идентификатор' })
   @Column({
