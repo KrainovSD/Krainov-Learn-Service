@@ -11,20 +11,25 @@ import {
 import { utils } from 'src/utils/helpers'
 import { UpdateLearnsDto } from './dto/update-learns.dto'
 import { LearnIdDto } from './dto/learn-id-dto'
+import { KnownsService } from '../knowns/knowns.service'
+import { RelevancesService } from '../relevances/relevances.service'
 
 @Injectable()
 export class LearnsService {
   constructor(
     @InjectModel(Learns) private readonly learnsRepo: typeof Learns,
     private readonly categoryService: CategoriesService,
-  ) {}
+  ) // private readonly knownService: KnownsService,
+  // private readonly relevanceService: RelevancesService,
+  {}
 
   async createLearn(dto: CreateLearnDto, userId: number) {
     const category = await this.getOwnCategory(dto.categoryId, userId)
     if (category.isLearn)
       throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
 
-    //FIXME: Проверка на наличие такого слова тут и в изученных и отдельно в актуализаторе
+    //await this.checkHasWord(dto.word, userId)
+
     const isIrregularVerb = utils.checkIrregularVerb(dto.word)
     await this.learnsRepo.create({ ...dto, isIrregularVerb })
 
@@ -54,7 +59,7 @@ export class LearnsService {
         throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
     }
 
-    //FIXME: Проверка на наличие такого слова тут и в изученных и отдельно в актуализаторе
+    //await this.checkHasWord(dto.word, userId)
 
     const isIrregularVerb = utils.checkIrregularVerb(dto.word)
     learn.isIrregularVerb = isIrregularVerb
@@ -103,4 +108,17 @@ export class LearnsService {
       throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
     return category
   }
+  // private async checkHasWord(word: string, userId: number) {
+  //   const known = await this.knownService.getKnownByWordAndUserId(word, userId)
+  //   if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
+  //   const learn = await this.getLearnsByWordAndUserId(word, userId)
+  //   if (learn) throw new BadRequestException(ERROR_MESSAGES.hasWord)
+  //   const relevance = await this.relevanceService.getRelevanceByWordAndUserId(
+  //     word,
+  //     userId,
+  //   )
+  //   //FIXME: Придумать другой статус
+  //   if (relevance)
+  //     throw new BadRequestException(ERROR_MESSAGES.hasRelevanceWord)
+  // }
 }

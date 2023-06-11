@@ -6,16 +6,24 @@ import { utils } from 'src/utils/helpers'
 import { KnownIdDto } from './dto/known-id-dto'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { UpdateKnownsDto } from './dto/update-knowns-dto'
+import { LearnsService } from '../learns/learns.service'
+import { RelevancesService } from '../relevances/relevances.service'
 
 @Injectable()
 export class KnownsService {
-  constructor(@InjectModel(Knowns) private readonly knownRepo: typeof Knowns) {}
+  constructor(
+    @InjectModel(Knowns) private readonly knownRepo: typeof Knowns,
+    private readonly learService: LearnsService,
+    private readonly relevanceService: RelevancesService,
+  ) {}
 
   async createKnown(dto: CreateKnownsDto) {
-    //FIXME: Проверка на слово
+    await this.checkHasWord(dto.word, dto.userId)
+
     const isIrregularVerb = utils.checkIrregularVerb(dto.word)
     const dateCreate = new Date()
-    const known = await this.knownRepo.create({
+
+    await this.knownRepo.create({
       ...dto,
       isIrregularVerb,
       dateCreate,
@@ -35,6 +43,8 @@ export class KnownsService {
     const known = await this.getKnownById(dto.id)
     if (!known || (known && known.userId !== userId))
       throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+
+    await this.checkHasWord(dto.word, userId)
 
     const isIrregularVerb = utils.checkIrregularVerb(dto.word)
     known.isIrregularVerb = isIrregularVerb
@@ -57,5 +67,18 @@ export class KnownsService {
   async getAllKnownByUserId(userId: number) {
     const known = await this.knownRepo.findAll({ where: { userId } })
     return known
+  }
+  private async checkHasWord(word: string, userId: number) {
+    const known = await this.getKnownByWordAndUserId(word, userId)
+    if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
+    const learn = await this.learService.getLearnsByWordAndUserId(word, userId)
+    if (learn) throw new BadRequestException(ERROR_MESSAGES.hasWord)
+    const relevance = await this.relevanceService.getRelevanceByWordAndUserId(
+      word,
+      userId,
+    )
+    //FIXME: Придумать другой статус
+    if (relevance)
+      throw new BadRequestException(ERROR_MESSAGES.hasRelevanceWord)
   }
 }

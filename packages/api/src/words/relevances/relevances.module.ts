@@ -2,7 +2,7 @@ import { JwtModule } from '@nestjs/jwt'
 import { RelevancesController } from './relevances.controller'
 import { RelevancesService } from './relevances.service'
 
-import { Module } from '@nestjs/common'
+import { Module, forwardRef } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { User } from 'src/users/users.model'
 import { Relevance } from './relevances.model'
@@ -13,8 +13,8 @@ import { LearnsModule } from '../learns/learns.module'
   imports: [
     JwtModule,
     SequelizeModule.forFeature([User, Relevance]),
-    KnownsModule,
-    LearnsModule,
+    forwardRef(() => LearnsModule),
+    forwardRef(() => KnownsModule),
   ],
   controllers: [RelevancesController],
   providers: [RelevancesService],
