@@ -37,6 +37,9 @@ export class RepeatsService {
     })
     return RESPONSE_MESSAGES.success
   }
+  async getAllRepeat(userId: number) {
+    return await this.getAllRepeatByUserId(userId)
+  }
 
   async getRepeatByUserId(userId: number) {
     const repeat = await this.repeatRepo.findAll({ where: { userId } })
@@ -44,6 +47,10 @@ export class RepeatsService {
   }
   async getRepeatByWordAndUserId(word: string, userId: number) {
     const repeat = await this.repeatRepo.findOne({ where: { userId, word } })
+    return repeat
+  }
+  async getAllRepeatByUserId(userId: number) {
+    const repeat = await this.repeatRepo.findAll({ where: { userId } })
     return repeat
   }
   async deleteRepeat(id: number) {

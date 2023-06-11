@@ -1,9 +1,11 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common'
 import { RepeatsService } from './repeats.service'
 import { Role } from 'src/utils/decorators/role.decorator'
 import { RoleGuard } from 'src/utils/guards/role.guard'
 import { CreateRepeatDto } from './dto/create-repeat-dto'
 import { API_VERSION } from 'src/const'
+import { AuthGuard } from 'src/utils/guards/auth.guard'
+import { TRequest } from 'src/auth/auth.service'
 
 @Controller(`${API_VERSION.v1}/words/repeats`)
 export class RepeatsController {
@@ -14,5 +16,11 @@ export class RepeatsController {
   @UseGuards(RoleGuard)
   createRepeat(@Body() dto: CreateRepeatDto) {
     return this.repeatService.createRepeat(dto)
+  }
+
+  @Get('')
+  @UseGuards(AuthGuard)
+  getAllRepeat(@Request() request: TRequest) {
+    return this.repeatService.getAllRepeat(request.user.id)
   }
 }
