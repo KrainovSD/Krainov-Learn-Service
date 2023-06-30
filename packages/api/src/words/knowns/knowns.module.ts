@@ -13,8 +13,8 @@ import { LearnsModule } from '../learns/learns.module'
   imports: [
     JwtModule,
     SequelizeModule.forFeature([Knowns, User]),
-    forwardRef(() => RelevancesModule),
     forwardRef(() => LearnsModule),
+    forwardRef(() => RelevancesModule),
   ],
   controllers: [KnownsController],
   providers: [KnownsService],

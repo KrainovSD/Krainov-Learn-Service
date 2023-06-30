@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Relevance } from './relevances.model'
 import { CreateRelevanceDto } from './dto/create-relevance-dto'
@@ -11,7 +16,9 @@ import { RelevanceIdDto } from './dto/relevance-id.dto'
 export class RelevancesService {
   constructor(
     @InjectModel(Relevance) private readonly relevanceRepo: typeof Relevance,
+    @Inject(forwardRef(() => KnownsService))
     private readonly knownService: KnownsService,
+    @Inject(forwardRef(() => LearnsService))
     private readonly learnService: LearnsService,
   ) {}
 

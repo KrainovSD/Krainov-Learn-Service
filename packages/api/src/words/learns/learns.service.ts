@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  forwardRef,
+  Inject,
+} from '@nestjs/common'
 import { Learns } from './learns.model'
 import { InjectModel } from '@nestjs/sequelize'
 import { CreateLearnDto } from './dto/create-learns-dto'
@@ -19,16 +24,18 @@ export class LearnsService {
   constructor(
     @InjectModel(Learns) private readonly learnsRepo: typeof Learns,
     private readonly categoryService: CategoriesService,
-  ) // private readonly knownService: KnownsService,
-  // private readonly relevanceService: RelevancesService,
-  {}
+    @Inject(forwardRef(() => KnownsService))
+    private readonly knownService: KnownsService,
+    @Inject(forwardRef(() => RelevancesService))
+    private readonly relevanceService: RelevancesService,
+  ) {}
 
   async createLearn(dto: CreateLearnDto, userId: number) {
     const category = await this.getOwnCategory(dto.categoryId, userId)
     if (category.isLearn)
       throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
 
-    //await this.checkHasWord(dto.word, userId)
+    await this.checkHasWord(dto.word, userId)
 
     const isIrregularVerb = utils.checkIrregularVerb(dto.word)
     await this.learnsRepo.create({ ...dto, isIrregularVerb })
@@ -59,7 +66,7 @@ export class LearnsService {
         throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
     }
 
-    //await this.checkHasWord(dto.word, userId)
+    await this.checkHasWord(dto.word, userId)
 
     const isIrregularVerb = utils.checkIrregularVerb(dto.word)
     learn.isIrregularVerb = isIrregularVerb
@@ -108,17 +115,17 @@ export class LearnsService {
       throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
     return category
   }
-  // private async checkHasWord(word: string, userId: number) {
-  //   const known = await this.knownService.getKnownByWordAndUserId(word, userId)
-  //   if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-  //   const learn = await this.getLearnsByWordAndUserId(word, userId)
-  //   if (learn) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-  //   const relevance = await this.relevanceService.getRelevanceByWordAndUserId(
-  //     word,
-  //     userId,
-  //   )
-  //   //FIXME: Придумать другой статус
-  //   if (relevance)
-  //     throw new BadRequestException(ERROR_MESSAGES.hasRelevanceWord)
-  // }
+  private async checkHasWord(word: string, userId: number) {
+    const known = await this.knownService.getKnownByWordAndUserId(word, userId)
+    if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
+    const learn = await this.getLearnsByWordAndUserId(word, userId)
+    if (learn) throw new BadRequestException(ERROR_MESSAGES.hasWord)
+    const relevance = await this.relevanceService.getRelevanceByWordAndUserId(
+      word,
+      userId,
+    )
+    //FIXME: Придумать другой статус
+    if (relevance)
+      throw new BadRequestException(ERROR_MESSAGES.hasRelevanceWord)
+  }
 }
