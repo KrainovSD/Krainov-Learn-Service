@@ -11,7 +11,7 @@ export const API_VERSION = {
 export const ROLE_DECORATOR_KEY = 'roles'
 
 export const SALT_ROUNDS = 10
-export const ALLOW_WORDS_TO_START_CATEGORY = 2
+export const ALLOW_WORDS_TO_START_CATEGORY = 0
 export const ALLOW_WORDS_AFTER_DELETE_FROM_START_CATEGORY = 2
 
 export const SETTINGS_DEFAULT = {

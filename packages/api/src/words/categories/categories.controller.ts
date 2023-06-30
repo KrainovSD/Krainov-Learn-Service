@@ -1,9 +1,7 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
-  Param,
   Post,
   Put,
   Req,
@@ -16,6 +14,7 @@ import { TRequest } from 'src/auth/auth.service'
 import { AuthGuard } from 'src/utils/guards/auth.guard'
 import { UpdateCategoryDto } from './dto/update-category-dro'
 import { CategoryIdDto } from './dto/category-id-dto'
+import { CategoryMultipleIdDto } from './dto/category-multiple-id-dto'
 
 @Controller(`${API_VERSION.v1}/words/category`)
 export class CategoriesController {
@@ -34,9 +33,9 @@ export class CategoriesController {
   }
 
   @UseGuards(AuthGuard)
-  @Delete('/:id')
-  deleteCategory(@Param() dto: CategoryIdDto, @Req() request: TRequest) {
-    return this.categoriesService.deleteCategory(dto, request.user.id)
+  @Post('/delete')
+  deleteCategory(@Body() dto: CategoryMultipleIdDto, @Req() request: TRequest) {
+    return this.categoriesService.deleteCategory(dto.ids, request.user.id)
   }
 
   @UseGuards(AuthGuard)

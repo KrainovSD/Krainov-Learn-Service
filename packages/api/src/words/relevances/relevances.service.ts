@@ -11,7 +11,7 @@ import { KnownsService } from '../knowns/knowns.service'
 import { LearnsService } from '../learns/learns.service'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { utils } from 'src/utils/helpers'
-import { RelevanceIdDto } from './dto/relevance-id.dto'
+
 @Injectable()
 export class RelevancesService {
   constructor(
@@ -53,13 +53,15 @@ export class RelevancesService {
 
     return RESPONSE_MESSAGES.success
   }
-  async deleteRelevance(dto: RelevanceIdDto, userId: number) {
-    const relevance = await this.getRelevanceById(dto.id)
-    if (!relevance || (relevance && relevance.userId !== userId))
-      throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+  async deleteRelevance(ids: number[], userId: number) {
+    for (const id of ids) {
+      const relevance = await this.getRelevanceById(id)
+      if (!relevance || (relevance && relevance.userId !== userId))
+        throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+    }
 
     await this.relevanceRepo.destroy({
-      where: { id: dto.id },
+      where: { id: ids },
     })
 
     return RESPONSE_MESSAGES.success

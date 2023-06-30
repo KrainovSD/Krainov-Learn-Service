@@ -15,7 +15,6 @@ import {
 } from 'src/const'
 import { utils } from 'src/utils/helpers'
 import { UpdateLearnsDto } from './dto/update-learns.dto'
-import { LearnIdDto } from './dto/learn-id-dto'
 import { KnownsService } from '../knowns/knowns.service'
 import { RelevancesService } from '../relevances/relevances.service'
 
@@ -42,18 +41,20 @@ export class LearnsService {
 
     return RESPONSE_MESSAGES.success
   }
-  async deleteLearn(dto: LearnIdDto, userId: number) {
-    const learn = await this.getLearnById(dto.id)
-    if (!learn) throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
-    const category = await this.getOwnCategory(learn.categoryId, userId)
-    if (
-      category.isLearn &&
-      category.learns.length <= ALLOW_WORDS_AFTER_DELETE_FROM_START_CATEGORY
-    ) {
-      throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
+  async deleteLearn(ids: number[], userId: number) {
+    for (const id of ids) {
+      const learn = await this.getLearnById(id)
+      if (!learn) throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+      const category = await this.getOwnCategory(learn.categoryId, userId)
+      if (
+        category.isLearn &&
+        category.learns.length <= ALLOW_WORDS_AFTER_DELETE_FROM_START_CATEGORY
+      ) {
+        throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
+      }
     }
 
-    await this.learnsRepo.destroy({ where: { id: dto.id } })
+    await this.learnsRepo.destroy({ where: { id: ids } })
     return RESPONSE_MESSAGES.success
   }
   async updateLearn(dto: UpdateLearnsDto, userId: number) {

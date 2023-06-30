@@ -39,11 +39,14 @@ export class CategoriesService {
     await category.save()
     return RESPONSE_MESSAGES.success
   }
-  async deleteCategory(dto: CategoryIdDto, userId: number) {
-    const category = await this.getCategoryById(dto.id)
-    if (!category || (category && category.userId !== userId))
-      throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
-    await this.deleteCategoryById(dto.id)
+  async deleteCategory(ids: number[], userId: number) {
+    for (const id of ids) {
+      const category = await this.getCategoryById(id)
+      if (!category || (category && category.userId !== userId))
+        throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+    }
+
+    await this.categoryRepo.destroy({ where: { id: ids } })
     return RESPONSE_MESSAGES.success
   }
   async startLearnCategory(dto: CategoryIdDto, userId: number) {
@@ -54,9 +57,10 @@ export class CategoriesService {
       throw new BadRequestException(ERROR_MESSAGES.lowWordsInCategory)
     if (category.isLearn)
       throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
-    category.isLearn = true
-    //FIXME:  NEXT repeat?
 
+    category.isLearn = true
+    category.nextRepeat = utils.date.getDate(1, 'days')
+    category.nextReverseRepeat = utils.date.getDate(1, 'days')
     await category.save()
     return RESPONSE_MESSAGES.success
   }
@@ -87,9 +91,6 @@ export class CategoriesService {
       include: learns ? [Learns] : [],
     })
     return categories
-  }
-  async deleteCategoryById(id: number) {
-    await this.categoryRepo.destroy({ where: { id } })
   }
   private async isHasNameCategory(
     name: string,

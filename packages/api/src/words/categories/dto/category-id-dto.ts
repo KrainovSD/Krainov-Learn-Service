@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNumber } from 'class-validator'
+import { IsInt } from 'class-validator'
 
 export class CategoryIdDto {
   @ApiProperty({
@@ -7,6 +7,6 @@ export class CategoryIdDto {
     description: 'Уникальный идентификатор',
     required: true,
   })
-  @IsNumber({}, { message: 'Неверный формат уникального идентификатора' })
+  @IsInt({ message: 'Неверный формат уникального идентификатора' })
   id!: number
 }

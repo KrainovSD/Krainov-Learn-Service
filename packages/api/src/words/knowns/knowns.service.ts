@@ -8,7 +8,6 @@ import {
 import { Knowns } from './knowns.model'
 import { CreateKnownsDto } from './dto/create-knowns-dto'
 import { utils } from 'src/utils/helpers'
-import { KnownIdDto } from './dto/known-id-dto'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { UpdateKnownsDto } from './dto/update-knowns-dto'
 import { LearnsService } from '../learns/learns.service'
@@ -37,12 +36,14 @@ export class KnownsService {
     })
     return RESPONSE_MESSAGES.success
   }
-  async deleteKnown(dto: KnownIdDto, userId: number) {
-    const known = await this.getKnownById(dto.id)
-    if (!known || (known && known.userId !== userId))
-      throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+  async deleteKnown(ids: number[], userId: number) {
+    for (const id of ids) {
+      const known = await this.getKnownById(id)
+      if (!known || (known && known.userId !== userId))
+        throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+    }
 
-    await this.knownRepo.destroy({ where: { id: dto.id } })
+    await this.knownRepo.destroy({ where: { id: ids } })
 
     return RESPONSE_MESSAGES.success
   }

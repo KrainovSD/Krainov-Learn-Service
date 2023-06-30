@@ -19,7 +19,7 @@ export class RepeatsService {
     const user = await this.userService.getUserById(dto.userId)
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
     const repeat = await this.getRepeatByWordAndUserId(dto.word, dto.userId)
-    if (repeat) throw new BadRequestException(ERROR_MESSAGES.hasWord)
+    if (repeat) this.deleteRepeat([repeat.id], dto.userId)
 
     const nextRepeat = new Date()
     const nextReverseRepeat = new Date()
@@ -40,10 +40,23 @@ export class RepeatsService {
   async getAllRepeat(userId: number) {
     return await this.getAllRepeatByUserId(userId)
   }
+  async deleteRepeat(ids: number[], userId: number) {
+    for (const id of ids) {
+      const repeat = await this.getRepeatById(id)
+      if (!repeat || (repeat && repeat.userId !== userId))
+        throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+    }
+    await this.repeatRepo.destroy({ where: { id: ids } })
+
+    return RESPONSE_MESSAGES.success
+  }
 
   async getRepeatByUserId(userId: number) {
     const repeat = await this.repeatRepo.findAll({ where: { userId } })
     return repeat
+  }
+  async getRepeatById(id: number) {
+    return await this.repeatRepo.findByPk(id)
   }
   async getRepeatByWordAndUserId(word: string, userId: number) {
     const repeat = await this.repeatRepo.findOne({ where: { userId, word } })
@@ -52,8 +65,5 @@ export class RepeatsService {
   async getAllRepeatByUserId(userId: number) {
     const repeat = await this.repeatRepo.findAll({ where: { userId } })
     return repeat
-  }
-  async deleteRepeat(id: number) {
-    await this.repeatRepo.destroy({ where: { id } })
   }
 }

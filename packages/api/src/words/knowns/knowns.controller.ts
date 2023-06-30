@@ -1,9 +1,7 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
-  Param,
   Post,
   Put,
   Request,
@@ -16,8 +14,8 @@ import { RoleGuard } from 'src/utils/guards/role.guard'
 import { CreateKnownsDto } from './dto/create-knowns-dto'
 import { AuthGuard } from 'src/utils/guards/auth.guard'
 import { TRequest } from 'src/auth/auth.service'
-import { KnownIdDto } from './dto/known-id-dto'
 import { UpdateKnownsDto } from './dto/update-knowns-dto'
+import { KnownMultipleIdDto } from './dto/known-multiple-id-dto'
 
 @Controller(`${API_VERSION.v1}/words/knowns`)
 export class KnownsController {
@@ -36,10 +34,10 @@ export class KnownsController {
     return this.knownService.getAllKnown(request.user.id)
   }
 
-  @Delete('/:id')
+  @Post('/delete')
   @UseGuards(AuthGuard)
-  deleteKnown(@Param() dto: KnownIdDto, @Request() request: TRequest) {
-    return this.knownService.deleteKnown(dto, request.user.id)
+  deleteKnown(@Body() dto: KnownMultipleIdDto, @Request() request: TRequest) {
+    return this.knownService.deleteKnown(dto.ids, request.user.id)
   }
 
   @Put('')
