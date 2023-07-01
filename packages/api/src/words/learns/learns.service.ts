@@ -17,6 +17,7 @@ import { utils } from 'src/utils/helpers'
 import { UpdateLearnsDto } from './dto/update-learns.dto'
 import { KnownsService } from '../knowns/knowns.service'
 import { RelevancesService } from '../relevances/relevances.service'
+import { Category } from '../categories/categories.model'
 
 @Injectable()
 export class LearnsService {
@@ -88,27 +89,30 @@ export class LearnsService {
     return await this.learnsRepo.findByPk(id)
   }
   async getLearnByWordAndUserId(word: string, userId: number) {
-    //FIXME: Исправить
-    const learns = await this.getAllLearnsByUserId(userId)
-    return learns.reduce((result: Learns | null, learn) => {
-      if (learn.word === word) {
-        result = learn
-        return result
-      }
-      return result
-    }, null)
+    return await this.learnsRepo.findOne({
+      where: { word },
+      include: [
+        {
+          model: Category,
+          attributes: ['id'],
+          where: { userId },
+        },
+      ],
+      raw: true,
+    })
   }
   async getAllLearnsByUserId(userId: number) {
-    //FIXME: Исправить
-    const categories = await this.categoryService.getAllCategoriesByUserId(
-      userId,
-      true,
-    )
-    if (!categories) throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
-    const learns = categories.reduce((result: Learns[], category) => {
-      return result.concat(category.learns)
-    }, [])
-    return learns
+    return await this.learnsRepo.findAll({
+      where: {},
+      include: [
+        {
+          model: Category,
+          attributes: ['id'],
+          where: { userId },
+        },
+      ],
+      raw: true,
+    })
   }
   async getAllLearnsById(ids: number[]) {
     return await this.learnsRepo.findAll({ where: { id: ids } })

@@ -88,10 +88,9 @@ export class CategoriesService {
   async getAllCategoriesById(ids: number[]) {
     return await this.categoryRepo.findAll({ where: { id: ids } })
   }
-  async getAllCategoriesByUserId(userId: number, learns: boolean = false) {
+  async getAllCategoriesByUserId(userId: number) {
     return await this.categoryRepo.findAll({
       where: { userId },
-      include: learns ? [Learns] : [],
     })
   }
 

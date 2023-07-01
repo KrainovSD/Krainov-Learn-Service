@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import {
+  BelongsTo,
   Column,
   DataType,
   ForeignKey,
@@ -17,7 +18,7 @@ export interface LearnCreationArgs {
 
 @Table({ tableName: 'learns', createdAt: false, updatedAt: false })
 export class Learns extends Model<Learns, LearnCreationArgs> {
-  @ApiProperty({ example: '1', description: 'Уникальный идентификатор' })
+  @ApiProperty({ example: 1, description: 'Уникальный идентификатор' })
   @Column({
     type: DataType.INTEGER,
     unique: true,
@@ -30,11 +31,11 @@ export class Learns extends Model<Learns, LearnCreationArgs> {
     example: 1,
     description: 'Уникальный идентификатор категории',
   })
-  @ForeignKey(() => Category)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
+  @ForeignKey(() => Category)
   categoryId!: number
 
   @ApiProperty({
@@ -122,4 +123,7 @@ export class Learns extends Model<Learns, LearnCreationArgs> {
     allowNull: false,
   })
   mistakesTotal!: number
+
+  @BelongsTo(() => Category)
+  category!: Category
 }
