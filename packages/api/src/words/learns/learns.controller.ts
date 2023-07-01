@@ -13,7 +13,7 @@ import { AuthGuard } from 'src/utils/guards/auth.guard'
 import { CreateLearnDto } from './dto/create-learns-dto'
 import { TRequest } from 'src/auth/auth.service'
 import { UpdateLearnsDto } from './dto/update-learns.dto'
-import { LearnMultipleIdDto } from './dto/learn-multiple-id-dto'
+import { DeleteLearnsDto } from './dto/delete-learns-dto'
 
 @Controller(`${API_VERSION.v1}/words/learns`)
 export class LearnsController {
@@ -33,8 +33,12 @@ export class LearnsController {
 
   @UseGuards(AuthGuard)
   @Post('/delete')
-  deleteLearn(@Body() dto: LearnMultipleIdDto, @Req() request: TRequest) {
-    return this.learnsService.deleteLearn(dto.ids, request.user.id)
+  deleteLearn(@Body() dto: DeleteLearnsDto, @Req() request: TRequest) {
+    return this.learnsService.deleteLearn(
+      dto.ids,
+      dto.categoryId,
+      request.user.id,
+    )
   }
 
   @UseGuards(AuthGuard)

@@ -31,6 +31,6 @@ export class RelevancesController {
   @Get()
   @UseGuards(AuthGuard)
   getAllRelevance(@Request() request: TRequest) {
-    return this.relevanceService.getAllRelevance(request.user.id)
+    return this.relevanceService.getAllRelevances(request.user.id)
   }
 }

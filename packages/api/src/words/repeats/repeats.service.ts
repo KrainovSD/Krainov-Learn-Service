@@ -37,33 +37,35 @@ export class RepeatsService {
     })
     return RESPONSE_MESSAGES.success
   }
-  async getAllRepeat(userId: number) {
-    return await this.getAllRepeatByUserId(userId)
+  async getAllRepeats(userId: number) {
+    return await this.getAllRepeatsByUserId(userId)
   }
   async deleteRepeat(ids: number[], userId: number) {
-    for (const id of ids) {
-      const repeat = await this.getRepeatById(id)
-      if (!repeat || (repeat && repeat.userId !== userId))
-        throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+    const repeats = await this.getAllRepeatsById(ids)
+
+    const checkedIds: number[] = []
+    for (const repeat of repeats) {
+      if (repeat.userId !== userId) continue
+      checkedIds.push(repeat.id)
     }
-    await this.repeatRepo.destroy({ where: { id: ids } })
+    await this.repeatRepo.destroy({ where: { id: checkedIds } })
 
     return RESPONSE_MESSAGES.success
   }
 
   async getRepeatByUserId(userId: number) {
-    const repeat = await this.repeatRepo.findAll({ where: { userId } })
-    return repeat
+    return await this.repeatRepo.findAll({ where: { userId } })
   }
   async getRepeatById(id: number) {
     return await this.repeatRepo.findByPk(id)
   }
   async getRepeatByWordAndUserId(word: string, userId: number) {
-    const repeat = await this.repeatRepo.findOne({ where: { userId, word } })
-    return repeat
+    return await this.repeatRepo.findOne({ where: { userId, word } })
   }
-  async getAllRepeatByUserId(userId: number) {
-    const repeat = await this.repeatRepo.findAll({ where: { userId } })
-    return repeat
+  async getAllRepeatsByUserId(userId: number) {
+    return await this.repeatRepo.findAll({ where: { userId } })
+  }
+  async getAllRepeatsById(ids: number[]) {
+    return await this.repeatRepo.findAll({ where: { id: ids } })
   }
 }

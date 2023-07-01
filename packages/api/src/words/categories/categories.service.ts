@@ -40,13 +40,15 @@ export class CategoriesService {
     return RESPONSE_MESSAGES.success
   }
   async deleteCategory(ids: number[], userId: number) {
-    for (const id of ids) {
-      const category = await this.getCategoryById(id)
-      if (!category || (category && category.userId !== userId))
-        throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+    const categories = await this.getAllCategoriesById(ids)
+
+    const checkedIds: number[] = []
+    for (const category of categories) {
+      if (category.userId !== userId) continue
+      checkedIds.push(category.id)
     }
 
-    await this.categoryRepo.destroy({ where: { id: ids } })
+    await this.categoryRepo.destroy({ where: { id: checkedIds } })
     return RESPONSE_MESSAGES.success
   }
   async startLearnCategory(dto: CategoryIdDto, userId: number) {
@@ -65,33 +67,34 @@ export class CategoriesService {
     return RESPONSE_MESSAGES.success
   }
   async getAllCategories(userId: number) {
-    const categories = await this.getCategoriesByUserId(userId)
+    const categories = await this.getAllCategoriesByUserId(userId)
     if (!categories) throw new NotFoundException(ERROR_MESSAGES.infoNotFound)
     return categories
   }
 
   async getCategoryByNameAndUserId(name: string, userId: number) {
-    const category = await this.categoryRepo.findOne({
+    return await this.categoryRepo.findOne({
       where: {
         name,
         userId,
       },
     })
-    return category
   }
   async getCategoryById(id: number) {
-    const category = await this.categoryRepo.findByPk(id, {
+    return await this.categoryRepo.findByPk(id, {
       include: [Learns],
     })
-    return category
   }
-  async getCategoriesByUserId(userId: number, learns: boolean = false) {
-    const categories = await this.categoryRepo.findAll({
+  async getAllCategoriesById(ids: number[]) {
+    return await this.categoryRepo.findAll({ where: { id: ids } })
+  }
+  async getAllCategoriesByUserId(userId: number, learns: boolean = false) {
+    return await this.categoryRepo.findAll({
       where: { userId },
       include: learns ? [Learns] : [],
     })
-    return categories
   }
+
   private async isHasNameCategory(
     name: string,
     userId: number,

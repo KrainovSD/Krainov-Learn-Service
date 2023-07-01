@@ -22,7 +22,7 @@ export class RepeatsController {
   @Get('')
   @UseGuards(AuthGuard)
   getAllRepeat(@Request() request: TRequest) {
-    return this.repeatService.getAllRepeat(request.user.id)
+    return this.repeatService.getAllRepeats(request.user.id)
   }
 
   @Post('/delete')

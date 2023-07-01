@@ -29,7 +29,7 @@ export class RelevancesService {
       userId,
     )
     if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-    const learn = await this.learnService.getLearnsByWordAndUserId(
+    const learn = await this.learnService.getLearnByWordAndUserId(
       dto.word,
       userId,
     )
@@ -54,34 +54,36 @@ export class RelevancesService {
     return RESPONSE_MESSAGES.success
   }
   async deleteRelevance(ids: number[], userId: number) {
-    for (const id of ids) {
-      const relevance = await this.getRelevanceById(id)
-      if (!relevance || (relevance && relevance.userId !== userId))
-        throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+    const relevances = await this.getAllRelevancesById(ids)
+
+    const checkedIds: number[] = []
+    for (const relevance of relevances) {
+      if (relevance.userId !== userId) continue
+      checkedIds.push(relevance.id)
     }
 
     await this.relevanceRepo.destroy({
-      where: { id: ids },
+      where: { id: checkedIds },
     })
 
     return RESPONSE_MESSAGES.success
   }
-  async getAllRelevance(userId: number) {
-    return await this.getAllRelevanceByUserId(userId)
+  async getAllRelevances(userId: number) {
+    return await this.getAllRelevancesByUserId(userId)
   }
 
   async getRelevanceByWordAndUserId(word: string, userId: number) {
-    const relevance = await this.relevanceRepo.findOne({
+    return await this.relevanceRepo.findOne({
       where: { word, userId },
     })
-    return relevance
   }
   async getRelevanceById(id: number) {
-    const relevance = await this.relevanceRepo.findByPk(id)
-    return relevance
+    return await this.relevanceRepo.findByPk(id)
   }
-  async getAllRelevanceByUserId(userId: number) {
-    const relevance = await this.relevanceRepo.findAll({ where: { userId } })
-    return relevance
+  async getAllRelevancesByUserId(userId: number) {
+    return await this.relevanceRepo.findAll({ where: { userId } })
+  }
+  async getAllRelevancesById(ids: number[]) {
+    return await this.relevanceRepo.findAll({ where: { id: ids } })
   }
 }

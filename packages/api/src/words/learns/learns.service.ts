@@ -41,20 +41,22 @@ export class LearnsService {
 
     return RESPONSE_MESSAGES.success
   }
-  async deleteLearn(ids: number[], userId: number) {
-    for (const id of ids) {
-      const learn = await this.getLearnById(id)
-      if (!learn) throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
-      const category = await this.getOwnCategory(learn.categoryId, userId)
-      if (
-        category.isLearn &&
-        category.learns.length <= ALLOW_WORDS_AFTER_DELETE_FROM_START_CATEGORY
-      ) {
-        throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
-      }
+  async deleteLearn(ids: number[], categoryId: number, userId: number) {
+    const learns = await this.getAllLearnsById(ids)
+
+    const category = await this.getOwnCategory(categoryId, userId)
+    if (
+      category.isLearn &&
+      category.learns.length <= ALLOW_WORDS_AFTER_DELETE_FROM_START_CATEGORY
+    )
+      throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
+
+    const checkedIds: number[] = []
+    for (const learn of learns) {
+      if (learn.categoryId === categoryId) checkedIds.push(learn.id)
     }
 
-    await this.learnsRepo.destroy({ where: { id: ids } })
+    await this.learnsRepo.destroy({ where: { id: checkedIds } })
     return RESPONSE_MESSAGES.success
   }
   async updateLearn(dto: UpdateLearnsDto, userId: number) {
@@ -77,14 +79,28 @@ export class LearnsService {
     return RESPONSE_MESSAGES.success
   }
   async getAllLearns(userId: number) {
-    const learns = await this.getLearnsByUserId(userId)
+    const learns = await this.getAllLearnsByUserId(userId)
     if (!learns) throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
     return learns
   }
 
-  async getLearnsByUserId(userId: number) {
+  async getLearnById(id: number) {
+    return await this.learnsRepo.findByPk(id)
+  }
+  async getLearnByWordAndUserId(word: string, userId: number) {
     //FIXME: Исправить
-    const categories = await this.categoryService.getCategoriesByUserId(
+    const learns = await this.getAllLearnsByUserId(userId)
+    return learns.reduce((result: Learns | null, learn) => {
+      if (learn.word === word) {
+        result = learn
+        return result
+      }
+      return result
+    }, null)
+  }
+  async getAllLearnsByUserId(userId: number) {
+    //FIXME: Исправить
+    const categories = await this.categoryService.getAllCategoriesByUserId(
       userId,
       true,
     )
@@ -94,20 +110,8 @@ export class LearnsService {
     }, [])
     return learns
   }
-  async getLearnById(id: number) {
-    const learn = await this.learnsRepo.findByPk(id)
-    return learn
-  }
-  async getLearnsByWordAndUserId(word: string, userId: number) {
-    //FIXME: Исправить
-    const learns = await this.getLearnsByUserId(userId)
-    return learns.reduce((result: Learns | null, learn) => {
-      if (learn.word === word) {
-        result = learn
-        return result
-      }
-      return result
-    }, null)
+  async getAllLearnsById(ids: number[]) {
+    return await this.learnsRepo.findAll({ where: { id: ids } })
   }
 
   private async getOwnCategory(categoryId: number, userId: number) {
@@ -119,7 +123,7 @@ export class LearnsService {
   private async checkHasWord(word: string, userId: number) {
     const known = await this.knownService.getKnownByWordAndUserId(word, userId)
     if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-    const learn = await this.getLearnsByWordAndUserId(word, userId)
+    const learn = await this.getLearnByWordAndUserId(word, userId)
     if (learn) throw new BadRequestException(ERROR_MESSAGES.hasWord)
     const relevance = await this.relevanceService.getRelevanceByWordAndUserId(
       word,

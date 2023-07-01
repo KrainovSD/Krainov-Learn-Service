@@ -31,7 +31,7 @@ export class KnownsController {
   @Get('')
   @UseGuards(AuthGuard)
   getAllKnown(@Request() request: TRequest) {
-    return this.knownService.getAllKnown(request.user.id)
+    return this.knownService.getAllKnowns(request.user.id)
   }
 
   @Post('/delete')

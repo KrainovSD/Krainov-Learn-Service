@@ -37,13 +37,15 @@ export class KnownsService {
     return RESPONSE_MESSAGES.success
   }
   async deleteKnown(ids: number[], userId: number) {
-    for (const id of ids) {
-      const known = await this.getKnownById(id)
-      if (!known || (known && known.userId !== userId))
-        throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+    const knowns = await this.getAllKnownsById(ids)
+
+    const checkedIds: number[] = []
+    for (const known of knowns) {
+      if (known.userId !== userId) continue
+      checkedIds.push(known.id)
     }
 
-    await this.knownRepo.destroy({ where: { id: ids } })
+    await this.knownRepo.destroy({ where: { id: checkedIds } })
 
     return RESPONSE_MESSAGES.success
   }
@@ -60,26 +62,27 @@ export class KnownsService {
     await known.save()
     return RESPONSE_MESSAGES.success
   }
-  async getAllKnown(userId: number) {
-    return await this.getAllKnownByUserId(userId)
+  async getAllKnowns(userId: number) {
+    return await this.getAllKnownsByUserId(userId)
   }
 
   async getKnownByWordAndUserId(word: string, userId: number) {
-    const known = await this.knownRepo.findOne({ where: { userId, word } })
-    return known
+    return await this.knownRepo.findOne({ where: { userId, word } })
   }
   async getKnownById(id: number) {
-    const known = await this.knownRepo.findByPk(id)
-    return known
+    return await this.knownRepo.findByPk(id)
   }
-  async getAllKnownByUserId(userId: number) {
-    const known = await this.knownRepo.findAll({ where: { userId } })
-    return known
+  async getAllKnownsById(ids: number[]) {
+    return await this.knownRepo.findAll({ where: { id: ids } })
   }
+  async getAllKnownsByUserId(userId: number) {
+    return await this.knownRepo.findAll({ where: { userId } })
+  }
+
   private async checkHasWord(word: string, userId: number) {
     const known = await this.getKnownByWordAndUserId(word, userId)
     if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-    const learn = await this.learService.getLearnsByWordAndUserId(word, userId)
+    const learn = await this.learService.getLearnByWordAndUserId(word, userId)
     if (learn) throw new BadRequestException(ERROR_MESSAGES.hasWord)
     const relevance = await this.relevanceService.getRelevanceByWordAndUserId(
       word,
