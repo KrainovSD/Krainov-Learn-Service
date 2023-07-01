@@ -29,11 +29,10 @@ export class SettingsService {
   }
 
   async getSettingsByUserId(userId: number) {
-    const settings = await this.settingRepo.findOne({
+    return await this.settingRepo.findOne({
       where: {
         userId,
       },
     })
-    return settings
   }
 }

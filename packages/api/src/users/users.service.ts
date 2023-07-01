@@ -97,7 +97,7 @@ export class UsersService {
   }
 
   async callChangeEmail(userId: number) {
-    const user = await this.getUserUserByIdService(userId)
+    const user = await this.getUserByIdService(userId)
 
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
 
@@ -159,7 +159,7 @@ export class UsersService {
   }
 
   async changeNickName(nickName: string, userId: number) {
-    const user = await this.getUserUserByIdService(userId)
+    const user = await this.getUserByIdService(userId)
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
     if (user.nickNameChangeDate) {
       const lastDateChange = user.nickNameChangeDate
@@ -218,22 +218,20 @@ export class UsersService {
     user.settings = settings
     return user
   }
+
   async getUserByEmail(email: string) {
-    const user = await this.userRepo.findOne({ where: { email } })
-    return user
+    return await this.userRepo.findOne({ where: { email } })
   }
   async getUserByNickName(nickName: string) {
-    const user = await this.userRepo.findOne({ where: { nickName } })
-    return user
+    return await this.userRepo.findOne({ where: { nickName } })
   }
-  async getUserUserByIdService(id: number) {
-    const user = await this.userRepo.findByPk(id, {
+  async getUserByIdService(id: number) {
+    return await this.userRepo.findByPk(id, {
       include: [Settings, Statistic],
     })
-    return user
   }
   async getUserById(id: number, privateFields: boolean = false) {
-    const user = await this.userRepo.findByPk(id, {
+    return await this.userRepo.findByPk(id, {
       attributes: {
         exclude: privateFields
           ? this.forbiddenFields
@@ -241,7 +239,6 @@ export class UsersService {
       },
       include: [Settings, Statistic],
     })
-    return user
   }
   async getAllUser(userId: number) {
     // const user = await this.userRepo.findAll({where: {
@@ -250,17 +247,15 @@ export class UsersService {
     //TODO: Узнать как искать по НЕ РАВНО
   }
   async getUserByEmailChangeKey(key: string) {
-    const user = await this.userRepo.findOne({ where: { emailChangeKey: key } })
-    return user
+    return await this.userRepo.findOne({ where: { emailChangeKey: key } })
   }
   async getUserByPasswordChangeKey(key: string) {
-    const user = await this.userRepo.findOne({
+    return await this.userRepo.findOne({
       where: { passwordChangeKey: key },
     })
-    return user
   }
   async getUserByEmailOrNickName(login: string) {
-    const user = await this.userRepo.findOne({
+    return await this.userRepo.findOne({
       where: {
         [Op.or]: [
           {
@@ -272,19 +267,16 @@ export class UsersService {
         ],
       },
     })
-    return user
   }
   async getUserByTokenAndId(token: string, id: number) {
-    const user = await this.userRepo.findOne({
+    return await this.userRepo.findOne({
       where: {
         [Op.and]: [{ token }, { id }],
       },
     })
-    return user
   }
   async deleteUserById(id: number) {
-    const user = await this.userRepo.destroy({ where: { id } })
-    return user
+    return await this.userRepo.destroy({ where: { id } })
   }
 
   async checkUniqueEmail(email: string) {
