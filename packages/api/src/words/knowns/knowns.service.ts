@@ -18,41 +18,37 @@ export class KnownsService {
   constructor(
     @InjectModel(Knowns) private readonly knownRepo: typeof Knowns,
     @Inject(forwardRef(() => LearnsService))
-    private readonly learService: LearnsService,
+    private readonly learnService: LearnsService,
     @Inject(forwardRef(() => RelevancesService))
     private readonly relevanceService: RelevancesService,
   ) {}
 
-  async createKnown(dto: CreateKnownsDto) {
-    const words: string[] = dto.knowns.map((known) => known.word)
-    const hasWords = await this.getHasWords(words, dto.userId)
+  async createKnown(dto: CreateKnownsDto, userId: number) {
+    const words: string[] = dto.words.map((known) => known.word)
+    const hasWords = await this.getHasWords(words, userId)
 
-    const checkedKnowns = dto.knowns.reduce(
+    const checkedWords = dto.words.reduce(
       (result: KnownsCreationArgs[], known) => {
         if (hasWords.has(known.word)) return result
 
         const isIrregularVerb = utils.checkIrregularVerb(known.word)
         const dateCreate = new Date()
-        const checkedKnown = {
+        const checkedWord = {
           ...known,
           isIrregularVerb,
           dateCreate,
-          userId: dto.userId,
+          userId: userId,
         }
-        result.push(checkedKnown)
+        result.push(checkedWord)
         return result
       },
       [],
     )
 
-    await this.knownRepo.bulkCreate(checkedKnowns)
+    await this.knownRepo.bulkCreate(checkedWords)
     return hasWords.size === 0
       ? RESPONSE_MESSAGES.success
-      : {
-          message: `Следующие слова не были добавлены, так как они уже существуют: ${Array.from(
-            hasWords,
-          ).join(', ')}`,
-        }
+      : RESPONSE_MESSAGES.existWords(hasWords)
   }
   async deleteKnown(ids: number[], userId: number) {
     const knowns = await this.getAllKnownsById(ids)
@@ -97,31 +93,31 @@ export class KnownsService {
   async getAllKnownsByUserId(userId: number) {
     return await this.knownRepo.findAll({ where: { userId } })
   }
-  async getAllKnownsByWordAndUserId(word: string | string[], userId: number) {
-    return await this.knownRepo.findAll({ where: { userId, word } })
+  async getAllKnownsByWordAndUserId(words: string | string[], userId: number) {
+    return await this.knownRepo.findAll({ where: { userId, word: words } })
   }
 
-  private async getHasWords(word: string | string[], userId: number) {
-    const words = new Set<string>()
+  private async getHasWords(words: string | string[], userId: number) {
+    const hasWords = new Set<string>()
 
     const knownWords = (
-      await this.getAllKnownsByWordAndUserId(word, userId)
-    ).forEach((known) => words.add(known.word))
+      await this.getAllKnownsByWordAndUserId(words, userId)
+    ).forEach((known) => hasWords.add(known.word))
     const learnWords = (
-      await this.learService.getAllLearnsByWordAndUserId(word, userId)
-    ).forEach((learn) => words.add(learn.word))
+      await this.learnService.getAllLearnsByWordAndUserId(words, userId)
+    ).forEach((learn) => hasWords.add(learn.word))
     const relevanceWords = (
-      await this.relevanceService.getAllRelevancesByWordAndUserId(word, userId)
-    ).forEach((relevance) => words.add(relevance.word))
+      await this.relevanceService.getAllRelevancesByWordAndUserId(words, userId)
+    ).forEach((relevance) => hasWords.add(relevance.word))
 
-    return words
+    return hasWords
   }
   private async checkHasWord(word: string, id: number, userId: number) {
     const knownWords = await this.getKnownByWordAndUserId(word, userId)
     if (knownWords && knownWords.id !== id)
       throw new BadRequestException(ERROR_MESSAGES.hasWord)
 
-    const learnWords = await this.learService.getLearnByWordAndUserId(
+    const learnWords = await this.learnService.getLearnByWordAndUserId(
       word,
       userId,
     )

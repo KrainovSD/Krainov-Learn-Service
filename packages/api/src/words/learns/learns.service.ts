@@ -72,7 +72,7 @@ export class LearnsService {
         throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
     }
 
-    await this.checkHasWord(dto.word, userId)
+    await this.checkHasWord(dto.word, userId, dto.id)
 
     const isIrregularVerb = utils.checkIrregularVerb(dto.word)
     learn.isIrregularVerb = isIrregularVerb
@@ -140,16 +140,19 @@ export class LearnsService {
       throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
     return category
   }
-  private async checkHasWord(word: string | string[], userId: number) {
-    const known = await this.knownService.getAllKnownsByWordAndUserId(
+  private async checkHasWord(word: string, userId: number, id?: number) {
+    const known = await this.knownService.getKnownByWordAndUserId(word, userId)
+    if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
+
+    const learn = await this.getLearnByWordAndUserId(word, userId)
+    if (id && learn && learn.id !== id)
+      throw new BadRequestException(ERROR_MESSAGES.hasWord)
+    if (!id && learn) throw new BadRequestException(ERROR_MESSAGES.hasWord)
+
+    const relevance = await this.relevanceService.getRelevanceByWordAndUserId(
       word,
       userId,
     )
-    if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-    const learn = await this.getAllLearnsByWordAndUserId(word, userId)
-    if (learn) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-    const relevance =
-      await this.relevanceService.getAllRelevancesByWordAndUserId(word, userId)
     if (relevance)
       throw new HttpException(
         ERROR_MESSAGES.hasRelevanceWord,

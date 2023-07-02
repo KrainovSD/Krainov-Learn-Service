@@ -1,11 +1,6 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  forwardRef,
-} from '@nestjs/common'
+import { Inject, Injectable, forwardRef } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
-import { Relevance } from './relevances.model'
+import { Relevance, RelevanceCreationArgs } from './relevances.model'
 import { CreateRelevanceDto } from './dto/create-relevance-dto'
 import { KnownsService } from '../knowns/knowns.service'
 import { LearnsService } from '../learns/learns.service'
@@ -23,35 +18,33 @@ export class RelevancesService {
   ) {}
 
   async createRelevance(dto: CreateRelevanceDto, userId: number) {
-    //FIXME: Переписать на приемку массива или обдумать альтернативный способ заполнения
-    const known = await this.knownService.getAllKnownsByWordAndUserId(
-      dto.word,
-      userId,
-    )
-    if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-    const learn = await this.learnService.getAllLearnsByWordAndUserId(
-      dto.word,
-      userId,
-    )
-    if (learn) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-    const relevance = await this.getRelevanceByWordAndUserId(dto.word, userId)
-    if (relevance) {
-      const newDetected = new Date()
-      relevance.dateDetected = relevance.dateDetected.concat(newDetected)
-      await relevance.save()
-      return RESPONSE_MESSAGES.success
-    }
+    const hasWords = await this.getHasWords(dto.words, userId)
+    const hasRelevanceWords = await this.getHasRelevanceWords(dto.words, userId)
 
-    const newDetected = new Date()
-    const isIrregularVerb = utils.checkIrregularVerb(dto.word)
-    await this.relevanceRepo.create({
-      ...dto,
-      userId,
-      isIrregularVerb,
-      dateDetected: [newDetected],
-    })
+    const checkedWords = dto.words.reduce(
+      (result: RelevanceCreationArgs[], word) => {
+        if (hasWords.has(word) || hasRelevanceWords.has(word)) return result
 
-    return RESPONSE_MESSAGES.success
+        const dateDetected = [new Date()]
+        const isIrregularVerb = utils.checkIrregularVerb(word)
+
+        const checkedWord = {
+          word,
+          dateDetected,
+          isIrregularVerb,
+          userId,
+        }
+        result.push(checkedWord)
+        return result
+      },
+      [],
+    )
+
+    await this.relevanceRepo.bulkCreate(checkedWords)
+
+    return hasWords.size === 0
+      ? RESPONSE_MESSAGES.success
+      : RESPONSE_MESSAGES.existWords(hasWords)
   }
   async deleteRelevance(ids: number[], userId: number) {
     const relevances = await this.getAllRelevancesById(ids)
@@ -87,11 +80,33 @@ export class RelevancesService {
     return await this.relevanceRepo.findAll({ where: { id: ids } })
   }
   async getAllRelevancesByWordAndUserId(
-    word: string | string[],
+    words: string | string[],
     userId: number,
   ) {
     return await this.relevanceRepo.findAll({
-      where: { word, userId },
+      where: { word: words, userId },
     })
+  }
+
+  private async getHasWords(words: string[], userId: number) {
+    const hasWords = new Set<string>()
+
+    const knownWords = (
+      await this.knownService.getAllKnownsByWordAndUserId(words, userId)
+    ).forEach((known) => hasWords.add(known.word))
+    const learnWords = (
+      await this.learnService.getAllLearnsByWordAndUserId(words, userId)
+    ).forEach((learn) => hasWords.add(learn.word))
+
+    return hasWords
+  }
+  private async getHasRelevanceWords(words: string[], userId: number) {
+    const hasWords = new Set<string>()
+
+    const relevances = (
+      await this.getAllRelevancesByWordAndUserId(words, userId)
+    ).forEach((relevance) => hasWords.add(relevance.word))
+
+    return hasWords
   }
 }

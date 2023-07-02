@@ -5,14 +5,6 @@ import { Type } from 'class-transformer'
 
 export class CreateKnownsDto {
   @ApiProperty({
-    example: 4,
-    description: 'Уникальный идентификатор пользователя',
-    required: true,
-  })
-  @IsNumber({}, { message: 'Неверный формат уникального идентификатора' })
-  userId!: number
-
-  @ApiProperty({
     example: [],
     description: 'Информация о словах',
     required: true,
@@ -20,5 +12,5 @@ export class CreateKnownsDto {
   @IsArray({ message: 'Должно быть массивом слов' })
   @ValidateNested({ each: true, message: 'test' })
   @Type(() => KnownsDto)
-  knowns!: KnownsDto[]
+  words!: KnownsDto[]
 }

@@ -32,6 +32,11 @@ export const RESPONSE_MESSAGES = {
     message:
       'На указанную вами электронную почту был отправлен уникальный ключ для завершения операции',
   },
+  existWords: (hasWords: Set<string>) => ({
+    message: `Следующие слова не были добавлены, так как они уже существуют: ${Array.from(
+      hasWords,
+    ).join(', ')}`,
+  }),
 }
 export const ERROR_MESSAGES = {
   badKeyOrTime: 'Неверный формат уникального ключа или истекло время операции',
