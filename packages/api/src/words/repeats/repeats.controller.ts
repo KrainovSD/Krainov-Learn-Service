@@ -16,7 +16,7 @@ export class RepeatsController {
   @Role('admin')
   @UseGuards(RoleGuard)
   createRepeat(@Body() dto: CreateRepeatDto) {
-    return this.repeatService.createRepeat(dto)
+    return this.repeatService.createRepeat(dto.words, dto.userId)
   }
 
   @Get('')

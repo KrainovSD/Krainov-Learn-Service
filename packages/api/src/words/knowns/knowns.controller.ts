@@ -24,8 +24,8 @@ export class KnownsController {
   @Post('')
   @Role('admin')
   @UseGuards(RoleGuard)
-  createKnown(@Body() dto: CreateKnownsDto, @Request() request: TRequest) {
-    return this.knownService.createKnown(dto, request.user.id)
+  createKnown(@Body() dto: CreateKnownsDto) {
+    return this.knownService.createKnown(dto.words, dto.userId)
   }
 
   @Get('')

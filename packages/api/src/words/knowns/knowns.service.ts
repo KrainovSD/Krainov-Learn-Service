@@ -6,12 +6,13 @@ import {
   forwardRef,
 } from '@nestjs/common'
 import { Knowns, KnownsCreationArgs } from './knowns.model'
-import { CreateKnownsDto } from './dto/create-knowns-dto'
 import { utils } from 'src/utils/helpers'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { UpdateKnownsDto } from './dto/update-knowns-dto'
 import { LearnsService } from '../learns/learns.service'
 import { RelevancesService } from '../relevances/relevances.service'
+import { KnownsDto } from './dto/knowns-dto'
+import { UsersService } from 'src/users/users.service'
 
 @Injectable()
 export class KnownsService {
@@ -21,25 +22,26 @@ export class KnownsService {
     private readonly learnService: LearnsService,
     @Inject(forwardRef(() => RelevancesService))
     private readonly relevanceService: RelevancesService,
+    private readonly userService: UsersService,
   ) {}
 
-  async createKnown(dto: CreateKnownsDto, userId: number) {
-    const words: string[] = dto.words.map((known) => known.word)
+  async createKnown(knowns: KnownsDto[], userId: number) {
+    const user = await this.userService.getUserById(userId)
+    if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
+
+    const words: string[] = knowns.map((known) => known.word)
     const hasWords = await this.getHasWords(words, userId)
 
-    const checkedWords = dto.words.reduce(
+    const checkedWords = knowns.reduce(
       (result: KnownsCreationArgs[], known) => {
         if (hasWords.has(known.word)) return result
 
-        const isIrregularVerb = utils.checkIrregularVerb(known.word)
-        const dateCreate = new Date()
-        const checkedWord = {
+        result.push({
           ...known,
-          isIrregularVerb,
-          dateCreate,
-          userId: userId,
-        }
-        result.push(checkedWord)
+          isIrregularVerb: utils.checkIrregularVerb(known.word),
+          dateCreate: new Date(),
+          userId,
+        })
         return result
       },
       [],

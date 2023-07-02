@@ -25,16 +25,12 @@ export class RelevancesService {
       (result: RelevanceCreationArgs[], word) => {
         if (hasWords.has(word) || hasRelevanceWords.has(word)) return result
 
-        const dateDetected = [new Date()]
-        const isIrregularVerb = utils.checkIrregularVerb(word)
-
-        const checkedWord = {
+        result.push({
           word,
-          dateDetected,
-          isIrregularVerb,
+          dateDetected: [new Date()],
+          isIrregularVerb: utils.checkIrregularVerb(word),
           userId,
-        }
-        result.push(checkedWord)
+        })
         return result
       },
       [],
@@ -101,6 +97,7 @@ export class RelevancesService {
     return hasWords
   }
   private async getHasRelevanceWords(words: string[], userId: number) {
+    //FIXME: нужно дописать update метод
     const hasWords = new Set<string>()
 
     const relevances = (
