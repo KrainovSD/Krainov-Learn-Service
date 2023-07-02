@@ -5,7 +5,7 @@ import {
   Injectable,
   forwardRef,
 } from '@nestjs/common'
-import { Knowns } from './knowns.model'
+import { Knowns, KnownsCreationArgs } from './knowns.model'
 import { CreateKnownsDto } from './dto/create-knowns-dto'
 import { utils } from 'src/utils/helpers'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
@@ -24,17 +24,35 @@ export class KnownsService {
   ) {}
 
   async createKnown(dto: CreateKnownsDto) {
-    await this.checkHasWord(dto.word, dto.userId)
+    const words: string[] = dto.knowns.map((known) => known.word)
+    const hasWords = await this.getHasWords(words, dto.userId)
 
-    const isIrregularVerb = utils.checkIrregularVerb(dto.word)
-    const dateCreate = new Date()
+    const checkedKnowns = dto.knowns.reduce(
+      (result: KnownsCreationArgs[], known) => {
+        if (hasWords.has(known.word)) return result
 
-    await this.knownRepo.create({
-      ...dto,
-      isIrregularVerb,
-      dateCreate,
-    })
-    return RESPONSE_MESSAGES.success
+        const isIrregularVerb = utils.checkIrregularVerb(known.word)
+        const dateCreate = new Date()
+        const checkedKnown = {
+          ...known,
+          isIrregularVerb,
+          dateCreate,
+          userId: dto.userId,
+        }
+        result.push(checkedKnown)
+        return result
+      },
+      [],
+    )
+
+    await this.knownRepo.bulkCreate(checkedKnowns)
+    return hasWords.size === 0
+      ? RESPONSE_MESSAGES.success
+      : {
+          message: `Следующие слова не были добавлены, так как они уже существуют: ${Array.from(
+            hasWords,
+          ).join(', ')}`,
+        }
   }
   async deleteKnown(ids: number[], userId: number) {
     const knowns = await this.getAllKnownsById(ids)
@@ -54,7 +72,7 @@ export class KnownsService {
     if (!known || (known && known.userId !== userId))
       throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
 
-    await this.checkHasWord(dto.word, userId)
+    await this.checkHasWord(dto.word, dto.id, userId)
 
     const isIrregularVerb = utils.checkIrregularVerb(dto.word)
     known.isIrregularVerb = isIrregularVerb
@@ -65,12 +83,13 @@ export class KnownsService {
   async getAllKnowns(userId: number) {
     return await this.getAllKnownsByUserId(userId)
   }
+  async studyKnown() {}
 
-  async getKnownByWordAndUserId(word: string, userId: number) {
-    return await this.knownRepo.findOne({ where: { userId, word } })
-  }
   async getKnownById(id: number) {
     return await this.knownRepo.findByPk(id)
+  }
+  async getKnownByWordAndUserId(word: string, userId: number) {
+    return await this.knownRepo.findOne({ where: { userId, word } })
   }
   async getAllKnownsById(ids: number[]) {
     return await this.knownRepo.findAll({ where: { id: ids } })
@@ -78,18 +97,38 @@ export class KnownsService {
   async getAllKnownsByUserId(userId: number) {
     return await this.knownRepo.findAll({ where: { userId } })
   }
+  async getAllKnownsByWordAndUserId(word: string | string[], userId: number) {
+    return await this.knownRepo.findAll({ where: { userId, word } })
+  }
 
-  private async checkHasWord(word: string, userId: number) {
-    const known = await this.getKnownByWordAndUserId(word, userId)
-    if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-    const learn = await this.learService.getLearnByWordAndUserId(word, userId)
-    if (learn) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-    const relevance = await this.relevanceService.getRelevanceByWordAndUserId(
+  private async getHasWords(word: string | string[], userId: number) {
+    const words = new Set<string>()
+
+    const knownWords = (
+      await this.getAllKnownsByWordAndUserId(word, userId)
+    ).forEach((known) => words.add(known.word))
+    const learnWords = (
+      await this.learService.getAllLearnsByWordAndUserId(word, userId)
+    ).forEach((learn) => words.add(learn.word))
+    const relevanceWords = (
+      await this.relevanceService.getAllRelevancesByWordAndUserId(word, userId)
+    ).forEach((relevance) => words.add(relevance.word))
+
+    return words
+  }
+  private async checkHasWord(word: string, id: number, userId: number) {
+    const knownWords = await this.getKnownByWordAndUserId(word, userId)
+    if (knownWords && knownWords.id !== id)
+      throw new BadRequestException(ERROR_MESSAGES.hasWord)
+
+    const learnWords = await this.learService.getLearnByWordAndUserId(
       word,
       userId,
     )
-    //FIXME: Придумать другой статус
-    if (relevance)
-      throw new BadRequestException(ERROR_MESSAGES.hasRelevanceWord)
+    if (learnWords) throw new BadRequestException(ERROR_MESSAGES.hasWord)
+
+    const relevanceWords =
+      await this.relevanceService.getRelevanceByWordAndUserId(word, userId)
+    if (relevanceWords) throw new BadRequestException(ERROR_MESSAGES.hasWord)
   }
 }

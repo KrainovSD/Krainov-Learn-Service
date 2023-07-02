@@ -3,6 +3,8 @@ import {
   Injectable,
   forwardRef,
   Inject,
+  HttpStatus,
+  HttpException,
 } from '@nestjs/common'
 import { Learns } from './learns.model'
 import { InjectModel } from '@nestjs/sequelize'
@@ -84,6 +86,7 @@ export class LearnsService {
     if (!learns) throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
     return learns
   }
+  async studyLearn() {}
 
   async getLearnById(id: number) {
     return await this.learnsRepo.findByPk(id)
@@ -117,6 +120,19 @@ export class LearnsService {
   async getAllLearnsById(ids: number[]) {
     return await this.learnsRepo.findAll({ where: { id: ids } })
   }
+  async getAllLearnsByWordAndUserId(word: string | string[], userId: number) {
+    return await this.learnsRepo.findAll({
+      where: { word },
+      include: [
+        {
+          model: Category,
+          attributes: ['id'],
+          where: { userId },
+        },
+      ],
+      raw: true,
+    })
+  }
 
   private async getOwnCategory(categoryId: number, userId: number) {
     const category = await this.categoryService.getCategoryById(categoryId)
@@ -124,17 +140,20 @@ export class LearnsService {
       throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
     return category
   }
-  private async checkHasWord(word: string, userId: number) {
-    const known = await this.knownService.getKnownByWordAndUserId(word, userId)
-    if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-    const learn = await this.getLearnByWordAndUserId(word, userId)
-    if (learn) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-    const relevance = await this.relevanceService.getRelevanceByWordAndUserId(
+  private async checkHasWord(word: string | string[], userId: number) {
+    const known = await this.knownService.getAllKnownsByWordAndUserId(
       word,
       userId,
     )
-    //FIXME: Придумать другой статус
+    if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
+    const learn = await this.getAllLearnsByWordAndUserId(word, userId)
+    if (learn) throw new BadRequestException(ERROR_MESSAGES.hasWord)
+    const relevance =
+      await this.relevanceService.getAllRelevancesByWordAndUserId(word, userId)
     if (relevance)
-      throw new BadRequestException(ERROR_MESSAGES.hasRelevanceWord)
+      throw new HttpException(
+        ERROR_MESSAGES.hasRelevanceWord,
+        HttpStatus.ACCEPTED,
+      )
   }
 }

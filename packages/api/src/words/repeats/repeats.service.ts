@@ -21,13 +21,11 @@ export class RepeatsService {
     const repeat = await this.getRepeatByWordAndUserId(dto.word, dto.userId)
     if (repeat) this.deleteRepeat([repeat.id], dto.userId)
 
-    const nextRepeat = new Date()
-    const nextReverseRepeat = new Date()
-    nextRepeat.setDate(nextRepeat.getDate() + 1)
-    nextReverseRepeat.setDate(nextReverseRepeat.getDate() + 1)
-
+    const nextRepeat = utils.date.getDate(1, 'days')
+    const nextReverseRepeat = utils.date.getDate(1, 'days')
     const isIrregularVerb = utils.checkIrregularVerb(dto.word)
     const dateCreate = new Date()
+
     await this.repeatRepo.create({
       ...dto,
       isIrregularVerb,
@@ -52,6 +50,7 @@ export class RepeatsService {
 
     return RESPONSE_MESSAGES.success
   }
+  async studyRepeat() {}
 
   async getRepeatByUserId(userId: number) {
     return await this.repeatRepo.findAll({ where: { userId } })

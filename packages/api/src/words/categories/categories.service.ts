@@ -71,6 +71,7 @@ export class CategoriesService {
     if (!categories) throw new NotFoundException(ERROR_MESSAGES.infoNotFound)
     return categories
   }
+  async studyCategory() {}
 
   async getCategoryByNameAndUserId(name: string, userId: number) {
     return await this.categoryRepo.findOne({

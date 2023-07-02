@@ -24,12 +24,12 @@ export class RelevancesService {
 
   async createRelevance(dto: CreateRelevanceDto, userId: number) {
     //FIXME: Переписать на приемку массива или обдумать альтернативный способ заполнения
-    const known = await this.knownService.getKnownByWordAndUserId(
+    const known = await this.knownService.getAllKnownsByWordAndUserId(
       dto.word,
       userId,
     )
     if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-    const learn = await this.learnService.getLearnByWordAndUserId(
+    const learn = await this.learnService.getAllLearnsByWordAndUserId(
       dto.word,
       userId,
     )
@@ -72,18 +72,26 @@ export class RelevancesService {
     return await this.getAllRelevancesByUserId(userId)
   }
 
+  async getRelevanceById(id: number) {
+    return await this.relevanceRepo.findByPk(id)
+  }
   async getRelevanceByWordAndUserId(word: string, userId: number) {
     return await this.relevanceRepo.findOne({
       where: { word, userId },
     })
-  }
-  async getRelevanceById(id: number) {
-    return await this.relevanceRepo.findByPk(id)
   }
   async getAllRelevancesByUserId(userId: number) {
     return await this.relevanceRepo.findAll({ where: { userId } })
   }
   async getAllRelevancesById(ids: number[]) {
     return await this.relevanceRepo.findAll({ where: { id: ids } })
+  }
+  async getAllRelevancesByWordAndUserId(
+    word: string | string[],
+    userId: number,
+  ) {
+    return await this.relevanceRepo.findAll({
+      where: { word, userId },
+    })
   }
 }
