@@ -4,11 +4,13 @@ import {
   DataType,
   ForeignKey,
   Model,
+  Sequelize,
   Table,
 } from 'sequelize-typescript'
 import { User } from 'src/users/users.model'
 
 export interface RelevanceCreationArgs {
+  id?: string
   userId: number
   word: string
   isIrregularVerb: boolean
@@ -19,12 +21,13 @@ export interface RelevanceCreationArgs {
 export class Relevance extends Model<Relevance, RelevanceCreationArgs> {
   @ApiProperty({ example: '1', description: 'Уникальный идентификатор' })
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
+    defaultValue: Sequelize.literal('gen_random_uuid()'),
     unique: true,
-    autoIncrement: true,
     primaryKey: true,
+    allowNull: false,
   })
-  id!: number
+  id!: string
 
   @ApiProperty({
     example: 1,

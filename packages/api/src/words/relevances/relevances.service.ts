@@ -6,6 +6,7 @@ import { KnownsService } from '../knowns/knowns.service'
 import { LearnsService } from '../learns/learns.service'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { utils } from 'src/utils/helpers'
+import { v4 as uuidV4 } from 'uuid'
 
 @Injectable()
 export class RelevancesService {
@@ -21,11 +22,14 @@ export class RelevancesService {
     const hasWords = await this.getHasWords(dto.words, userId)
     const hasRelevanceWords = await this.getHasRelevanceWords(dto.words, userId)
 
+    await this.updateRelevance(Array.from(hasRelevanceWords), userId)
+
     const checkedWords = dto.words.reduce(
       (result: RelevanceCreationArgs[], word) => {
         if (hasWords.has(word) || hasRelevanceWords.has(word)) return result
 
         result.push({
+          id: uuidV4(),
           word,
           dateDetected: [new Date()],
           isIrregularVerb: utils.checkIrregularVerb(word),
@@ -45,7 +49,7 @@ export class RelevancesService {
   async deleteRelevance(ids: number[], userId: number) {
     const relevances = await this.getAllRelevancesById(ids)
 
-    const checkedIds: number[] = []
+    const checkedIds: string[] = []
     for (const relevance of relevances) {
       if (relevance.userId !== userId) continue
       checkedIds.push(relevance.id)
@@ -56,6 +60,23 @@ export class RelevancesService {
     })
 
     return RESPONSE_MESSAGES.success
+  }
+  async updateRelevance(words: string[], userId: number) {
+    const updatedRelevances: RelevanceCreationArgs[] = (
+      await this.getAllRelevancesByWordAndUserId(words, userId)
+    ).map((relevance) => {
+      return {
+        id: relevance.id,
+        userId: relevance.userId,
+        word: relevance.word,
+        isIrregularVerb: relevance.isIrregularVerb,
+        dateDetected: [...relevance.dateDetected, new Date()],
+      }
+    })
+
+    await this.relevanceRepo.bulkCreate(updatedRelevances, {
+      updateOnDuplicate: ['dateDetected'],
+    })
   }
   async getAllRelevances(userId: number) {
     return await this.getAllRelevancesByUserId(userId)
@@ -97,7 +118,6 @@ export class RelevancesService {
     return hasWords
   }
   private async getHasRelevanceWords(words: string[], userId: number) {
-    //FIXME: нужно дописать update метод
     const hasWords = new Set<string>()
 
     const relevances = (
