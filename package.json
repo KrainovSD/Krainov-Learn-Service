@@ -12,7 +12,7 @@
     "start:api-dev": "lerna run --scope @krainov/api --stream start:dev",
     "start:api": "lerna run --scope @krainov/api --stream start",
     "build:api": "lerna run --scope @krainov/api --stream build",
-    "build:utils-dev": "lerna run --scope @krainov/utils --stream dev"
+    "build:utils": "lerna run --scope @krainov/utils --stream build"
   },
   "workspaces": [
     "packages/*"

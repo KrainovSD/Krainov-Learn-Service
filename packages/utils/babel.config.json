@@ -1,24 +1,14 @@
 {
   "presets": [
-    [
-      "@babel/typescript",
-      {
-        "allExtensions": true
-      }
-    ],
+    ["@babel/typescript"],
     [
       "@babel/env",
       {
-        "targets": "> 0.25%, not dead",
-        "useBuiltIns": "usage",
-        "corejs": 3
-      }
-    ],
-    [
-      "@babel/react",
-      {
-        "runtime": "automatic"
+        "useBuiltIns": false,
+        "loose": true,
+        "bugfixes": true
       }
     ]
-  ]
+  ],
+  "plugins": [["@babel/transform-runtime"]]
 }

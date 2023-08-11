@@ -1,19 +1,19 @@
 {
   "compilerOptions": {
     "outDir": "./dist/",
-    "module": "CommonJS",
+    "module": "ES2015",
     "target": "ES2017",
     "allowJs": true,
     "sourceMap": true,
     "declaration": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": false,
+    "noEmit": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "incremental": true
   },
-  "exclude": ["node_modules", "dist", "webpack.config.js"]
+  "exclude": ["node_modules", "dist"]
 }

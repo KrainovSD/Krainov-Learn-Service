@@ -5,7 +5,7 @@ import { CreateRelevanceDto } from './dto/create-relevance-dto'
 import { KnownsService } from '../knowns/knowns.service'
 import { LearnsService } from '../learns/learns.service'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { utils } from 'src/utils/helpers'
+import { node, utils } from 'src/utils/helpers'
 import { v4 as uuidV4 } from 'uuid'
 
 @Injectable()
@@ -29,7 +29,7 @@ export class RelevancesService {
         if (hasWords.has(word) || hasRelevanceWords.has(word)) return result
 
         result.push({
-          id: uuidV4(),
+          id: node.genUUID(),
           word,
           dateDetected: [new Date()],
           isIrregularVerb: utils.checkIrregularVerb(word),
