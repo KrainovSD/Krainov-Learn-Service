@@ -1,10 +1,9 @@
-import { defineConfig } from 'rollup'
-import nodeResolve from '@rollup/plugin-node-resolve'
-import commonjs from '@rollup/plugin-commonjs'
-import { babel } from '@rollup/plugin-babel'
-import pkg from './package.json' assert { type: 'json' }
-import { uglify } from 'rollup-plugin-uglify'
-
+const { defineConfig } = require('rollup')
+const nodeResolve = require('@rollup/plugin-node-resolve')
+const commonjs = require('@rollup/plugin-commonjs')
+const { babel } = require('@rollup/plugin-babel')
+const pkg = require('./package.json')
+const { uglify } = require('rollup-plugin-uglify')
 const extensions = ['.ts', '.js']
 
 const options = defineConfig({
@@ -35,4 +34,4 @@ const options = defineConfig({
   ],
 })
 
-export default options
+module.exports = options
