@@ -33,7 +33,7 @@ export class RepeatsService {
           ...repeat,
           nextRepeat: utils.date.getDate(1, 'days'),
           nextReverseRepeat: utils.date.getDate(1, 'days'),
-          isIrregularVerb: utils.checkIrregularVerb(repeat.word),
+          isIrregularVerb: utils.common.checkIrregularVerb(repeat.word),
           dateCreate: new Date(),
           userId,
         })

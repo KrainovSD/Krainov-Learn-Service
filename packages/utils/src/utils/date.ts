@@ -4,7 +4,7 @@ import { DateType, Maybe } from '../types'
 
 dayjs.extend(today)
 
-export function isToday(date: Maybe<string>) {
+function isToday(date: Maybe<string>) {
   try {
     return dayjs(date).isToday()
   } catch {
@@ -12,7 +12,7 @@ export function isToday(date: Maybe<string>) {
   }
 }
 
-export function getDate(increment: number, type: DateType) {
+function getDate(increment: number, type: DateType) {
   const result = new Date()
   switch (type) {
     case 'days': {
@@ -42,4 +42,9 @@ export function getDate(increment: number, type: DateType) {
     default:
       return result
   }
+}
+
+export default {
+  isToday,
+  getDate,
 }

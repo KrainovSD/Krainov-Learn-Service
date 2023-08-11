@@ -19,7 +19,7 @@ export class SettingsService {
     const settings = await this.getSettingsByUserId(userId)
     if (!settings) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
 
-    utils.updateNewValue(settings, dto)
+    utils.common.updateNewValue(settings, dto)
     await settings.save()
     return RESPONSE_MESSAGES.success
   }

@@ -1,2 +1,7 @@
-export * from './common'
-export * as date from './date'
+import common from './common'
+import date from './date'
+
+export default {
+  common,
+  date,
+}

@@ -35,7 +35,7 @@ export class CategoriesService {
     if (category.isLearn)
       throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
 
-    utils.updateNewValue(category, dto, ['id'])
+    utils.common.updateNewValue(category, dto, ['id'])
     await category.save()
     return RESPONSE_MESSAGES.success
   }

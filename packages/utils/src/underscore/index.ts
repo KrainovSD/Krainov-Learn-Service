@@ -14,4 +14,4 @@ function get(
   return getByPath(object, path, defaultValue)
 }
 
-export { get, set, cloneDeep }
+export default { get, set, cloneDeep }

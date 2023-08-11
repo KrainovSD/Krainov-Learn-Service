@@ -32,7 +32,7 @@ export class RelevancesService {
           id: node.genUUID(),
           word,
           dateDetected: [new Date()],
-          isIrregularVerb: utils.checkIrregularVerb(word),
+          isIrregularVerb: utils.common.checkIrregularVerb(word),
           userId,
         })
         return result

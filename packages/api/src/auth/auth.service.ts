@@ -171,7 +171,7 @@ export class AuthService {
     const registrationDate = new Date()
     const emailChangeTime = new Date()
     emailChangeTime.setFullYear(emailChangeTime.getFullYear() + 1)
-    const emailChangeKey = utils.getRandomString()
+    const emailChangeKey = utils.common.getRandomString()
 
     return {
       userName: userDto.userName,

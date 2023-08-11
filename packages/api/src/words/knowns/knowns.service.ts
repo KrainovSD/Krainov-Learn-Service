@@ -38,7 +38,7 @@ export class KnownsService {
 
         result.push({
           ...known,
-          isIrregularVerb: utils.checkIrregularVerb(known.word),
+          isIrregularVerb: utils.common.checkIrregularVerb(known.word),
           dateCreate: new Date(),
           userId,
         })
@@ -72,9 +72,9 @@ export class KnownsService {
 
     await this.checkHasWord(dto.word, dto.id, userId)
 
-    const isIrregularVerb = utils.checkIrregularVerb(dto.word)
+    const isIrregularVerb = utils.common.checkIrregularVerb(dto.word)
     known.isIrregularVerb = isIrregularVerb
-    utils.updateNewValue(known, dto, ['id'])
+    utils.common.updateNewValue(known, dto, ['id'])
     await known.save()
     return RESPONSE_MESSAGES.success
   }

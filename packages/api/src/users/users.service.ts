@@ -59,7 +59,7 @@ export class UsersService {
     if (user.passwordChangeTime && user.passwordChangeTime > new Date())
       throw new BadRequestException(ERROR_MESSAGES.oftenTryChange)
 
-    const passwordChangeKey = utils.getRandomString()
+    const passwordChangeKey = utils.common.getRandomString()
     const passwordChangeTime = new Date()
     passwordChangeTime.setMinutes(passwordChangeTime.getMinutes() + 5)
     user.passwordChangeKey = passwordChangeKey
@@ -110,7 +110,7 @@ export class UsersService {
     if (user.emailChangeTime && user.emailChangeTime > new Date())
       throw new BadRequestException(ERROR_MESSAGES.oftenTryChange)
 
-    const emailChangeKey = utils.getRandomString()
+    const emailChangeKey = utils.common.getRandomString()
     const emailChangeTime = new Date()
     emailChangeTime.setMinutes(emailChangeTime.getMinutes() + 5)
     user.emailChangeKey = emailChangeKey
@@ -140,7 +140,7 @@ export class UsersService {
     await this.checkUniqueEmail(dto.email)
 
     user.emailToChange = dto.email
-    const emailChangeKey = utils.getRandomString()
+    const emailChangeKey = utils.common.getRandomString()
     const emailChangeTime = new Date()
     emailChangeTime.setMinutes(emailChangeTime.getMinutes() + 5)
     user.emailChangeKey = emailChangeKey

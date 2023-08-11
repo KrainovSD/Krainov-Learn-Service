@@ -39,7 +39,7 @@ export class LearnsService {
 
     await this.checkHasWord(dto.word, userId)
 
-    const isIrregularVerb = utils.checkIrregularVerb(dto.word)
+    const isIrregularVerb = utils.common.checkIrregularVerb(dto.word)
     await this.learnsRepo.create({ ...dto, isIrregularVerb })
 
     return RESPONSE_MESSAGES.success
@@ -74,10 +74,10 @@ export class LearnsService {
 
     await this.checkHasWord(dto.word, userId, dto.id)
 
-    const isIrregularVerb = utils.checkIrregularVerb(dto.word)
+    const isIrregularVerb = utils.common.checkIrregularVerb(dto.word)
     learn.isIrregularVerb = isIrregularVerb
 
-    utils.updateNewValue(learn, dto, ['id'])
+    utils.common.updateNewValue(learn, dto, ['id'])
     await learn.save()
     return RESPONSE_MESSAGES.success
   }

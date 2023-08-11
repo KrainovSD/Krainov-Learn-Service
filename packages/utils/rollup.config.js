@@ -3,7 +3,6 @@ import nodeResolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import { babel } from '@rollup/plugin-babel'
 import pkg from './package.json' assert { type: 'json' }
-import typescript from 'rollup-plugin-typescript2'
 import { uglify } from 'rollup-plugin-uglify'
 
 const extensions = ['.ts', '.js']
@@ -25,10 +24,6 @@ const options = defineConfig({
     },
   ],
   plugins: [
-    typescript({
-      rollupCommonJSResolveHack: false,
-      clean: true,
-    }),
     babel({
       babelHelpers: 'runtime',
       extensions,
