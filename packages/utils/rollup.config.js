@@ -5,6 +5,7 @@ const { babel } = require('@rollup/plugin-babel')
 const pkg = require('./package.json')
 const { uglify } = require('rollup-plugin-uglify')
 const extensions = ['.ts', '.js']
+const json = require('@rollup/plugin-json')
 
 const options = defineConfig({
   input: './src/index.ts',
@@ -29,6 +30,7 @@ const options = defineConfig({
       shouldPrintComment: (comment) => false,
     }),
     nodeResolve({ extensions }),
+    json(),
     commonjs(),
     uglify(),
   ],

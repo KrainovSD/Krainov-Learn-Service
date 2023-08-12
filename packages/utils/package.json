@@ -21,6 +21,7 @@
     "@microsoft/api-extractor": "^7.36.4",
     "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-commonjs": "^25.0.4",
+    "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.1.0",
     "@types/lodash": "^4.14.195",
     "@types/uuid": "^9.0.2",
@@ -33,6 +34,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "dayjs": "^1.11.8",
     "lodash": "^4.17.21",
     "uuid": "^9.0.0"

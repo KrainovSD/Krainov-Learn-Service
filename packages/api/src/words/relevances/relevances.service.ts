@@ -6,7 +6,6 @@ import { KnownsService } from '../knowns/knowns.service'
 import { LearnsService } from '../learns/learns.service'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { node, utils } from 'src/utils/helpers'
-import { v4 as uuidV4 } from 'uuid'
 
 @Injectable()
 export class RelevancesService {

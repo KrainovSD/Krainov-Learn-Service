@@ -7,7 +7,7 @@ import { StatisticsService } from 'src/statistics/statistics.service'
 import { SettingsService } from 'src/settings/settings.service'
 import { Settings } from 'src/settings/settings.model'
 import { MailerService } from '@nestjs-modules/mailer'
-import { fsAsync, utils } from 'src/utils/helpers'
+import { fsAsync, utils, node } from 'src/utils/helpers'
 import {
   ERROR_MESSAGES,
   MAIL_MESSAGES_OPTION,
@@ -16,7 +16,6 @@ import {
   UPLOAD_PATH,
 } from 'src/const'
 import { ChangePassDto } from './dto/change-pass.dto'
-import bcrypt from 'bcryptjs'
 import { ChangeEmailDto } from './dto/change-email.dto'
 
 @Injectable()
@@ -86,7 +85,7 @@ export class UsersService {
     )
       throw new BadRequestException(ERROR_MESSAGES.badKeyOrTime)
 
-    const hash = await bcrypt.hash(dto.password, SALT_ROUNDS)
+    const hash = await node.hash(dto.password, SALT_ROUNDS)
     user.hash = hash
     user.passwordChangeDate = new Date()
     user.passwordChangeKey = null

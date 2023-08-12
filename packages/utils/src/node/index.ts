@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import { hash, compare } from 'bcryptjs'
 import { v4 as uuid4 } from 'uuid'
 
 function genUUID() {
@@ -7,4 +7,6 @@ function genUUID() {
 
 export default {
   genUUID,
+  hash,
+  compare,
 }

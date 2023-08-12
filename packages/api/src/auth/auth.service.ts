@@ -6,8 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt'
 import { CreateUserDto } from 'src/users/dto/create-user.dto'
 import { UsersService } from 'src/users/users.service'
-import * as bcrypt from 'bcryptjs'
-import { utils } from 'src/utils/helpers'
+import { utils, node } from 'src/utils/helpers'
 import { ConfirmDto } from './dto/confirm.dto'
 import { MailerService } from '@nestjs-modules/mailer'
 import { LoginDto } from './dto/login.dto'
@@ -74,7 +73,7 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const user = await this.userService.getUserByEmailOrNickName(loginDto.login)
     if (!user) throw new BadRequestException('Неверный логин или пароль')
-    const checkPassword = await bcrypt.compare(loginDto.password, user.hash)
+    const checkPassword = await node.compare(loginDto.password, user.hash)
     if (!checkPassword)
       throw new BadRequestException('Неверный логин или пароль')
     if (!user.confirmed) throw new BadRequestException('Аккаунт не подтвержден')
@@ -167,7 +166,7 @@ export class AuthService {
     }
   }
   private async getCreateUserDto(userDto: CreateUserDto) {
-    const hash = await bcrypt.hash(userDto.password, SALT_ROUNDS)
+    const hash = await node.hash(userDto.password, SALT_ROUNDS)
     const registrationDate = new Date()
     const emailChangeTime = new Date()
     emailChangeTime.setFullYear(emailChangeTime.getFullYear() + 1)
