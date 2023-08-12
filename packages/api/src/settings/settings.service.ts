@@ -7,7 +7,7 @@ import { InjectModel } from '@nestjs/sequelize'
 import { Settings } from './settings.model'
 import { UpdateSettingsDto } from './dto/update-settings.dto'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { typings, _, utils, node } from 'src/utils/helpers'
+import { _, utils, uuid } from 'src/utils/helpers'
 
 @Injectable()
 export class SettingsService {
@@ -25,7 +25,7 @@ export class SettingsService {
   }
   async createSettings(userId: string) {
     const settings = await this.settingRepo.create({
-      id: node.genUUID(),
+      id: uuid(),
       userId,
     })
     return settings

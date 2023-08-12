@@ -3,7 +3,7 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Repeats, RepeatsCreationArgs } from './repeats.model'
 import { CreateRepeatDto } from './dto/create-repeat-dto'
-import { node, utils } from 'src/utils/helpers'
+import { utils, uuid } from 'src/utils/helpers'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { UsersService } from 'src/users/users.service'
 import { RepeatDto } from './dto/repeat-dto'
@@ -31,7 +31,7 @@ export class RepeatsService {
       (result: RepeatsCreationArgs[], repeat) => {
         result.push({
           ...repeat,
-          id: node.genUUID(),
+          id: uuid(),
           nextRepeat: utils.date.getDate(1, 'days'),
           nextReverseRepeat: utils.date.getDate(1, 'days'),
           isIrregularVerb: utils.common.checkIrregularVerb(repeat.word),

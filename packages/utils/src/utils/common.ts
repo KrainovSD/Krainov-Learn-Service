@@ -1,24 +1,5 @@
 import { typings, _ } from '..'
-
-//TODO: Переименовать в random key
-function getRandomString(lenght: number = 8, possible: string = '0123456789') {
-  let text = ''
-  for (var i = 0; i < lenght; ++i)
-    text += possible.charAt(Math.floor(Math.random() * possible.length))
-
-  return text
-}
-
-function getUniqueId() {
-  return (
-    `${Math.floor(Math.random() * Date.now())}`.substring(0, 5) +
-    '_' +
-    `${getRandomString(
-      5,
-      'QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm',
-    )}`
-  )
-}
+import { nanoid } from 'nanoid'
 
 function checkIrregularVerb(word: string) {
   const splitWord = word.split('--').filter((item) => typings.isString(item))
@@ -41,9 +22,12 @@ function updateNewValue(
   }
 }
 
+function getId(size?: number) {
+  return nanoid(size)
+}
+
 export default {
-  getRandomString,
-  getUniqueId,
   checkIrregularVerb,
   updateNewValue,
+  getId,
 }

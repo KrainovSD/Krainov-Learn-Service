@@ -11,6 +11,7 @@ import { Settings } from 'src/settings/settings.model'
 import { Statistic } from 'src/statistics/statistics.model'
 
 export interface UserCreationArgs {
+  id: string
   userName: string
   nickName: string
   hash: string

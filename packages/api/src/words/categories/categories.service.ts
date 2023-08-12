@@ -12,7 +12,7 @@ import {
   ERROR_MESSAGES,
   RESPONSE_MESSAGES,
 } from 'src/const'
-import { _, node, utils } from 'src/utils/helpers'
+import { _, utils, uuid } from 'src/utils/helpers'
 import { CategoryIdDto } from './dto/category-id-dto'
 import { Learns } from '../learns/learns.model'
 
@@ -24,7 +24,7 @@ export class CategoriesService {
 
   async createCategory(dto: CreateCategoryDto, userId: string) {
     await this.isHasNameCategory(dto.name, userId)
-    await this.categoryRepo.create({ ...dto, userId, id: node.genUUID() })
+    await this.categoryRepo.create({ ...dto, userId, id: uuid() })
     return RESPONSE_MESSAGES.success
   }
   async updateCategory(dto: UpdateCategoryDto, userId: string) {

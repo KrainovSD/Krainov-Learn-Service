@@ -6,7 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt'
 import { CreateUserDto } from 'src/users/dto/create-user.dto'
 import { UsersService } from 'src/users/users.service'
-import { utils, node } from 'src/utils/helpers'
+import { utils, node, uuid } from 'src/utils/helpers'
 import { ConfirmDto } from './dto/confirm.dto'
 import { MailerService } from '@nestjs-modules/mailer'
 import { LoginDto } from './dto/login.dto'
@@ -168,11 +168,11 @@ export class AuthService {
   private async getCreateUserDto(userDto: CreateUserDto) {
     const hash = await node.hash(userDto.password, SALT_ROUNDS)
     const registrationDate = new Date()
-    const emailChangeTime = new Date()
-    emailChangeTime.setFullYear(emailChangeTime.getFullYear() + 1)
-    const emailChangeKey = utils.common.getRandomString()
+    const emailChangeTime = utils.date.getDate(1, 'years')
+    const emailChangeKey = utils.common.getId()
 
     return {
+      id: uuid(),
       userName: userDto.userName,
       nickName: userDto.nickName,
       hash,

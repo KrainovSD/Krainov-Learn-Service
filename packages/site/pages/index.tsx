@@ -7,7 +7,7 @@ const Index = () => {
   React.useEffect(() => {
     console.log(typings.isString('test'))
     console.log(typings.isString(''))
-    console.log(node.genUUID())
+    console.log(utils.common.getId())
 
     console.log('test')
     console.log(process.env.NEXT_PUBLIC_TEST)

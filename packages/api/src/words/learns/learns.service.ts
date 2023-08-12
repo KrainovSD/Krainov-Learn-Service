@@ -15,7 +15,7 @@ import {
   ERROR_MESSAGES,
   RESPONSE_MESSAGES,
 } from 'src/const'
-import { node, utils } from 'src/utils/helpers'
+import { utils, uuid } from 'src/utils/helpers'
 import { UpdateLearnsDto } from './dto/update-learns.dto'
 import { KnownsService } from '../knowns/knowns.service'
 import { RelevancesService } from '../relevances/relevances.service'
@@ -43,7 +43,7 @@ export class LearnsService {
     await this.learnsRepo.create({
       ...dto,
       isIrregularVerb,
-      id: node.genUUID(),
+      id: uuid(),
     })
 
     return RESPONSE_MESSAGES.success

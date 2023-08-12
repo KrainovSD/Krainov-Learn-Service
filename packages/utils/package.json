@@ -24,7 +24,6 @@
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.1.0",
     "@types/lodash": "^4.14.195",
-    "@types/uuid": "^9.0.2",
     "babel-loader": "^9.1.2",
     "rollup": "^3.26.2",
     "rollup-plugin-uglify": "^6.0.4",
@@ -37,6 +36,6 @@
     "bcryptjs": "^2.4.3",
     "dayjs": "^1.11.8",
     "lodash": "^4.17.21",
-    "uuid": "^9.0.0"
+    "nanoid": "^4.0.2"
   }
 }

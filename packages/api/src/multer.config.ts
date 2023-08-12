@@ -32,7 +32,7 @@ export const multerOptions = {
       }
     },
     filename: (req: any, file: Express.Multer.File, cb: any) => {
-      cb(null, `${utils.common.getUniqueId()}${extname(file.originalname)}`)
+      cb(null, `${utils.common.getId()}${extname(file.originalname)}`)
     },
   }),
 }

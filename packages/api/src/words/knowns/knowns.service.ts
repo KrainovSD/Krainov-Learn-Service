@@ -6,7 +6,7 @@ import {
   forwardRef,
 } from '@nestjs/common'
 import { Knowns, KnownsCreationArgs } from './knowns.model'
-import { node, utils } from 'src/utils/helpers'
+import { utils, uuid } from 'src/utils/helpers'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { UpdateKnownsDto } from './dto/update-knowns-dto'
 import { LearnsService } from '../learns/learns.service'
@@ -40,7 +40,7 @@ export class KnownsService {
 
         result.push({
           ...known,
-          id: node.genUUID(),
+          id: uuid(),
           isIrregularVerb: utils.common.checkIrregularVerb(known.word),
           dateCreate: new Date(),
           userId,
