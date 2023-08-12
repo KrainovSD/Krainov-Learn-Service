@@ -1,16 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsArray, IsInt, ValidateNested } from 'class-validator'
-import { KnownsDto } from './knowns-dto'
+import { ValidateNested, IsArray, IsNotEmpty, IsString } from 'class-validator'
 import { Type } from 'class-transformer'
+import { KnownsDto } from './knowns-dto'
 
 export class CreateKnownsDto {
   @ApiProperty({
-    example: 4,
+    example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
     description: 'Уникальный идентификатор пользователя',
     required: true,
   })
-  @IsInt({ message: 'Неверный формат уникального идентификатора' })
-  userId!: number
+  @IsNotEmpty({ message: 'Не должно быть пустым' })
+  @IsString({ message: 'Должно быть строкой' })
+  userId!: string
 
   @ApiProperty({
     example: [],
@@ -18,7 +19,7 @@ export class CreateKnownsDto {
     required: true,
   })
   @IsArray({ message: 'Должно быть массивом слов' })
-  @ValidateNested({ each: true, message: 'test' })
+  @ValidateNested({ each: true, message: 'Неверный формат слов' })
   @Type(() => KnownsDto)
   words!: KnownsDto[]
 }

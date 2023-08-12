@@ -21,7 +21,7 @@ import {
 } from '../const'
 
 export type UserInfo = {
-  id: number
+  id: string
   role: string
   subscription: Date
 }

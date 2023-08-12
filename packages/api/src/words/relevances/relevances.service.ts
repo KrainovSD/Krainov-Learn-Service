@@ -17,7 +17,7 @@ export class RelevancesService {
     private readonly learnService: LearnsService,
   ) {}
 
-  async createRelevance(dto: CreateRelevanceDto, userId: number) {
+  async createRelevance(dto: CreateRelevanceDto, userId: string) {
     const hasWords = await this.getHasWords(dto.words, userId)
     const hasRelevanceWords = await this.getHasRelevanceWords(dto.words, userId)
 
@@ -45,7 +45,7 @@ export class RelevancesService {
       ? RESPONSE_MESSAGES.success
       : RESPONSE_MESSAGES.existWords(hasWords)
   }
-  async deleteRelevance(ids: number[], userId: number) {
+  async deleteRelevance(ids: string[], userId: string) {
     const relevances = await this.getAllRelevancesById(ids)
 
     const checkedIds: string[] = []
@@ -60,7 +60,7 @@ export class RelevancesService {
 
     return RESPONSE_MESSAGES.success
   }
-  async updateRelevance(words: string[], userId: number) {
+  async updateRelevance(words: string[], userId: string) {
     const updatedRelevances: RelevanceCreationArgs[] = (
       await this.getAllRelevancesByWordAndUserId(words, userId)
     ).map((relevance) => {
@@ -77,34 +77,34 @@ export class RelevancesService {
       updateOnDuplicate: ['dateDetected'],
     })
   }
-  async getAllRelevances(userId: number) {
+  async getAllRelevances(userId: string) {
     return await this.getAllRelevancesByUserId(userId)
   }
 
-  async getRelevanceById(id: number) {
+  async getRelevanceById(id: string) {
     return await this.relevanceRepo.findByPk(id)
   }
-  async getRelevanceByWordAndUserId(word: string, userId: number) {
+  async getRelevanceByWordAndUserId(word: string, userId: string) {
     return await this.relevanceRepo.findOne({
       where: { word, userId },
     })
   }
-  async getAllRelevancesByUserId(userId: number) {
+  async getAllRelevancesByUserId(userId: string) {
     return await this.relevanceRepo.findAll({ where: { userId } })
   }
-  async getAllRelevancesById(ids: number[]) {
+  async getAllRelevancesById(ids: string[]) {
     return await this.relevanceRepo.findAll({ where: { id: ids } })
   }
   async getAllRelevancesByWordAndUserId(
     words: string | string[],
-    userId: number,
+    userId: string,
   ) {
     return await this.relevanceRepo.findAll({
       where: { word: words, userId },
     })
   }
 
-  private async getHasWords(words: string[], userId: number) {
+  private async getHasWords(words: string[], userId: string) {
     const hasWords = new Set<string>()
 
     const knownWords = (
@@ -116,7 +116,7 @@ export class RelevancesService {
 
     return hasWords
   }
-  private async getHasRelevanceWords(words: string[], userId: number) {
+  private async getHasRelevanceWords(words: string[], userId: string) {
     const hasWords = new Set<string>()
 
     const relevances = (

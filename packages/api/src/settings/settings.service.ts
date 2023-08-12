@@ -7,7 +7,7 @@ import { InjectModel } from '@nestjs/sequelize'
 import { Settings } from './settings.model'
 import { UpdateSettingsDto } from './dto/update-settings.dto'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { typings, _, utils } from 'src/utils/helpers'
+import { typings, _, utils, node } from 'src/utils/helpers'
 
 @Injectable()
 export class SettingsService {
@@ -15,7 +15,7 @@ export class SettingsService {
     @InjectModel(Settings) private readonly settingRepo: typeof Settings,
   ) {}
 
-  async updateSettings(dto: UpdateSettingsDto, userId: number) {
+  async updateSettings(dto: UpdateSettingsDto, userId: string) {
     const settings = await this.getSettingsByUserId(userId)
     if (!settings) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
 
@@ -23,12 +23,15 @@ export class SettingsService {
     await settings.save()
     return RESPONSE_MESSAGES.success
   }
-  async createSettings(userId: number) {
-    const settings = await this.settingRepo.create({ userId })
+  async createSettings(userId: string) {
+    const settings = await this.settingRepo.create({
+      id: node.genUUID(),
+      userId,
+    })
     return settings
   }
 
-  async getSettingsByUserId(userId: number) {
+  async getSettingsByUserId(userId: string) {
     return await this.settingRepo.findOne({
       where: {
         userId,

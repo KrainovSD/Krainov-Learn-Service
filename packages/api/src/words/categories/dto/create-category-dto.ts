@@ -5,7 +5,6 @@ import {
   IsArray,
   IsInt,
   IsNotEmpty,
-  IsNumber,
   IsString,
   Length,
   Matches,

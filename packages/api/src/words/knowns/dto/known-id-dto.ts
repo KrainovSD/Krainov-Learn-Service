@@ -1,12 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNumber } from 'class-validator'
+import { IsNotEmpty, IsString } from 'class-validator'
 
 export class KnownIdDto {
   @ApiProperty({
-    example: 4,
+    example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
     description: 'Уникальный идентификатор',
     required: true,
   })
-  @IsNumber({}, { message: 'Неверный формат уникального идентификатора' })
-  id!: number
+  @IsNotEmpty({ message: 'Не должно быть пустым' })
+  @IsString({ message: 'Должно быть строкой' })
+  id!: string
 }

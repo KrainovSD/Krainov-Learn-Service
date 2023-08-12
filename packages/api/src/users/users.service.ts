@@ -95,7 +95,7 @@ export class UsersService {
     return RESPONSE_MESSAGES.success
   }
 
-  async callChangeEmail(userId: number) {
+  async callChangeEmail(userId: string) {
     const user = await this.getUserByIdService(userId)
 
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
@@ -125,7 +125,7 @@ export class UsersService {
 
     return RESPONSE_MESSAGES.sendEmail
   }
-  async changeEmail(dto: ChangeEmailDto, userId: number) {
+  async changeEmail(dto: ChangeEmailDto, userId: string) {
     const user = await this.getUserByEmailChangeKey(dto.key)
     if (
       !user ||
@@ -157,7 +157,7 @@ export class UsersService {
     return RESPONSE_MESSAGES.sendNewEmail
   }
 
-  async changeNickName(nickName: string, userId: number) {
+  async changeNickName(nickName: string, userId: string) {
     const user = await this.getUserByIdService(userId)
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
     if (user.nickNameChangeDate) {
@@ -174,7 +174,7 @@ export class UsersService {
     return RESPONSE_MESSAGES.success
   }
 
-  async clearAvatar(userId: number) {
+  async clearAvatar(userId: string) {
     const user = await this.getUserById(userId)
     if (!user || !user.avatar)
       throw new BadRequestException(ERROR_MESSAGES.userNotFound)
@@ -183,7 +183,7 @@ export class UsersService {
     await user.save()
     return RESPONSE_MESSAGES.success
   }
-  async updateAvatar(file: Express.Multer.File, userId: number) {
+  async updateAvatar(file: Express.Multer.File, userId: string) {
     const user = await this.getUserById(userId)
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
     user.avatar = file.filename
@@ -191,7 +191,7 @@ export class UsersService {
     return RESPONSE_MESSAGES.success
   }
 
-  async clearWallpaper(userId: number) {
+  async clearWallpaper(userId: string) {
     const user = await this.getUserById(userId)
     if (!user || !user.wallpaper)
       throw new BadRequestException(ERROR_MESSAGES.userNotFound)
@@ -200,7 +200,7 @@ export class UsersService {
     await user.save()
     return RESPONSE_MESSAGES.success
   }
-  async updateWallpaper(file: Express.Multer.File, userId: number) {
+  async updateWallpaper(file: Express.Multer.File, userId: string) {
     const user = await this.getUserById(userId)
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
     user.wallpaper = file.filename
@@ -224,12 +224,12 @@ export class UsersService {
   async getUserByNickName(nickName: string) {
     return await this.userRepo.findOne({ where: { nickName } })
   }
-  async getUserByIdService(id: number) {
+  async getUserByIdService(id: string) {
     return await this.userRepo.findByPk(id, {
       include: [Settings, Statistic],
     })
   }
-  async getUserById(id: number, privateFields: boolean = false) {
+  async getUserById(id: string, privateFields: boolean = false) {
     return await this.userRepo.findByPk(id, {
       attributes: {
         exclude: privateFields
@@ -239,11 +239,17 @@ export class UsersService {
       include: [Settings, Statistic],
     })
   }
-  async getAllUser(userId: number) {
-    // const user = await this.userRepo.findAll({where: {
-    //   id:
-    // }})
-    //TODO: Узнать как искать по НЕ РАВНО
+  async getAllUser(userId: string) {
+    return await this.userRepo.findAll({
+      where: {
+        id: {
+          [Op.not]: userId,
+        },
+      },
+      attributes: {
+        exclude: [...this.forbiddenFields, ...this.privateFields],
+      },
+    })
   }
   async getUserByEmailChangeKey(key: string) {
     return await this.userRepo.findOne({ where: { emailChangeKey: key } })
@@ -267,14 +273,14 @@ export class UsersService {
       },
     })
   }
-  async getUserByTokenAndId(token: string, id: number) {
+  async getUserByTokenAndId(token: string, id: string) {
     return await this.userRepo.findOne({
       where: {
         [Op.and]: [{ token }, { id }],
       },
     })
   }
-  async deleteUserById(id: number) {
+  async deleteUserById(id: string) {
     return await this.userRepo.destroy({ where: { id } })
   }
 

@@ -5,12 +5,14 @@ import {
   DataType,
   ForeignKey,
   Model,
+  Sequelize,
   Table,
 } from 'sequelize-typescript'
 import { Category } from '../categories/categories.model'
 
 export interface LearnCreationArgs {
-  categoryId: number
+  id: string
+  categoryId: string
   word: string
   translate: string
   isIrregularVerb: boolean
@@ -18,25 +20,29 @@ export interface LearnCreationArgs {
 
 @Table({ tableName: 'learns', createdAt: false, updatedAt: false })
 export class Learns extends Model<Learns, LearnCreationArgs> {
-  @ApiProperty({ example: 1, description: 'Уникальный идентификатор' })
-  @Column({
-    type: DataType.INTEGER,
-    unique: true,
-    autoIncrement: true,
-    primaryKey: true,
+  @ApiProperty({
+    example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
+    description: 'Уникальный идентификатор',
   })
-  id!: number
+  @Column({
+    type: DataType.UUID,
+    defaultValue: Sequelize.literal('gen_random_uuid()'),
+    unique: true,
+    primaryKey: true,
+    allowNull: false,
+  })
+  id!: string
 
   @ApiProperty({
-    example: 1,
+    example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
     description: 'Уникальный идентификатор категории',
   })
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     allowNull: false,
   })
   @ForeignKey(() => Category)
-  categoryId!: number
+  categoryId!: string
 
   @ApiProperty({
     example: 'cat',

@@ -4,36 +4,42 @@ import {
   DataType,
   ForeignKey,
   Model,
+  Sequelize,
   Table,
 } from 'sequelize-typescript'
 import { SETTINGS_DEFAULT } from 'src/const'
 import { User } from 'src/users/users.model'
 
 type SettingCreationArgs = {
-  userId: number
+  id: string
+  userId: string
 }
 
 @Table({ tableName: 'settings', createdAt: false, updatedAt: false })
 export class Settings extends Model<Settings, SettingCreationArgs> {
-  @ApiProperty({ example: 1, description: 'Уникальный идентификатор' })
-  @Column({
-    type: DataType.INTEGER,
-    unique: true,
-    autoIncrement: true,
-    primaryKey: true,
+  @ApiProperty({
+    example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
+    description: 'Уникальный идентификатор',
   })
-  id!: number
+  @Column({
+    type: DataType.UUID,
+    defaultValue: Sequelize.literal('gen_random_uuid()'),
+    unique: true,
+    primaryKey: true,
+    allowNull: false,
+  })
+  id!: string
 
   @ApiProperty({
-    example: 1,
+    example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
     description: 'Уникальный идентификатор пользователя',
   })
   @ForeignKey(() => User)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     allowNull: false,
   })
-  userId!: number
+  userId!: string
 
   @ApiProperty({
     example: 50,

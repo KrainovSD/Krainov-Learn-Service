@@ -1,16 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsArray, IsInt, ValidateNested } from 'class-validator'
+import { IsArray, IsNotEmpty, IsString, ValidateNested } from 'class-validator'
 import { RepeatDto } from './repeat-dto'
 import { Type } from 'class-transformer'
 
 export class CreateRepeatDto {
   @ApiProperty({
-    example: 4,
+    example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
     description: 'Уникальный идентификатор пользователя',
     required: true,
   })
-  @IsInt({ message: 'Неверный формат уникального идентификатора' })
-  userId!: number
+  @IsNotEmpty({ message: 'Не должно быть пустым' })
+  @IsString({ message: 'Должно быть строкой' })
+  userId!: string
 
   @ApiProperty({
     example: [],

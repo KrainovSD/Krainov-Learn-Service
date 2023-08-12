@@ -4,12 +4,14 @@ import {
   DataType,
   ForeignKey,
   Model,
+  Sequelize,
   Table,
 } from 'sequelize-typescript'
 import { User } from 'src/users/users.model'
 
 export interface KnownsCreationArgs {
-  userId: number
+  userId: string
+  id: string
   word: string
   translate: string
   transcription: string | null
@@ -23,25 +25,29 @@ export interface KnownsCreationArgs {
 
 @Table({ tableName: 'knowns', createdAt: false, updatedAt: false })
 export class Knowns extends Model<Knowns, KnownsCreationArgs> {
-  @ApiProperty({ example: '1', description: 'Уникальный идентификатор' })
-  @Column({
-    type: DataType.INTEGER,
-    unique: true,
-    autoIncrement: true,
-    primaryKey: true,
+  @ApiProperty({
+    example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
+    description: 'Уникальный идентификатор',
   })
-  id!: number
+  @Column({
+    type: DataType.UUID,
+    defaultValue: Sequelize.literal('gen_random_uuid()'),
+    unique: true,
+    primaryKey: true,
+    allowNull: false,
+  })
+  id!: string
 
   @ApiProperty({
-    example: 1,
+    example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
     description: 'Уникальный идентификатор пользователя',
   })
   @ForeignKey(() => User)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     allowNull: false,
   })
-  userId!: number
+  userId!: string
 
   @ApiProperty({
     example: 'cat',

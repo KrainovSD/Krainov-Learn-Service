@@ -12,7 +12,7 @@ import {
   ERROR_MESSAGES,
   RESPONSE_MESSAGES,
 } from 'src/const'
-import { _, utils } from 'src/utils/helpers'
+import { _, node, utils } from 'src/utils/helpers'
 import { CategoryIdDto } from './dto/category-id-dto'
 import { Learns } from '../learns/learns.model'
 
@@ -22,12 +22,12 @@ export class CategoriesService {
     @InjectModel(Category) private readonly categoryRepo: typeof Category,
   ) {}
 
-  async createCategory(dto: CreateCategoryDto, userId: number) {
+  async createCategory(dto: CreateCategoryDto, userId: string) {
     await this.isHasNameCategory(dto.name, userId)
-    await this.categoryRepo.create({ ...dto, userId })
+    await this.categoryRepo.create({ ...dto, userId, id: node.genUUID() })
     return RESPONSE_MESSAGES.success
   }
-  async updateCategory(dto: UpdateCategoryDto, userId: number) {
+  async updateCategory(dto: UpdateCategoryDto, userId: string) {
     await this.isHasNameCategory(dto.name, userId, dto.id)
     const category = await this.getCategoryById(dto.id)
     if (!category || (category && category.userId !== userId))
@@ -39,10 +39,10 @@ export class CategoriesService {
     await category.save()
     return RESPONSE_MESSAGES.success
   }
-  async deleteCategory(ids: number[], userId: number) {
+  async deleteCategory(ids: string[], userId: string) {
     const categories = await this.getAllCategoriesById(ids)
 
-    const checkedIds: number[] = []
+    const checkedIds: string[] = []
     for (const category of categories) {
       if (category.userId !== userId) continue
       checkedIds.push(category.id)
@@ -51,7 +51,7 @@ export class CategoriesService {
     await this.categoryRepo.destroy({ where: { id: checkedIds } })
     return RESPONSE_MESSAGES.success
   }
-  async startLearnCategory(dto: CategoryIdDto, userId: number) {
+  async startLearnCategory(dto: CategoryIdDto, userId: string) {
     const category = await this.getCategoryById(dto.id)
     if (!category || (category && category.userId !== userId))
       throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
@@ -66,14 +66,14 @@ export class CategoriesService {
     await category.save()
     return RESPONSE_MESSAGES.success
   }
-  async getAllCategories(userId: number) {
+  async getAllCategories(userId: string) {
     const categories = await this.getAllCategoriesByUserId(userId)
     if (!categories) throw new NotFoundException(ERROR_MESSAGES.infoNotFound)
     return categories
   }
   async studyCategory() {}
 
-  async getCategoryByNameAndUserId(name: string, userId: number) {
+  async getCategoryByNameAndUserId(name: string, userId: string) {
     return await this.categoryRepo.findOne({
       where: {
         name,
@@ -81,15 +81,15 @@ export class CategoriesService {
       },
     })
   }
-  async getCategoryById(id: number) {
+  async getCategoryById(id: string) {
     return await this.categoryRepo.findByPk(id, {
       include: [Learns],
     })
   }
-  async getAllCategoriesById(ids: number[]) {
+  async getAllCategoriesById(ids: string[]) {
     return await this.categoryRepo.findAll({ where: { id: ids } })
   }
-  async getAllCategoriesByUserId(userId: number) {
+  async getAllCategoriesByUserId(userId: string) {
     return await this.categoryRepo.findAll({
       where: { userId },
     })
@@ -97,8 +97,8 @@ export class CategoriesService {
 
   private async isHasNameCategory(
     name: string,
-    userId: number,
-    categoryId?: number,
+    userId: string,
+    categoryId?: string,
   ) {
     const category = await this.getCategoryByNameAndUserId(name, userId)
     if (!category) return

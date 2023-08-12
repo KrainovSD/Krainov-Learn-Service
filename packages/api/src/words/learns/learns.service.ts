@@ -15,7 +15,7 @@ import {
   ERROR_MESSAGES,
   RESPONSE_MESSAGES,
 } from 'src/const'
-import { utils } from 'src/utils/helpers'
+import { node, utils } from 'src/utils/helpers'
 import { UpdateLearnsDto } from './dto/update-learns.dto'
 import { KnownsService } from '../knowns/knowns.service'
 import { RelevancesService } from '../relevances/relevances.service'
@@ -32,7 +32,7 @@ export class LearnsService {
     private readonly relevanceService: RelevancesService,
   ) {}
 
-  async createLearn(dto: CreateLearnDto, userId: number) {
+  async createLearn(dto: CreateLearnDto, userId: string) {
     const category = await this.getOwnCategory(dto.categoryId, userId)
     if (category.isLearn)
       throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
@@ -40,11 +40,15 @@ export class LearnsService {
     await this.checkHasWord(dto.word, userId)
 
     const isIrregularVerb = utils.common.checkIrregularVerb(dto.word)
-    await this.learnsRepo.create({ ...dto, isIrregularVerb })
+    await this.learnsRepo.create({
+      ...dto,
+      isIrregularVerb,
+      id: node.genUUID(),
+    })
 
     return RESPONSE_MESSAGES.success
   }
-  async deleteLearn(ids: number[], categoryId: number, userId: number) {
+  async deleteLearn(ids: string[], categoryId: string, userId: string) {
     const learns = await this.getAllLearnsById(ids)
 
     const category = await this.getOwnCategory(categoryId, userId)
@@ -54,7 +58,7 @@ export class LearnsService {
     )
       throw new BadRequestException(ERROR_MESSAGES.isLearnCategory)
 
-    const checkedIds: number[] = []
+    const checkedIds: string[] = []
     for (const learn of learns) {
       if (learn.categoryId === categoryId) checkedIds.push(learn.id)
     }
@@ -62,7 +66,7 @@ export class LearnsService {
     await this.learnsRepo.destroy({ where: { id: checkedIds } })
     return RESPONSE_MESSAGES.success
   }
-  async updateLearn(dto: UpdateLearnsDto, userId: number) {
+  async updateLearn(dto: UpdateLearnsDto, userId: string) {
     const newCategory = await this.getOwnCategory(dto.categoryId, userId)
     const learn = await this.getLearnById(dto.id)
     if (!learn) throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
@@ -81,17 +85,17 @@ export class LearnsService {
     await learn.save()
     return RESPONSE_MESSAGES.success
   }
-  async getAllLearns(userId: number) {
+  async getAllLearns(userId: string) {
     const learns = await this.getAllLearnsByUserId(userId)
     if (!learns) throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
     return learns
   }
   async studyLearn() {}
 
-  async getLearnById(id: number) {
+  async getLearnById(id: string) {
     return await this.learnsRepo.findByPk(id)
   }
-  async getLearnByWordAndUserId(word: string, userId: number) {
+  async getLearnByWordAndUserId(word: string, userId: string) {
     return await this.learnsRepo.findOne({
       where: { word },
       include: [
@@ -104,7 +108,7 @@ export class LearnsService {
       raw: true,
     })
   }
-  async getAllLearnsByUserId(userId: number) {
+  async getAllLearnsByUserId(userId: string) {
     return await this.learnsRepo.findAll({
       where: {},
       include: [
@@ -117,10 +121,10 @@ export class LearnsService {
       raw: true,
     })
   }
-  async getAllLearnsById(ids: number[]) {
+  async getAllLearnsById(ids: string[]) {
     return await this.learnsRepo.findAll({ where: { id: ids } })
   }
-  async getAllLearnsByWordAndUserId(word: string | string[], userId: number) {
+  async getAllLearnsByWordAndUserId(word: string | string[], userId: string) {
     return await this.learnsRepo.findAll({
       where: { word },
       include: [
@@ -134,13 +138,13 @@ export class LearnsService {
     })
   }
 
-  private async getOwnCategory(categoryId: number, userId: number) {
+  private async getOwnCategory(categoryId: string, userId: string) {
     const category = await this.categoryService.getCategoryById(categoryId)
     if (!category || (category && category.userId !== userId))
       throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
     return category
   }
-  private async checkHasWord(word: string, userId: number, id?: number) {
+  private async checkHasWord(word: string, userId: string, id?: string) {
     const known = await this.knownService.getKnownByWordAndUserId(word, userId)
     if (known) throw new BadRequestException(ERROR_MESSAGES.hasWord)
 

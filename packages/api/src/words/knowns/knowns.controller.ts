@@ -14,8 +14,8 @@ import { RoleGuard } from 'src/utils/guards/role.guard'
 import { CreateKnownsDto } from './dto/create-knowns-dto'
 import { AuthGuard } from 'src/utils/guards/auth.guard'
 import { TRequest } from 'src/auth/auth.service'
-import { UpdateKnownsDto } from './dto/update-knowns-dto'
 import { KnownMultipleIdDto } from './dto/known-multiple-id-dto'
+import { FullKnownsDto } from './dto/full-known-dto'
 
 @Controller(`${API_VERSION.v1}/words/knowns`)
 export class KnownsController {
@@ -42,7 +42,7 @@ export class KnownsController {
 
   @Put('')
   @UseGuards(AuthGuard)
-  updateKnown(@Body() dto: UpdateKnownsDto, @Request() request: TRequest) {
+  updateKnown(@Body() dto: FullKnownsDto, @Request() request: TRequest) {
     return this.knownService.updateKnown(dto, request.user.id)
   }
 }

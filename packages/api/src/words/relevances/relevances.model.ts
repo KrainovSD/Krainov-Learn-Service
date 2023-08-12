@@ -11,7 +11,7 @@ import { User } from 'src/users/users.model'
 
 export interface RelevanceCreationArgs {
   id?: string
-  userId: number
+  userId: string
   word: string
   isIrregularVerb: boolean
   dateDetected: Date[]
@@ -19,7 +19,10 @@ export interface RelevanceCreationArgs {
 
 @Table({ tableName: 'relevances', createdAt: false, updatedAt: false })
 export class Relevance extends Model<Relevance, RelevanceCreationArgs> {
-  @ApiProperty({ example: '1', description: 'Уникальный идентификатор' })
+  @ApiProperty({
+    example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
+    description: 'Уникальный идентификатор',
+  })
   @Column({
     type: DataType.UUID,
     defaultValue: Sequelize.literal('gen_random_uuid()'),
@@ -30,15 +33,15 @@ export class Relevance extends Model<Relevance, RelevanceCreationArgs> {
   id!: string
 
   @ApiProperty({
-    example: 1,
+    example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
     description: 'Уникальный идентификатор пользователя',
   })
   @ForeignKey(() => User)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID,
     allowNull: false,
   })
-  userId!: number
+  userId!: string
 
   @ApiProperty({
     example: 'cat',
