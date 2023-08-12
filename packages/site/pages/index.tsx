@@ -1,12 +1,13 @@
 import React from 'react'
 import HeaderContainer from '../components/HeaderContainer/HeaderContainer'
 import styles from './index.module.scss'
-import { typings } from 'common/utils'
+import { typings, node } from 'common/utils'
 
 const Index = () => {
   React.useEffect(() => {
     console.log(typings.isString('test'))
     console.log(typings.isString(''))
+    console.log(node.genUUID())
 
     console.log('test')
     console.log(process.env.NEXT_PUBLIC_TEST)
