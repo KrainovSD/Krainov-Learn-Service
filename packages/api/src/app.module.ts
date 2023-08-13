@@ -1,3 +1,4 @@
+import { WorkModule } from './words/work/work.module'
 import { RelevancesModule } from './words/relevances/relevances.module'
 import { RepeatsModule } from './words/repeats/repeats.module'
 import { KnownsModule } from './words/knowns/knowns.module'
@@ -20,7 +21,6 @@ import { Repeats } from './words/repeats/repeats.model'
 import { Relevance } from './words/relevances/relevances.model'
 
 @Module({
-  controllers: [],
   imports: [
     RelevancesModule,
     RepeatsModule,
@@ -53,6 +53,9 @@ import { Relevance } from './words/relevances/relevances.model'
     }),
     UsersModule,
     AuthModule,
+    WorkModule,
   ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

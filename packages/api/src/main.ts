@@ -5,10 +5,12 @@ import { ValidationPipe } from './utils/pipes/validation.pipe'
 import { TrimPipe } from './utils/pipes/trim.pipe'
 import cookieParser from 'cookie-parser'
 import { TransformToNumberPipe } from './utils/pipes/transformNumber.pipe'
+import { WsAdapter } from '@nestjs/platform-ws'
 
 async function start() {
   const PORT = process.env.PORT || 3000
   const app = await NestFactory.create(AppModule)
+  app.useWebSocketAdapter(new WsAdapter(app))
 
   const config = new DocumentBuilder()
     .setTitle('Krainov Learn Service')
