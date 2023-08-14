@@ -2,11 +2,17 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsResponse,
+  OnGatewayInit,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets'
-import { from, Observable } from 'rxjs'
-import { map } from 'rxjs/operators'
 import { Server } from 'ws'
+import { WorkService } from './work.service'
+import { StartWorkDro } from './dto/start.work.dto'
+import { UsePipes } from '@nestjs/common'
+import { WSValidationPipe } from 'src/utils/pipes/wsValidation.pipe'
 
 @WebSocketGateway({
   cors: {
@@ -15,21 +21,47 @@ import { Server } from 'ws'
   },
   path: '/word',
 })
-export class WorkGateway {
+export class WorkGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
+  constructor(private readonly workService: WorkService) {}
+
   @WebSocketServer()
   server!: Server
 
-  @SubscribeMessage('events')
-  onEvent(client: any, data: any): Observable<WsResponse<number>> {
-    console.log(data)
-    console.log(client)
-    return from([1, 2, 3]).pipe(
-      map((item) => ({ event: 'events', data: item })),
-    )
+  afterInit(server: Server): void {
+    server.on('connection', (client: any, request: Request) => {
+      client.req = request
+    })
   }
 
-  bindClientConnect(server: Server, callback: () => void) {
-    console.log(server)
-    server.on('connection', callback)
+  handleConnection(client: any) {
+    const user = this.workService.getUserInfoFromClient(client)
+    if (!user) this.workService.closeClientConnection(1008, 'no auth', client)
+    client.user = user
+  }
+
+  handleDisconnect(client: any) {
+    console.log(client.user)
+    //this.broadcast('disconnect', {})
+  }
+
+  // @SubscribeMessage('test')
+  // onChgEvent(client: any, payload: any) {
+  //   console.log(client.user)
+  //   console.log(payload)
+  // }
+
+  @UsePipes(WSValidationPipe)
+  @SubscribeMessage('start')
+  async startWork(
+    @ConnectedSocket() client: any,
+    @MessageBody() dto: StartWorkDro,
+  ) {
+    if (!dto)
+      this.workService.sendTargetMessage(client, 'bad_request', {
+        message: 'bad request',
+      })
+    await this.workService.startWork(client, dto)
   }
 }
