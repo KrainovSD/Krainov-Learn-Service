@@ -9,10 +9,20 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets'
 import { Server } from 'ws'
-import { WorkService } from './work.service'
-import { StartWorkDro } from './dto/start.work.dto'
+import { WorkKind, WorkService, WorkType } from './work.service'
+import { StartWorkDro } from './dto/start.dto'
 import { UsePipes } from '@nestjs/common'
 import { WSValidationPipe } from 'src/utils/pipes/wsValidation.pipe'
+import { AuthWorkDto } from './dto/auth.dto'
+import { UserInfo } from 'src/auth/auth.service'
+import { WordsWorkDro } from './dto/words.dto'
+
+export type Client = {
+  user?: UserInfo
+  id?: string
+  type?: WorkType
+  kind?: WorkKind
+} & Record<string, any>
 
 @WebSocketGateway({
   cors: {
@@ -29,39 +39,44 @@ export class WorkGateway
   @WebSocketServer()
   server!: Server
 
-  afterInit(server: Server): void {
-    server.on('connection', (client: any, request: Request) => {
-      client.req = request
-    })
-  }
+  afterInit(server: Server): void {}
 
-  handleConnection(client: any) {
-    const user = this.workService.getUserInfoFromClient(client)
-    if (!user) this.workService.closeClientConnection(1008, 'no auth', client)
-    client.user = user
-  }
+  handleConnection(client: Client) {}
 
-  handleDisconnect(client: any) {
-    console.log(client.user)
-    //this.broadcast('disconnect', {})
-  }
+  handleDisconnect(client: Client) {}
 
-  // @SubscribeMessage('test')
-  // onChgEvent(client: any, payload: any) {
-  //   console.log(client.user)
-  //   console.log(payload)
-  // }
+  @UsePipes(WSValidationPipe)
+  @SubscribeMessage('auth')
+  async authWork(
+    @ConnectedSocket() client: Client,
+    @MessageBody() dto: AuthWorkDto,
+  ) {
+    const user = this.workService.getUserInfoFromClient(dto)
+    if (user) {
+      client.user = user
+      this.workService.sendTargetMessage(client, 'auth', 'successfull connect')
+      return
+    }
+    this.workService.closeClientConnection(1008, 'no auth', client)
+  }
 
   @UsePipes(WSValidationPipe)
   @SubscribeMessage('start')
   async startWork(
-    @ConnectedSocket() client: any,
+    @ConnectedSocket() client: Client,
     @MessageBody() dto: StartWorkDro,
   ) {
-    if (!dto)
-      this.workService.sendTargetMessage(client, 'bad_request', {
-        message: 'bad request',
-      })
+    if (!this.workService.validateMessage(client, dto)) return
+
     await this.workService.startWork(client, dto)
+  }
+
+  @UsePipes(WSValidationPipe)
+  @SubscribeMessage('words')
+  async wordsWork(
+    @ConnectedSocket() client: Client,
+    @MessageBody() dto: WordsWorkDro,
+  ) {
+    if (!this.workService.validateMessage(client, dto)) return
   }
 }

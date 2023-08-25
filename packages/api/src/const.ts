@@ -1,6 +1,7 @@
 export const EXPIRES_ACCESS_TOKEN = '24d'
 export const EXPIRES_REFRESH_TOKEN = '24d'
 export const EXPIRES_COOKIES = 1000 * 60 * 60 * 24 * 24
+export const EXPIRES_CACHE = 60 * 60 * 24
 
 export const MAX_SIZE_FILE = 1.4 * 1024 * 1024
 export const MIME_TYPE_FILE = /\/(png|jpeg|jpg|gif)$/

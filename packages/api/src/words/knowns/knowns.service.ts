@@ -15,6 +15,7 @@ import { KnownsDto } from './dto/knowns-dto'
 import { UsersService } from 'src/users/users.service'
 import { FullKnownsDto } from './dto/full-known-dto'
 import { Op } from 'sequelize'
+import { SettingsService } from 'src/settings/settings.service'
 
 @Injectable()
 export class KnownsService {
@@ -25,6 +26,7 @@ export class KnownsService {
     @Inject(forwardRef(() => RelevancesService))
     private readonly relevanceService: RelevancesService,
     private readonly userService: UsersService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async createKnown(knowns: KnownsDto[], userId: string) {
@@ -146,6 +148,53 @@ export class KnownsService {
           [Op.not]: userId,
         },
       },
+    })
+  }
+  async getKnownForNormalWork(
+    userId: string,
+  ): Promise<Pick<Knowns, 'id' | 'word' | 'translate'>[]> {
+    // FIXME: Это не Known логика
+    // return await this.knownRepo.findAll({
+    //   attributes: ['lastRepeat'],
+    //   where: {
+    //     userId,
+    //     [Op.or]: [
+    //       {
+    //         lastRepeat: {
+    //           [Op.lte]: utils.date.getTomorrow(),
+    //         },
+    //       },
+    //       {
+    //         lastRepeat: null,
+    //       },
+    //     ],
+    //   },
+    // })
+    const settings = await this.settingsService.getSettingsByUserId(userId)
+    if (!settings) throw new BadRequestException()
+
+    return await this.knownRepo.findAll({
+      attributes: ['id', 'translate', 'word'],
+      where: {
+        userId,
+      },
+      order: [['lastRepeat', 'ASC NULLS FIRST']],
+      limit: settings.knownWordsCount,
+    })
+  }
+  async getKnownForReverseWork(
+    userId: string,
+  ): Promise<Pick<Knowns, 'id' | 'word' | 'translate'>[]> {
+    const settings = await this.settingsService.getSettingsByUserId(userId)
+    if (!settings) throw new BadRequestException()
+
+    return await this.knownRepo.findAll({
+      attributes: ['id', 'translate', 'word'],
+      where: {
+        userId,
+      },
+      order: [['lastReverseRepeat', 'ASC NULLS FIRST']],
+      limit: settings.knownWordsCount,
     })
   }
 

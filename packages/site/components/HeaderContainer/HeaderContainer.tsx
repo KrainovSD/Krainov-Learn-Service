@@ -38,10 +38,7 @@ export default function HeaderContainer({
     )
   }
 
-  useEffect(() => {
-    console.log(router)
-    console.log(router.query)
-  }, [router.query])
+  useEffect(() => {}, [router.query])
 
   return (
     <>

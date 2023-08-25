@@ -44,7 +44,30 @@ function getDate(increment: number, type: DateType) {
   }
 }
 
+function getTomorrow() {
+  const tomorrow = new Date()
+  tomorrow.setHours(0, 0, 0, 0)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  return tomorrow
+}
+function getYesterday() {
+  const yesterday = new Date()
+  yesterday.setHours(0, 0, 0, 0)
+  yesterday.setDate(yesterday.getDate() - 1)
+  return yesterday
+}
+function getToday() {
+  const startNow = new Date()
+  startNow.setHours(0, 0, 0, 0)
+  const endNow = new Date()
+  endNow.setHours(23, 59, 59, 999)
+  return { startNow, endNow }
+}
+
 export default {
   isToday,
   getDate,
+  getToday,
+  getYesterday,
+  getTomorrow,
 }

@@ -26,8 +26,18 @@ function getId(size?: number) {
   return nanoid(size)
 }
 
+function safeJsonParse<T = unknown>(value: any) {
+  try {
+    if (!typings.isString(value)) return null
+    return JSON.parse(value) as T
+  } catch {
+    return null
+  }
+}
+
 export default {
   checkIrregularVerb,
   updateNewValue,
   getId,
+  safeJsonParse,
 }

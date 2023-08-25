@@ -6,10 +6,12 @@ import { Module } from '@nestjs/common'
 import { WorkGateway } from './workGateway'
 import { JwtModule } from '@nestjs/jwt'
 import { WorkService } from './work.service'
+import { CacheModule } from 'src/cache/cache.module'
 
 @Module({
   imports: [
     JwtModule,
+    CacheModule,
     CategoriesModule,
     RepeatsModule,
     LearnsModule,

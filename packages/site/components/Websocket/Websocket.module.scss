@@ -1,0 +1,24 @@
+.base {
+  margin: 20px;
+  padding: 20px;
+  font-family: 'Roboto';
+  font-size: 18px;
+}
+
+.quest {
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.option {
+  padding: 10px;
+  flex-basis: 50%;
+
+  &:hover {
+    color: rgba(183, 5, 5, 0.616);
+    font-size: 20px;
+  }
+}
