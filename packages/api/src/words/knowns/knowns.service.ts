@@ -16,6 +16,8 @@ import { UsersService } from 'src/users/users.service'
 import { FullKnownsDto } from './dto/full-known-dto'
 import { Op } from 'sequelize'
 import { SettingsService } from 'src/settings/settings.service'
+import { WorkKind } from '../work/work.service'
+import { RepeatsService } from '../repeats/repeats.service'
 
 @Injectable()
 export class KnownsService {
@@ -25,6 +27,8 @@ export class KnownsService {
     private readonly learnService: LearnsService,
     @Inject(forwardRef(() => RelevancesService))
     private readonly relevanceService: RelevancesService,
+    @Inject(forwardRef(() => RepeatsService))
+    private readonly repeatService: RepeatsService,
     private readonly userService: UsersService,
     private readonly settingsService: SettingsService,
   ) {}
@@ -123,7 +127,43 @@ export class KnownsService {
   async getAllKnowns(userId: string) {
     return await this.getAllKnownsByUserId(userId)
   }
-  async studyKnown() {}
+  async studyKnown(id: string, userId: string, option: string, kind: WorkKind) {
+    const word = await this.getKnownById(id)
+    if (!word || (word && word.userId !== userId))
+      throw new BadRequestException()
+    const result =
+      kind === 'normal' ? word.word === option : word.translate === option
+
+    if (!result) {
+      const settings = await this.settingsService.getSettingsByUserId(userId)
+      if (!settings) throw new BadRequestException()
+      const countMistakes = settings.mistakesInWordsCount
+      word.mistakes++
+      word.mistakesTotal++
+      if (word.mistakes === countMistakes) {
+        await this.repeatService.createRepeat(
+          [
+            {
+              word: word.word,
+              transcription: word.transcription,
+              translate: word.translate,
+              description: word.description,
+              example: word.example,
+            },
+          ],
+          userId,
+        )
+        word.mistakes = 0
+      }
+    }
+    word[kind === 'normal' ? 'lastRepeat' : 'lastReverseRepeat'] = new Date()
+    word[kind === 'normal' ? 'repeatHistory' : 'reverseRepeatHistory'] = [
+      ...word[kind === 'normal' ? 'repeatHistory' : 'reverseRepeatHistory'],
+      new Date(),
+    ]
+    await word.save()
+    return result
+  }
 
   async getKnownById(id: string) {
     return await this.knownRepo.findByPk(id)

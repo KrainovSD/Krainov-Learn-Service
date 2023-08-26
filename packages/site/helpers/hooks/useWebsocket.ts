@@ -1,35 +1,35 @@
 import React from 'react'
 
-export type UseWebsocket = {
+export type UseWebsocket<T> = {
   url: string
   handleOpen?: () => void
   handleClose?: (code: number, reason: string) => void
-  handleMessage: (message: SocketMessage) => void
+  handleMessage: (message: T) => void
   handleError?: (e: Event) => void
 }
 
-export type SocketMessage = {
-  event: string
-  data: Record<string, any>
-}
+export type SocketMessage<T = unknown> = T extends Record<string, any>
+  ? T
+  : Record<string, any>
 
-export function useWebsocket({
+export function useWebsocket<T extends Record<string, any>>({
   url,
   handleMessage,
   handleClose,
   handleError,
   handleOpen,
-}: UseWebsocket) {
+}: UseWebsocket<T>) {
   const socket = React.useRef<WebSocket | null>(null)
   const countAuthReconecting = React.useRef(0)
   const countErrorReconecting = React.useRef(0)
   const [isSocketDestroy, setIsSocketDestroy] = React.useState(false)
+  const [isLoading, setIsLoading] = React.useState(false)
   //FIXME: Получить токен
   const token = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRjNzJiMDIyLWY5NDctNGJmZC05NjkxLTIwYjc4MTJjY2Q5YyIsInJvbGUiOiJhZG1pbiIsInN1YnNjcmlwdGlvbiI6bnVsbCwiaWF0IjoxNjkxODcyMDg4LCJleHAiOjE2OTM5NDU2ODh9.s0tMq5R2WvupZhdrMaA34p87NygZfb9q3k0VeMHslUI`
 
   function onOpen(e: Event) {
-    console.log(e)
     countErrorReconecting.current = 0
+    setIsLoading(false)
     sendMessage('auth', { token })
     handleOpen?.()
   }
@@ -50,7 +50,11 @@ export function useWebsocket({
         setIsSocketDestroy(true)
       }
     } else if (e.code === 1006) {
-      if (countErrorReconecting.current < 5) connectSocket()
+      if (countErrorReconecting.current < 5)
+        setTimeout(() => {
+          connectSocket()
+        }, 1000)
+
       countErrorReconecting.current++
     } else {
       setIsSocketDestroy(true)
@@ -67,6 +71,7 @@ export function useWebsocket({
   }
 
   function connectSocket() {
+    setIsLoading(true)
     socket.current = new WebSocket(url)
     socket.current.onopen = onOpen
     socket.current.onmessage = onMessage
@@ -81,5 +86,5 @@ export function useWebsocket({
     }
   }, [])
 
-  return { sendMessage, isSocketDestroy }
+  return { sendMessage, isSocketDestroy, isLoading }
 }

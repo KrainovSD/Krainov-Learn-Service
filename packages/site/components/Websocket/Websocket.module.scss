@@ -22,3 +22,24 @@
     font-size: 20px;
   }
 }
+
+.input {
+  border: 1px solid black;
+  padding: 3px;
+  font-size: 16px;
+  &__true {
+    border: 2px solid green;
+  }
+  &__false {
+    border: 2px solid red;
+  }
+}
+
+.next {
+  padding: 10px;
+  background-color: rgba(128, 128, 128, 0.515);
+  display: flex;
+  width: fit-content;
+  height: fit-content;
+  cursor: pointer;
+}

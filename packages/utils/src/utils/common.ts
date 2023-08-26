@@ -35,9 +35,16 @@ function safeJsonParse<T = unknown>(value: any) {
   }
 }
 
+function getRandomNumber(min: number, max: number) {
+  min = Math.ceil(min)
+  max = Math.floor(max)
+  return Math.floor(Math.random() * (max - min) + min)
+}
+
 export default {
   checkIrregularVerb,
   updateNewValue,
   getId,
   safeJsonParse,
+  getRandomNumber,
 }

@@ -1,6 +1,7 @@
 import set from 'lodash/set'
 import cloneDeep from 'lodash/cloneDeep'
 import getByPath from 'lodash/get'
+import shuffle from 'lodash/shuffle'
 import { Maybe } from '../types'
 import { typings } from '..'
 
@@ -14,4 +15,4 @@ function get(
   return getByPath(object, path, defaultValue)
 }
 
-export default { get, set, cloneDeep }
+export default { get, set, cloneDeep, shuffle }

@@ -20,8 +20,6 @@ import { WordsWorkDro } from './dto/words.dto'
 export type Client = {
   user?: UserInfo
   id?: string
-  type?: WorkType
-  kind?: WorkKind
 } & Record<string, any>
 
 @WebSocketGateway({
@@ -51,13 +49,21 @@ export class WorkGateway
     @ConnectedSocket() client: Client,
     @MessageBody() dto: AuthWorkDto,
   ) {
-    const user = this.workService.getUserInfoFromClient(dto)
-    if (user) {
-      client.user = user
-      this.workService.sendTargetMessage(client, 'auth', 'successfull connect')
-      return
+    try {
+      const user = this.workService.getUserInfoFromClient(dto)
+      if (user) {
+        client.user = user
+        this.workService.sendTargetMessage(
+          client,
+          'auth',
+          'successfull connect',
+        )
+        return
+      }
+      this.workService.closeClientConnection(1008, 'no auth', client)
+    } catch (error) {
+      this.workService.sendTargetMessage(client, 'error', error)
     }
-    this.workService.closeClientConnection(1008, 'no auth', client)
   }
 
   @UsePipes(WSValidationPipe)
@@ -66,9 +72,13 @@ export class WorkGateway
     @ConnectedSocket() client: Client,
     @MessageBody() dto: StartWorkDro,
   ) {
-    if (!this.workService.validateMessage(client, dto)) return
-
-    await this.workService.startWork(client, dto)
+    try {
+      if (!this.workService.validateMessage(client, dto)) return
+      await this.workService.startWork(client, dto)
+    } catch (error) {
+      console.log(error)
+      this.workService.sendTargetMessage(client, 'error', error)
+    }
   }
 
   @UsePipes(WSValidationPipe)
@@ -77,6 +87,21 @@ export class WorkGateway
     @ConnectedSocket() client: Client,
     @MessageBody() dto: WordsWorkDro,
   ) {
-    if (!this.workService.validateMessage(client, dto)) return
+    try {
+      if (!this.workService.validateMessage(client, dto, true)) return
+      await this.workService.wordsWork(client, dto)
+    } catch (error) {
+      this.workService.sendTargetMessage(client, 'error', error)
+    }
+  }
+
+  @SubscribeMessage('next')
+  async wordsNext(@ConnectedSocket() client: Client) {
+    try {
+      if (!this.workService.validateClient(client, true)) return
+      await this.workService.wordsNext(client)
+    } catch (error) {
+      this.workService.sendTargetMessage(client, 'error', error)
+    }
   }
 }

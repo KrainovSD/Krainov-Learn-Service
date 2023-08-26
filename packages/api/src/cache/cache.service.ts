@@ -16,9 +16,13 @@ export class CacheService {
     let cacheValue: string = value
     if (typings.isArray(value) || typings.isObject(value)) {
       cacheValue = JSON.stringify(value)
+      await this.cache.set(key, cacheValue)
+      return
     }
     if (!typings.isString(value)) {
       cacheValue = String(value)
+      await this.cache.set(key, cacheValue)
+      return
     }
     await this.cache.set(key, cacheValue)
   }

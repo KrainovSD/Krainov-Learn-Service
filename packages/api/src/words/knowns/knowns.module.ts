@@ -10,6 +10,7 @@ import { RelevancesModule } from '../relevances/relevances.module'
 import { LearnsModule } from '../learns/learns.module'
 import { UsersModule } from 'src/users/users.module'
 import { SettingsModule } from 'src/settings/settings.module'
+import { RepeatsModule } from '../repeats/repeats.module'
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { SettingsModule } from 'src/settings/settings.module'
     SequelizeModule.forFeature([Knowns, User]),
     forwardRef(() => LearnsModule),
     forwardRef(() => RelevancesModule),
+    forwardRef(() => RepeatsModule),
     UsersModule,
     SettingsModule,
   ],
