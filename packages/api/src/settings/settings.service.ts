@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common'
+import { Injectable, BadRequestException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Settings } from './settings.model'
 import { UpdateSettingsDto } from './dto/update-settings.dto'
@@ -23,6 +19,7 @@ export class SettingsService {
     await settings.save()
     return RESPONSE_MESSAGES.success
   }
+
   async createSettings(userId: string) {
     const settings = await this.settingRepo.create({
       id: uuid(),

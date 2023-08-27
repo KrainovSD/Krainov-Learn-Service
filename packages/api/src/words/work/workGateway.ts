@@ -9,13 +9,14 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets'
 import { Server } from 'ws'
-import { WorkKind, WorkService, WorkType } from './work.service'
-import { StartWorkDro } from './dto/start.dto'
+import { WorkService } from './work.service'
+import { StartWorkDto } from './dto/start.dto'
 import { UsePipes } from '@nestjs/common'
 import { WSValidationPipe } from 'src/utils/pipes/wsValidation.pipe'
 import { AuthWorkDto } from './dto/auth.dto'
 import { UserInfo } from 'src/auth/auth.service'
 import { WordsWorkDro } from './dto/words.dto'
+import { RestoreWorkDto } from './dto/restore.dto'
 
 export type Client = {
   user?: UserInfo
@@ -41,7 +42,12 @@ export class WorkGateway
 
   handleConnection(client: Client) {}
 
-  handleDisconnect(client: Client) {}
+  async handleDisconnect(client: Client) {
+    if (this.workService.validateClient(client, true)) {
+      await this.workService.handleDisconnect(client)
+    }
+    return
+  }
 
   @UsePipes(WSValidationPipe)
   @SubscribeMessage('auth')
@@ -68,13 +74,13 @@ export class WorkGateway
 
   @UsePipes(WSValidationPipe)
   @SubscribeMessage('start')
-  async startWork(
+  async startSession(
     @ConnectedSocket() client: Client,
-    @MessageBody() dto: StartWorkDro,
+    @MessageBody() dto: StartWorkDto,
   ) {
     try {
       if (!this.workService.validateMessage(client, dto)) return
-      await this.workService.startWork(client, dto)
+      await this.workService.startSession(client, dto)
     } catch (error) {
       console.log(error)
       this.workService.sendTargetMessage(client, 'error', error)
@@ -83,14 +89,15 @@ export class WorkGateway
 
   @UsePipes(WSValidationPipe)
   @SubscribeMessage('words')
-  async wordsWork(
+  async checkWord(
     @ConnectedSocket() client: Client,
     @MessageBody() dto: WordsWorkDro,
   ) {
     try {
       if (!this.workService.validateMessage(client, dto, true)) return
-      await this.workService.wordsWork(client, dto)
+      await this.workService.checkWord(client, dto)
     } catch (error) {
+      console.log(error)
       this.workService.sendTargetMessage(client, 'error', error)
     }
   }
@@ -99,8 +106,24 @@ export class WorkGateway
   async wordsNext(@ConnectedSocket() client: Client) {
     try {
       if (!this.workService.validateClient(client, true)) return
-      await this.workService.wordsNext(client)
+      await this.workService.defineNextWord(client)
     } catch (error) {
+      console.log(error)
+      this.workService.sendTargetMessage(client, 'error', error)
+    }
+  }
+
+  @UsePipes(WSValidationPipe)
+  @SubscribeMessage('restore')
+  async restoreSession(
+    @ConnectedSocket() client: Client,
+    @MessageBody() dto: RestoreWorkDto,
+  ) {
+    try {
+      if (!this.workService.validateMessage(client, dto, true)) return
+      await this.workService.restoreSession(client, dto)
+    } catch (error) {
+      console.log(error)
       this.workService.sendTargetMessage(client, 'error', error)
     }
   }

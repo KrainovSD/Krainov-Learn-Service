@@ -1,3 +1,4 @@
+import { SessionsModule } from './words/sessions/sessions.module'
 import { WorkModule } from './words/work/work.module'
 import { RelevancesModule } from './words/relevances/relevances.module'
 import { RepeatsModule } from './words/repeats/repeats.module'
@@ -22,6 +23,7 @@ import { Relevance } from './words/relevances/relevances.model'
 
 @Module({
   imports: [
+    SessionsModule,
     RelevancesModule,
     RepeatsModule,
     KnownsModule,

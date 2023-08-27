@@ -5,9 +5,16 @@ import { Category } from './categories.model'
 import { CategoriesController } from './categories.controller'
 import { CategoriesService } from './categories.service'
 import { JwtModule } from '@nestjs/jwt'
+import { KnownsModule } from '../knowns/knowns.module'
+import { LearnsModule } from '../learns/learns.module'
 
 @Module({
-  imports: [SequelizeModule.forFeature([Category, User]), JwtModule],
+  imports: [
+    SequelizeModule.forFeature([Category, User]),
+    JwtModule,
+    forwardRef(() => KnownsModule),
+    forwardRef(() => LearnsModule),
+  ],
   controllers: [CategoriesController],
   providers: [CategoriesService],
   exports: [CategoriesService],

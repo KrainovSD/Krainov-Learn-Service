@@ -20,16 +20,24 @@ import { UpdateLearnsDto } from './dto/update-learns.dto'
 import { KnownsService } from '../knowns/knowns.service'
 import { RelevancesService } from '../relevances/relevances.service'
 import { Category } from '../categories/categories.model'
+import { Op } from 'sequelize'
+import { WorkKind } from '../work/work.service'
+import { SettingsService } from 'src/settings/settings.service'
+import { RepeatsService } from '../repeats/repeats.service'
 
 @Injectable()
 export class LearnsService {
   constructor(
     @InjectModel(Learns) private readonly learnsRepo: typeof Learns,
+    @Inject(forwardRef(() => CategoriesService))
     private readonly categoryService: CategoriesService,
     @Inject(forwardRef(() => KnownsService))
     private readonly knownService: KnownsService,
     @Inject(forwardRef(() => RelevancesService))
     private readonly relevanceService: RelevancesService,
+    @Inject(forwardRef(() => RepeatsService))
+    private readonly repeatService: RepeatsService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async createLearn(dto: CreateLearnDto, userId: string) {
@@ -90,7 +98,41 @@ export class LearnsService {
     if (!learns) throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
     return learns
   }
-  async studyLearn() {}
+  async studyLearn(id: string, userId: string, option: string, kind: WorkKind) {
+    const word = await this.getLearnById(id)
+    if (!word) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
+    await this.getOwnCategory(word.categoryId, userId)
+
+    const result =
+      kind === 'normal' ? word.word === option : word.translate === option
+
+    if (!result) {
+      const settings = await this.settingsService.getSettingsByUserId(userId)
+      if (!settings) throw new BadRequestException()
+      const countMistakes = settings.mistakesInWordsCount
+      word.mistakes++
+      word.mistakesTotal++
+
+      if (word.mistakes === countMistakes) {
+        await this.repeatService.createRepeat(
+          [
+            {
+              word: word.word,
+              transcription: word.transcription,
+              translate: word.translate,
+              description: word.description,
+              example: word.example,
+            },
+          ],
+          userId,
+        )
+        word.mistakes = 0
+      }
+
+      await word.save()
+    }
+    return result
+  }
 
   async getLearnById(id: string) {
     return await this.learnsRepo.findByPk(id)
@@ -135,6 +177,47 @@ export class LearnsService {
         },
       ],
       raw: true,
+    })
+  }
+  async getAllLearnsByCategoryIds(ids: string[]) {
+    return await this.learnsRepo.findAll({ where: { categoryId: ids } })
+  }
+  async getLearnsForNormalSession(
+    userId: string,
+    categoryIds?: string[],
+  ): Promise<Pick<Learns, 'id' | 'word' | 'translate' | 'categoryId'>[]> {
+    if (!categoryIds) {
+      categoryIds = (
+        await this.categoryService.getCategoriesForNormalSession(userId)
+      ).map((category) => category.id)
+    }
+
+    return await this.learnsRepo.findAll({
+      attributes: ['id', 'translate', 'word', 'categoryId'],
+      where: {
+        categoryId: {
+          [Op.in]: categoryIds,
+        },
+      },
+    })
+  }
+  async getLearnsForReverseSession(
+    userId: string,
+    categoryIds?: string[],
+  ): Promise<Pick<Learns, 'id' | 'word' | 'translate' | 'categoryId'>[]> {
+    if (!categoryIds) {
+      categoryIds = (
+        await this.categoryService.getCategoriesForReverseSession(userId)
+      ).map((category) => category.id)
+    }
+
+    return await this.learnsRepo.findAll({
+      attributes: ['id', 'translate', 'word', 'categoryId'],
+      where: {
+        categoryId: {
+          [Op.in]: categoryIds,
+        },
+      },
     })
   }
 

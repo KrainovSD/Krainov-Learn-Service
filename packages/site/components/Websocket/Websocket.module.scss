@@ -21,6 +21,14 @@
     color: rgba(183, 5, 5, 0.616);
     font-size: 20px;
   }
+  &__true {
+    background-color: rgba(38, 183, 5, 0.616);
+    font-size: 20px;
+  }
+  &__false {
+    background-color: rgba(155, 7, 7, 0.389);
+    font-size: 20px;
+  }
 }
 
 .input {
@@ -42,4 +50,26 @@
   width: fit-content;
   height: fit-content;
   cursor: pointer;
+}
+
+.buttons {
+  display: flex;
+  gap: 20px;
+}
+
+.restore {
+  padding: 20px;
+  font-family: 'Roboto';
+  font-size: 16px;
+  & > button {
+    padding: 10px;
+    font-size: 16px;
+    margin-right: 10px;
+    margin-top: 10px;
+  }
+}
+
+.complete {
+  font-family: 'Roboto';
+  font-size: 16px;
 }

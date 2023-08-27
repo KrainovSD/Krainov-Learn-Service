@@ -4,25 +4,29 @@ import { KnownsService } from '../knowns/knowns.service'
 import { RepeatsService } from '../repeats/repeats.service'
 import { LearnsService } from '../learns/learns.service'
 import { JwtService } from '@nestjs/jwt'
-import { StartWorkDro } from './dto/start.dto'
+import { StartWorkDto } from './dto/start.dto'
 import { AuthWorkDto } from './dto/auth.dto'
 import { CacheService } from 'src/cache/cache.service'
 import { UserInfo } from 'src/auth/auth.service'
 import { Client } from './workGateway'
 import { typings, utils, _ } from 'src/utils/helpers'
 import { WordsWorkDro } from './dto/words.dto'
+import { RestoreWorkDto } from './dto/restore.dto'
+import { StatisticsService } from 'src/statistics/statistics.service'
+import { SessionsService } from '../sessions/sessions.service'
 
 type WordItem = {
   id: string
   word: string
   translate: string
+  categoryId?: string
 }
 
 export type CacheWords = {
   words: WordItem[]
   options?: string[]
   errors: string[]
-  lastCompleteIndex: number
+  currentIndex: number
   countConnection: number
   maxLength: number
 }
@@ -51,8 +55,10 @@ export class WorkService {
     private readonly knownsService: KnownsService,
     private readonly repeatsService: RepeatsService,
     private readonly learnsService: LearnsService,
+    private readonly statisticsService: StatisticsService,
     private readonly cacheService: CacheService,
     private readonly jwtService: JwtService,
+    private readonly sessionsService: SessionsService,
   ) {}
 
   getUserInfoFromClient(dto: AuthWorkDto) {
@@ -109,21 +115,76 @@ export class WorkService {
     }
     return true
   }
+  async handleDisconnect(client: Client) {
+    const cache = await this.cacheService.get<CacheWords>(client.id)
+    if (!cache) return
+    cache.countConnection--
+    await this.cacheService.set(client.id, cache)
+  }
 
-  async startWork(client: Client, payload: StartWorkDro) {
+  async startSession(client: Client, payload: StartWorkDto) {
     client.id = `${client.user?.id}:${payload.type}:${payload.kind}`
+    const cache = await this.cacheService.get<CacheWords>(client.id)
+
+    if (cache) {
+      await this.defineNextWord(client, cache)
+      return
+    }
+
     switch (payload.type) {
       case 'known': {
-        await this.startKnown(client, payload.kind)
+        const words = _.shuffle(
+          payload.kind === 'normal'
+            ? await this.knownsService.getKnownForNormalSession(
+                client.user?.id!,
+              )
+            : await this.knownsService.getKnownForReverseSession(
+                client.user?.id!,
+              ),
+        )
+
+        await this.defineNextWord(client, cache, words)
         break
       }
       case 'learn': {
+        const words = _.shuffle(
+          payload.kind === 'normal'
+            ? await this.learnsService.getLearnsForNormalSession(
+                client.user?.id!,
+              )
+            : await this.learnsService.getLearnsForReverseSession(
+                client.user?.id!,
+              ),
+        )
+        await this.defineNextWord(client, cache, words)
         break
       }
       case 'repeat': {
+        const words = _.shuffle(
+          payload.kind === 'normal'
+            ? await this.repeatsService.getRepeatForNormalSession(
+                client.user?.id!,
+              )
+            : await this.repeatsService.getRepeatForReverseSession(
+                client.user?.id!,
+              ),
+        )
+        await this.defineNextWord(client, cache, words)
         break
       }
       case 'learnOff': {
+        const words = _.shuffle(
+          payload.kind === 'normal'
+            ? await this.learnsService.getLearnsForNormalSession(
+                client.user?.id!,
+                payload.categories,
+              )
+            : await this.learnsService.getLearnsForReverseSession(
+                client.user?.id!,
+                payload.categories,
+              ),
+        )
+        await this.defineNextWord(client, cache, words)
         break
       }
       default: {
@@ -133,23 +194,8 @@ export class WorkService {
       }
     }
   }
-  private async startKnown(client: Client, kind: WorkKind) {
-    const cache = await this.cacheService.get<CacheWords>(client.id!)
 
-    if (cache) {
-      await this.wordsNext(client, cache)
-      return
-    }
-
-    const words =
-      kind === 'normal'
-        ? await this.knownsService.getKnownForNormalWork(client.user?.id!)
-        : await this.knownsService.getKnownForReverseWork(client.user?.id!)
-
-    await this.wordsNext(client, cache, words)
-  }
-
-  async wordsWork(client: Client, payload: WordsWorkDro) {
+  async checkWord(client: Client, payload: WordsWorkDro) {
     const { type, kind } = this.getOperationInfo(client)
 
     switch (type) {
@@ -160,16 +206,39 @@ export class WorkService {
           payload.option,
           kind as WorkKind,
         )
-        await this.wordCache(client, result, payload.id)
+        await this.setWordCacheAfterCheck(client, result, payload.id)
         break
       }
       case 'learn': {
+        const result = await this.learnsService.studyLearn(
+          payload.id,
+          client.user?.id!,
+          payload.option,
+          kind as WorkKind,
+        )
+        await this.setWordCacheAfterCheck(client, result, payload.id)
         break
       }
       case 'repeat': {
+        const result = await this.repeatsService.studyRepeat(
+          payload.id,
+          client.user?.id!,
+          payload.option,
+          kind as WorkKind,
+        )
+        await this.setWordCacheAfterCheck(client, result, payload.id)
         break
       }
       case 'learnOff': {
+        const cache = await this.cacheService.get<CacheWords>(client.id)
+        if (!cache) throw new BadRequestException()
+
+        const result =
+          cache.words[cache.currentIndex][
+            kind === 'normal' ? 'word' : 'translate'
+          ] === payload.option
+        await this.setWordCacheAfterCheck(client, result, payload.id)
+
         break
       }
       default: {
@@ -179,36 +248,44 @@ export class WorkService {
       }
     }
   }
-  private async wordCache(client: Client, result: boolean, id: string) {
-    const cache = await this.cacheService.get<CacheWords>(client.id!)
+  private async setWordCacheAfterCheck(
+    client: Client,
+    result: boolean,
+    id: string,
+  ) {
+    const cache = await this.cacheService.get<CacheWords>(client.id)
     if (!cache) throw new BadRequestException()
 
     if (!result) cache.errors.push(id)
-    cache.lastCompleteIndex++
+    cache.currentIndex++
 
-    await this.cacheService.set(client.id!, cache)
+    await this.cacheService.set(client.id, cache)
 
     this.sendTargetMessage(client, 'answer', { result })
   }
 
-  async wordsNext(
+  async defineNextWord(
     client: Client,
     cache?: CacheWords | null,
     words?: WordItem[],
   ) {
-    const { kind } = this.getOperationInfo(client)
+    const { type, kind } = this.getOperationInfo(client)
 
     /* if restore session */
     if (cache) {
-      if (cache.countConnection === 0) {
-        //FIXME: Спросить хочет ли пользователь продолжать
+      if (cache.countConnection <= 0) {
+        this.sendTargetMessage(
+          client,
+          'restore',
+          'do you want restore past session?',
+        )
         return
       }
-      await this.sendNext(client, cache, kind)
+      await this.sendNextWord(client, cache, type, kind)
       return
     }
 
-    cache = await this.cacheService.get<CacheWords>(client.id!)
+    cache = await this.cacheService.get<CacheWords>(client.id)
 
     /* If not cache and has words for start */
     if (!cache && words) {
@@ -221,49 +298,140 @@ export class WorkService {
         words,
         options,
         errors: [],
-        lastCompleteIndex: 0,
+        currentIndex: 0,
         maxLength: words.length - 1,
         countConnection: 1,
       }
-      await this.cacheService.set(client.id!, cache)
-
-      await this.sendNext(client, cache, kind)
+      await this.cacheService.set(client.id, cache)
+      await this.sendNextWord(client, cache, type, kind)
       return
     }
 
     /* if nothing have */
     if (!cache) throw new BadRequestException()
 
+    /* if work complete */
+    if (cache.currentIndex > cache.maxLength) {
+      await this.sendNextWord(client, cache, type, kind)
+      return
+    }
+
     /* if work continue */
     const options =
       kind === 'normal'
         ? undefined
-        : await this.getRandomOptions(
-            cache.words[cache.lastCompleteIndex].translate,
-          )
+        : await this.getRandomOptions(cache.words[cache.currentIndex].translate)
     cache.options = options
-    await this.cacheService.set(client.id!, cache)
-    await this.sendNext(client, cache, kind)
+    await this.cacheService.set(client.id, cache)
+    await this.sendNextWord(client, cache, type, kind)
   }
-  private async sendNext(client: Client, cache: CacheWords, kind: WorkKind) {
+  private async sendNextWord(
+    client: Client,
+    cache: CacheWords,
+    type: WorkType,
+    kind: WorkKind,
+  ) {
     /* if work complete */
-    if (cache.lastCompleteIndex > cache.maxLength) {
-      //FIXME: Завершение
-      await this.cacheService.del(client.id!)
+    if (cache.currentIndex > cache.maxLength) {
+      this.completeSession(client, cache, type, kind)
       return
     }
 
     /* if work continue */
 
     this.sendTargetMessage(client, 'words', {
-      id: cache.words[cache.lastCompleteIndex].id,
+      id: cache.words[cache.currentIndex].id,
       word:
         kind === 'normal'
-          ? cache.words[cache.lastCompleteIndex].translate
-          : cache.words[cache.lastCompleteIndex].word,
+          ? cache.words[cache.currentIndex].translate
+          : cache.words[cache.currentIndex].word,
       options: cache.options,
     })
     return
+  }
+
+  async restoreSession(client: Client, dto: RestoreWorkDto) {
+    const { type, kind } = this.getOperationInfo(client)
+
+    if (dto.isRestore) {
+      const cache = await this.cacheService.get<CacheWords>(client.id)
+      if (!cache) throw new BadRequestException()
+      cache.countConnection =
+        cache.countConnection <= 0 ? 1 : cache.countConnection + 1
+      await this.cacheService.set(client.id, cache)
+      await this.startSession(client, { kind, type })
+    } else {
+      await this.cacheService.del(client.id)
+      await this.startSession(client, { kind, type })
+    }
+  }
+
+  async completeSession(
+    client: Client,
+    cache: CacheWords,
+    type: WorkType,
+    kind: WorkKind,
+  ) {
+    if (type === 'learnOff' && client.user) {
+      const errorCount = cache.errors.length
+      await this.sessionsService.createSession(
+        {
+          kind,
+          type,
+          errorCount,
+          successCount: cache.words.length - errorCount,
+        },
+        client.user.id,
+      )
+    }
+
+    const wordErrorNames: string[] = []
+    const categoryCompletedIds: Set<string> = new Set()
+    const categoryErrorIds: Set<string> = new Set()
+    let categoryErrorNames: string[] = []
+
+    if (cache.errors.length > 0) {
+      for (const word of cache.words) {
+        if (cache.errors.includes(word.id)) {
+          wordErrorNames.push(word.word)
+          if (word.categoryId) {
+            categoryErrorIds.add(word.categoryId)
+          }
+        } else {
+          if (word.categoryId) {
+            categoryCompletedIds.add(word.categoryId)
+          }
+        }
+      }
+      if (type === 'learn' || type === 'learnOff') {
+        categoryErrorNames = (
+          await this.categoriesService.getCategoriesNameByIds([
+            ...categoryErrorIds,
+          ])
+        ).map((word) => word.name)
+      }
+    }
+
+    let answer: string = ''
+
+    if (type === 'learn') {
+      await this.categoriesService.studyCategory(
+        [...categoryCompletedIds],
+        client.user!.id,
+        kind,
+      )
+    }
+
+    const streakResult = await this.statisticsService.checkStreak(
+      client.user!.id,
+    )
+
+    //FIXME: Завершение:
+    // Придумать принцип формирования ответа финального с учетом всех произошедших действий
+    // реализовать CheckStreak
+    // произвести миграцию
+    this.sendTargetMessage(client, 'complete', answer)
+    await this.cacheService.del(client.id)
   }
 
   private async getRandomOptions(translate: string) {
@@ -293,7 +461,12 @@ export class WorkService {
       : result
   }
   private getOperationInfo(client: Client): { type: WorkType; kind: WorkKind } {
-    const id = client.id!.split(':')
+    if (!client.id)
+      throw new BadRequestException(
+        'Id пользователя при получении данных о сессии не обнаружено',
+      )
+
+    const id = client.id.split(':')
     const type = id[1]
     const kind = id[2]
     return { type: type as WorkType, kind: kind as WorkKind }

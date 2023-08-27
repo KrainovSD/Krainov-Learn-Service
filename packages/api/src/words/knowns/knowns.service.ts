@@ -130,7 +130,7 @@ export class KnownsService {
   async studyKnown(id: string, userId: string, option: string, kind: WorkKind) {
     const word = await this.getKnownById(id)
     if (!word || (word && word.userId !== userId))
-      throw new BadRequestException()
+      throw new BadRequestException(ERROR_MESSAGES.userNotFound)
     const result =
       kind === 'normal' ? word.word === option : word.translate === option
 
@@ -155,12 +155,11 @@ export class KnownsService {
         )
         word.mistakes = 0
       }
+      await word.save()
+      return result
     }
     word[kind === 'normal' ? 'lastRepeat' : 'lastReverseRepeat'] = new Date()
-    word[kind === 'normal' ? 'repeatHistory' : 'reverseRepeatHistory'] = [
-      ...word[kind === 'normal' ? 'repeatHistory' : 'reverseRepeatHistory'],
-      new Date(),
-    ]
+
     await word.save()
     return result
   }
@@ -190,26 +189,9 @@ export class KnownsService {
       },
     })
   }
-  async getKnownForNormalWork(
+  async getKnownForNormalSession(
     userId: string,
   ): Promise<Pick<Knowns, 'id' | 'word' | 'translate'>[]> {
-    // FIXME: Это не Known логика
-    // return await this.knownRepo.findAll({
-    //   attributes: ['lastRepeat'],
-    //   where: {
-    //     userId,
-    //     [Op.or]: [
-    //       {
-    //         lastRepeat: {
-    //           [Op.lte]: utils.date.getTomorrow(),
-    //         },
-    //       },
-    //       {
-    //         lastRepeat: null,
-    //       },
-    //     ],
-    //   },
-    // })
     const settings = await this.settingsService.getSettingsByUserId(userId)
     if (!settings) throw new BadRequestException()
 
@@ -222,7 +204,7 @@ export class KnownsService {
       limit: settings.knownWordsCount,
     })
   }
-  async getKnownForReverseWork(
+  async getKnownForReverseSession(
     userId: string,
   ): Promise<Pick<Knowns, 'id' | 'word' | 'translate'>[]> {
     const settings = await this.settingsService.getSettingsByUserId(userId)

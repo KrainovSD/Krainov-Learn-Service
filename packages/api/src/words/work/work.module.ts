@@ -7,15 +7,19 @@ import { WorkGateway } from './workGateway'
 import { JwtModule } from '@nestjs/jwt'
 import { WorkService } from './work.service'
 import { CacheModule } from 'src/cache/cache.module'
+import { StatisticsModule } from 'src/statistics/statistics.module'
+import { SessionsModule } from '../sessions/sessions.module'
 
 @Module({
   imports: [
+    SessionsModule,
     JwtModule,
     CacheModule,
     CategoriesModule,
     RepeatsModule,
     LearnsModule,
     KnownsModule,
+    StatisticsModule,
   ],
   providers: [WorkGateway, WorkService],
 })

@@ -8,12 +8,16 @@ import { JwtModule } from '@nestjs/jwt'
 import { CategoriesModule } from '../categories/categories.module'
 import { KnownsModule } from '../knowns/knowns.module'
 import { RelevancesModule } from '../relevances/relevances.module'
+import { SettingsModule } from 'src/settings/settings.module'
+import { RepeatsModule } from '../repeats/repeats.module'
 
 @Module({
   imports: [
     SequelizeModule.forFeature([Learns, Category]),
     JwtModule,
-    CategoriesModule,
+    forwardRef(() => CategoriesModule),
+    SettingsModule,
+    forwardRef(() => RepeatsModule),
     forwardRef(() => KnownsModule),
     forwardRef(() => RelevancesModule),
   ],

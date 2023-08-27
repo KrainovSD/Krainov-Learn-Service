@@ -1,10 +1,12 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
-import { Category } from './categories.model'
+import { Category, CategoryCreationArgs } from './categories.model'
 import { CreateCategoryDto } from './dto/create-category-dto'
 import { UpdateCategoryDto } from './dto/update-category-dro'
 import {
@@ -15,11 +17,19 @@ import {
 import { _, utils, uuid } from 'src/utils/helpers'
 import { CategoryIdDto } from './dto/category-id-dto'
 import { Learns } from '../learns/learns.model'
+import { Op } from 'sequelize'
+import { WorkKind } from '../work/work.service'
+import { LearnsService } from '../learns/learns.service'
+import { KnownsService } from '../knowns/knowns.service'
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectModel(Category) private readonly categoryRepo: typeof Category,
+    @Inject(forwardRef(() => LearnsService))
+    private readonly learnService: LearnsService,
+    @Inject(forwardRef(() => KnownsService))
+    private readonly knownsService: KnownsService,
   ) {}
 
   async createCategory(dto: CreateCategoryDto, userId: string) {
@@ -71,7 +81,65 @@ export class CategoriesService {
     if (!categories) throw new NotFoundException(ERROR_MESSAGES.infoNotFound)
     return categories
   }
-  async studyCategory() {}
+  async studyCategory(ids: string[], userId: string, kind: WorkKind) {
+    if (ids.length === 0) return
+
+    const categories = await this.getAllCategoriesById(ids)
+
+    const completedCategoryInfo: Map<string, Date> = new Map()
+    const editedCategories: CategoryCreationArgs[] = categories.reduce(
+      (result: CategoryCreationArgs[], category) => {
+        if (category.userId !== userId || !category.learnStartDate) {
+          return result
+        }
+        const countRepeat =
+          category[kind === 'normal' ? 'countRepeat' : 'countReverseRepeat'] + 1
+        /* if done word */
+        if (category.repeatRegularity.length >= countRepeat) {
+          const countAnotherRepeat =
+            category[kind === 'normal' ? 'countReverseRepeat' : 'countRepeat']
+          if (category.repeatRegularity.length >= countAnotherRepeat) {
+            completedCategoryInfo.set(category.id, category.learnStartDate)
+            return result
+          }
+        }
+
+        /* if not done */
+        const nextRepeat = utils.date.getDate(
+          category.repeatRegularity[countRepeat],
+          'days',
+        )
+
+        result.push({
+          ...category,
+          [kind === 'normal' ? 'countRepeat' : 'countReverseRepeat']:
+            countRepeat,
+          [kind === 'normal' ? 'nextRepeat' : 'nextReverseRepeat']: nextRepeat,
+        })
+        return result
+      },
+      [],
+    )
+    await this.categoryRepo.bulkCreate(editedCategories, {
+      updateOnDuplicate: ['id'],
+    })
+
+    if (completedCategoryInfo.size > 0) {
+      const completedWords = (
+        await this.learnService.getAllLearnsByCategoryIds([
+          ...completedCategoryInfo.keys(),
+        ])
+      ).map((word) => {
+        return {
+          ...word,
+          dateStartLearn:
+            completedCategoryInfo.get(word.categoryId) ?? new Date(),
+        }
+      })
+      await this.knownsService.createKnown(completedWords, userId)
+      await this.deleteCategory([...completedCategoryInfo.keys()], userId)
+    }
+  }
 
   async getCategoryByNameAndUserId(name: string, userId: string) {
     return await this.categoryRepo.findOne({
@@ -92,6 +160,42 @@ export class CategoriesService {
   async getAllCategoriesByUserId(userId: string) {
     return await this.categoryRepo.findAll({
       where: { userId },
+    })
+  }
+  async getCategoriesNameByIds(ids: string[]) {
+    return await this.categoryRepo.findAll({
+      attributes: ['name'],
+      where: {
+        id: {
+          [Op.in]: ids,
+        },
+      },
+    })
+  }
+  async getCategoriesForNormalSession(
+    userId: string,
+  ): Promise<Pick<Category, 'id'>[]> {
+    return await this.categoryRepo.findAll({
+      attributes: ['id'],
+      where: {
+        userId,
+        nextRepeat: {
+          [Op.lte]: utils.date.getTomorrow(),
+        },
+      },
+    })
+  }
+  async getCategoriesForReverseSession(
+    userId: string,
+  ): Promise<Pick<Category, 'id'>[]> {
+    return await this.categoryRepo.findAll({
+      attributes: ['id'],
+      where: {
+        userId,
+        nextReverseRepeat: {
+          [Op.lte]: utils.date.getTomorrow(),
+        },
+      },
     })
   }
 

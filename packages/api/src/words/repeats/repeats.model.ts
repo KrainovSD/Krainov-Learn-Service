@@ -120,28 +120,6 @@ export class Repeats extends Model<Repeats, RepeatsCreationArgs> {
 
   @ApiProperty({
     example: '2004-10-19 10:23:54+02',
-    description: 'Дата последнего повторения',
-  })
-  @Column({
-    type: DataType.DATE,
-    defaultValue: null,
-    allowNull: true,
-  })
-  lastRepeat!: Date | null
-
-  @ApiProperty({
-    example: '2004-10-19 10:23:54+02',
-    description: 'Дата последнего реверсивного повторения',
-  })
-  @Column({
-    type: DataType.DATE,
-    defaultValue: null,
-    allowNull: true,
-  })
-  lastReverseRepeat!: Date | null
-
-  @ApiProperty({
-    example: '2004-10-19 10:23:54+02',
     description: 'Дата следующего повторения',
   })
   @Column({
@@ -161,26 +139,26 @@ export class Repeats extends Model<Repeats, RepeatsCreationArgs> {
   nextReverseRepeat!: Date
 
   @ApiProperty({
-    example: ['2004-10-19 10:23:54+02'],
-    description: 'История повторения',
+    example: 2,
+    description: 'Количество успешных повторений',
   })
   @Column({
-    type: DataType.ARRAY(DataType.DATE),
-    defaultValue: [],
+    type: DataType.INTEGER,
+    defaultValue: -1,
     allowNull: false,
   })
-  repeatHistory!: Date[]
+  countRepeat!: number
 
   @ApiProperty({
-    example: ['2004-10-19 10:23:54+02'],
-    description: 'История реверсивного повторения',
+    example: 2,
+    description: 'Количество успешных реверсивных повторений',
   })
   @Column({
-    type: DataType.ARRAY(DataType.DATE),
-    defaultValue: [],
+    type: DataType.INTEGER,
+    defaultValue: -1,
     allowNull: false,
   })
-  reverseRepeatHistory!: Date[]
+  countReverseRepeat!: number
 
   @ApiProperty({
     example: '2004-10-19 10:23:54+02',

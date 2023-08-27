@@ -1,18 +1,25 @@
 import { SettingsService } from 'src/settings/settings.service'
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Repeats, RepeatsCreationArgs } from './repeats.model'
-import { CreateRepeatDto } from './dto/create-repeat-dto'
 import { utils, uuid } from 'src/utils/helpers'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { UsersService } from 'src/users/users.service'
 import { RepeatDto } from './dto/repeat-dto'
+import { Op } from 'sequelize'
+import { WorkKind } from '../work/work.service'
 
 @Injectable()
 export class RepeatsService {
   constructor(
     @InjectModel(Repeats) private readonly repeatRepo: typeof Repeats,
     private readonly settingsService: SettingsService,
+    @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
   ) {}
 
@@ -61,7 +68,51 @@ export class RepeatsService {
 
     return RESPONSE_MESSAGES.success
   }
-  async studyRepeat() {}
+  async studyRepeat(
+    id: string,
+    userId: string,
+    option: string,
+    kind: WorkKind,
+  ) {
+    const word = await this.getRepeatById(id)
+    if (!word || (word && word.userId !== userId))
+      throw new BadRequestException(ERROR_MESSAGES.userNotFound)
+    const result =
+      kind === 'normal' ? word.word === option : word.translate === option
+
+    if (!result) {
+      return result
+    }
+
+    const settings = await this.settingsService.getSettingsByUserId(userId)
+    if (!settings) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
+
+    word[kind === 'normal' ? 'countRepeat' : 'countReverseRepeat'] =
+      word[kind === 'normal' ? 'countRepeat' : 'countReverseRepeat'] + 1
+    const countRepeat =
+      word[kind === 'normal' ? 'countRepeat' : 'countReverseRepeat']
+
+    /* if done word */
+    if (settings.repeatWordsRegularity.length >= countRepeat) {
+      const countAnotherRepeat =
+        word[kind === 'normal' ? 'countReverseRepeat' : 'countRepeat']
+      if (settings.repeatWordsRegularity.length >= countAnotherRepeat) {
+        await word.destroy()
+        return result
+      }
+      await word.save()
+      return result
+    }
+
+    /* if not done */
+    const nextRepeat = utils.date.getDate(
+      settings.repeatWordsRegularity[countRepeat],
+      'days',
+    )
+    word[kind === 'normal' ? 'nextRepeat' : 'nextReverseRepeat'] = nextRepeat
+    await word.save()
+    return result
+  }
 
   async getRepeatByUserId(userId: string) {
     return await this.repeatRepo.findAll({ where: { userId } })
@@ -77,5 +128,31 @@ export class RepeatsService {
   }
   async getAllRepeatsByWordAndUserId(words: string[], userId: string) {
     return await this.repeatRepo.findAll({ where: { userId, word: words } })
+  }
+  async getRepeatForNormalSession(
+    userId: string,
+  ): Promise<Pick<Repeats, 'id' | 'word' | 'translate'>[]> {
+    return await this.repeatRepo.findAll({
+      attributes: ['id', 'translate', 'word'],
+      where: {
+        userId,
+        nextRepeat: {
+          [Op.lte]: utils.date.getTomorrow(),
+        },
+      },
+    })
+  }
+  async getRepeatForReverseSession(
+    userId: string,
+  ): Promise<Pick<Repeats, 'id' | 'word' | 'translate'>[]> {
+    return await this.repeatRepo.findAll({
+      attributes: ['id', 'translate', 'word'],
+      where: {
+        userId,
+        nextReverseRepeat: {
+          [Op.lte]: utils.date.getTomorrow(),
+        },
+      },
+    })
   }
 }

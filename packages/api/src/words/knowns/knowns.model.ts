@@ -21,6 +21,7 @@ export interface KnownsCreationArgs {
   mistakes: number
   mistakesTotal: number
   dateCreate: Date
+  dateStartLearn: Date
 }
 
 @Table({ tableName: 'knowns', createdAt: false, updatedAt: false })
@@ -158,34 +159,22 @@ export class Knowns extends Model<Knowns, KnownsCreationArgs> {
   lastReverseRepeat!: Date | null
 
   @ApiProperty({
-    example: ['2004-10-19 10:23:54+02'],
-    description: 'История повторения',
-  })
-  @Column({
-    type: DataType.ARRAY(DataType.DATE),
-    defaultValue: [],
-    allowNull: false,
-  })
-  repeatHistory!: Date[]
-
-  @ApiProperty({
-    example: ['2004-10-19 10:23:54+02'],
-    description: 'История реверсивного повторения',
-  })
-  @Column({
-    type: DataType.ARRAY(DataType.DATE),
-    defaultValue: [],
-    allowNull: false,
-  })
-  reverseRepeatHistory!: Date[]
-
-  @ApiProperty({
     example: '2004-10-19 10:23:54+02',
-    description: 'Дата создания',
+    description: 'Дата конца изучения',
   })
   @Column({
     type: DataType.DATE,
     allowNull: false,
   })
   dateCreate!: Date
+
+  @ApiProperty({
+    example: '2004-10-19 10:23:54+02',
+    description: 'Дата начала изучения',
+  })
+  @Column({
+    type: DataType.DATE,
+    allowNull: false,
+  })
+  dateStartLearn!: Date
 }

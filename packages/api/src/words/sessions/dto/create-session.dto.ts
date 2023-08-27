@@ -1,17 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger'
 import {
+  IsArray,
   IsIn,
+  IsInt,
   IsNotEmpty,
   IsString,
-  ValidateIf,
-  IsArray,
-  ArrayMinSize,
+  ValidateNested,
 } from 'class-validator'
+import { Type } from 'class-transformer'
+import { workKindList, workTypeList } from 'src/words/work/dto/start.dto'
 
-export const workTypeList = ['known', 'repeat', 'learn', 'learnOff']
-export const workKindList = ['normal', 'reverse']
-
-export class StartWorkDto {
+export class CreateSessionDto {
   @ApiProperty({
     example: 'known',
     description: 'Тип обучения',
@@ -37,18 +36,18 @@ export class StartWorkDto {
   kind!: 'normal' | 'reverse'
 
   @ApiProperty({
-    example: ['3850de1c-6b55-47e5-817f-bd02aaa69cf9'],
-    description: 'Список уникальных идентификаторов категорий',
-    required: false,
+    example: 10,
+    description: 'Количество правильных слов',
+    required: true,
   })
-  @ValidateIf((object, value) => {
-    return object.type === 'learnOff'
+  @IsInt({ message: 'Должно быть числом' })
+  successCount!: number
+
+  @ApiProperty({
+    example: 10,
+    description: 'Количество неправильных слов',
+    required: true,
   })
-  @IsArray({ message: 'Должно быть массивом строк' })
-  @ArrayMinSize(1, {
-    message: 'Количество идентификаторов должно быть не менее одного',
-  })
-  @IsNotEmpty({ each: true, message: 'Не должно быть пустым' })
-  @IsString({ each: true, message: 'Должно быть строкой' })
-  categories?: string[]
+  @IsInt({ message: 'Должно быть числом' })
+  errorCount!: number
 }

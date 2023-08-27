@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import {
   ArrayMaxSize,
   IsArray,
+  IsDate,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -109,4 +110,13 @@ export class KnownsDto {
   @ValidateIf((object, value) => value !== undefined)
   @IsNumber({}, { message: 'Неверный формат уникального идентификатора' })
   mistakesTotal!: number
+
+  @ApiProperty({
+    example: '2004-10-19 10:23:54+02',
+    description: 'Дата начала обучения слова',
+  })
+  @IsNotEmpty({ message: 'Не должно быть пустым' })
+  @IsString({ message: 'Должно быть строкой' })
+  @IsDate({ message: 'Должно быть датой' })
+  dateStartLearn!: Date
 }
