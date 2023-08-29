@@ -47,10 +47,10 @@ export class Statistic extends Model<Statistic, StatisticCreationArgs> {
   })
   @Column({
     type: DataType.INTEGER,
-    defaultValue: null,
-    allowNull: true,
+    defaultValue: 0,
+    allowNull: false,
   })
-  bestSteak!: number | null
+  bestSteak!: number
 
   @ApiProperty({
     example: 10,
@@ -59,10 +59,10 @@ export class Statistic extends Model<Statistic, StatisticCreationArgs> {
   })
   @Column({
     type: DataType.INTEGER,
-    defaultValue: null,
-    allowNull: true,
+    defaultValue: 0,
+    allowNull: false,
   })
-  currentStreak!: number | null
+  currentStreak!: number
 
   @ApiProperty({
     example: '2004-10-19 10:23:54+02',

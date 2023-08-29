@@ -8,7 +8,9 @@
     "build:ui-kit": "yarn workspace @krainov/ui-kit build",
     "start:api": "yarn workspace @krainov/api start:dev",
     "build:api": "yarn workspace @krainov/api build",
-    "build:utils": "yarn workspace @krainov/utils build"
+    "build:utils": "yarn workspace @krainov/utils build",
+    "migration:api": "yarn workspace @krainov/api migration",
+    "migration-back:api": "yarn workspace @krainov/api migration:back"
   },
   "workspaces": [
     "packages/*"
