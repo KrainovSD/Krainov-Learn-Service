@@ -4,25 +4,27 @@ import {
   Injectable,
   forwardRef,
 } from '@nestjs/common'
-import { InjectModel } from '@nestjs/sequelize'
+import { InjectConnection, InjectModel } from '@nestjs/sequelize'
 import { Statistic } from './statistics.model'
 import { utils, uuid } from 'src/utils/helpers'
 import { UpdateStatisticDto } from './dto/update-statistic.dto'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { KnownsService } from 'src/words/knowns/knowns.service'
 import { CategoriesService } from 'src/words/categories/categories.service'
 import { RepeatsService } from 'src/words/repeats/repeats.service'
+import { Sequelize } from 'sequelize-typescript'
+import { SessionsService } from 'src/words/sessions/sessions.service'
 
 @Injectable()
 export class StatisticsService {
   constructor(
     @InjectModel(Statistic) private readonly statisticRepo: typeof Statistic,
-    @Inject(forwardRef(() => KnownsService))
-    private readonly knownsService: KnownsService,
     @Inject(forwardRef(() => CategoriesService))
     private readonly categoriesService: CategoriesService,
     @Inject(forwardRef(() => RepeatsService))
     private readonly repeatsService: RepeatsService,
+    private readonly sessionsService: SessionsService,
+    @InjectConnection()
+    private sequelize: Sequelize,
   ) {}
 
   async createStatistic(userId: string) {
@@ -50,6 +52,51 @@ export class StatisticsService {
   }
 
   async checkStreak(userId: string) {
-    return false
+    //TODO: Закешировать этот ответ
+    const result = await this.sequelize.transaction(async (transaction) => {
+      const statistic = await this.statisticRepo.findOne({
+        where: { userId },
+        transaction,
+      })
+      const knownNormal =
+        await this.sessionsService.getNormalKnownSessionForStreak(
+          userId,
+          transaction,
+        )
+      const knownReverse =
+        await this.sessionsService.getReverseKnownSessionForStrek(
+          userId,
+          transaction,
+        )
+      const learnNormal =
+        await this.categoriesService.getCategoriesNormalForStreak(
+          userId,
+          transaction,
+        )
+      const learnReverse =
+        await this.categoriesService.getCategoriesReverseForStreak(
+          userId,
+          transaction,
+        )
+      const repeatNormal = await this.repeatsService.getRepeatNormalForStreak(
+        userId,
+        transaction,
+      )
+      const repeatReverse = await this.repeatsService.getRepeatReverseForStreak(
+        userId,
+        transaction,
+      )
+
+      return {
+        statistic,
+        knownNormal,
+        knownReverse,
+        learnNormal,
+        learnReverse,
+        repeatNormal,
+        repeatReverse,
+      }
+    })
+    return result
   }
 }

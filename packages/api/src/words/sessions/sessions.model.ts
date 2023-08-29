@@ -17,11 +17,12 @@ export interface SessionsCreationArgs {
   type: WorkType
   successCount: number
   errorCount: number
+  date: Date
 }
 
 @Table({
   tableName: 'sessions',
-  createdAt: true,
+  createdAt: false,
   updatedAt: false,
   indexes: [{ name: 'session_user_index', using: 'BTREE', fields: ['userId'] }],
 })
@@ -89,4 +90,14 @@ export class Sessions extends Model<Sessions, SessionsCreationArgs> {
     allowNull: false,
   })
   errorCount!: number
+
+  @ApiProperty({
+    example: '2004-10-19 10:23:54+02',
+    description: 'Дата создания сессии',
+  })
+  @Column({
+    type: DataType.DATE,
+    allowNull: false,
+  })
+  date!: Date
 }

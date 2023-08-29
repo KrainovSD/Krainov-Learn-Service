@@ -17,7 +17,7 @@ import {
 import { _, utils, uuid } from 'src/utils/helpers'
 import { CategoryIdDto } from './dto/category-id-dto'
 import { Learns } from '../learns/learns.model'
-import { Op } from 'sequelize'
+import { Op, Transaction } from 'sequelize'
 import { WorkKind } from '../work/work.service'
 import { LearnsService } from '../learns/learns.service'
 import { KnownsService } from '../knowns/knowns.service'
@@ -196,6 +196,36 @@ export class CategoriesService {
           [Op.lte]: utils.date.getTomorrow(),
         },
       },
+    })
+  }
+  async getCategoriesNormalForStreak(
+    userId: string,
+    transaction: Transaction,
+  ): Promise<Pick<Category, 'id'>[]> {
+    return await this.categoryRepo.findAll({
+      attributes: ['id'],
+      where: {
+        userId,
+        nextRepeat: {
+          [Op.lte]: utils.date.getTomorrow(),
+        },
+      },
+      transaction,
+    })
+  }
+  async getCategoriesReverseForStreak(
+    userId: string,
+    transaction: Transaction,
+  ): Promise<Pick<Category, 'id'>[]> {
+    return await this.categoryRepo.findAll({
+      attributes: ['id'],
+      where: {
+        userId,
+        nextReverseRepeat: {
+          [Op.lte]: utils.date.getTomorrow(),
+        },
+      },
+      transaction,
     })
   }
 

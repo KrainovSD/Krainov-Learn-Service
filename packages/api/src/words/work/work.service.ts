@@ -372,7 +372,7 @@ export class WorkService {
     type: WorkType,
     kind: WorkKind,
   ) {
-    if (type === 'learnOff' && client.user) {
+    if (type !== 'learnOff' && client.user) {
       const errorCount = cache.errors.length
       await this.sessionsService.createSession(
         {
@@ -422,14 +422,13 @@ export class WorkService {
       )
     }
 
-    const streakResult = await this.statisticsService.checkStreak(
-      client.user!.id,
-    )
+    // const streakResult = await this.statisticsService.checkStreak(
+    //   client.user!.id,
+    // )
 
     //FIXME: Завершение:
     // Придумать принцип формирования ответа финального с учетом всех произошедших действий
     // реализовать CheckStreak
-    // произвести миграцию
     this.sendTargetMessage(client, 'complete', answer)
     await this.cacheService.del(client.id)
   }

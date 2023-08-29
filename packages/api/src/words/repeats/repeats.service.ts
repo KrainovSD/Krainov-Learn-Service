@@ -11,7 +11,7 @@ import { utils, uuid } from 'src/utils/helpers'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { UsersService } from 'src/users/users.service'
 import { RepeatDto } from './dto/repeat-dto'
-import { Op } from 'sequelize'
+import { Op, Transaction } from 'sequelize'
 import { WorkKind } from '../work/work.service'
 
 @Injectable()
@@ -153,6 +153,36 @@ export class RepeatsService {
           [Op.lte]: utils.date.getTomorrow(),
         },
       },
+    })
+  }
+  async getRepeatNormalForStreak(
+    userId: string,
+    transaction: Transaction,
+  ): Promise<Pick<Repeats, 'id' | 'word' | 'translate'>[]> {
+    return await this.repeatRepo.findAll({
+      attributes: ['id', 'translate', 'word'],
+      where: {
+        userId,
+        nextRepeat: {
+          [Op.lte]: utils.date.getTomorrow(),
+        },
+      },
+      transaction,
+    })
+  }
+  async getRepeatReverseForStreak(
+    userId: string,
+    transaction: Transaction,
+  ): Promise<Pick<Repeats, 'id' | 'word' | 'translate'>[]> {
+    return await this.repeatRepo.findAll({
+      attributes: ['id', 'translate', 'word'],
+      where: {
+        userId,
+        nextReverseRepeat: {
+          [Op.lte]: utils.date.getTomorrow(),
+        },
+      },
+      transaction,
     })
   }
 }
