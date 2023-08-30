@@ -155,34 +155,4 @@ export class RepeatsService {
       },
     })
   }
-  async getRepeatNormalForStreak(
-    userId: string,
-    transaction: Transaction,
-  ): Promise<Pick<Repeats, 'id' | 'word' | 'translate'>[]> {
-    return await this.repeatRepo.findAll({
-      attributes: ['id', 'translate', 'word'],
-      where: {
-        userId,
-        nextRepeat: {
-          [Op.lte]: utils.date.getTomorrow(),
-        },
-      },
-      transaction,
-    })
-  }
-  async getRepeatReverseForStreak(
-    userId: string,
-    transaction: Transaction,
-  ): Promise<Pick<Repeats, 'id' | 'word' | 'translate'>[]> {
-    return await this.repeatRepo.findAll({
-      attributes: ['id', 'translate', 'word'],
-      where: {
-        userId,
-        nextReverseRepeat: {
-          [Op.lte]: utils.date.getTomorrow(),
-        },
-      },
-      transaction,
-    })
-  }
 }

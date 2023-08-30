@@ -22,10 +22,7 @@ export class SessionsService {
     return RESPONSE_MESSAGES.success
   }
 
-  async getNormalKnownSessionForStreak(
-    userId: string,
-    transaction: Transaction,
-  ) {
+  async getNormalKnownSessionForStreak(userId: string) {
     const { startNow, endNow } = utils.date.getToday()
     return await this.sessionsRepo.findAll({
       attributes: ['id'],
@@ -37,13 +34,9 @@ export class SessionsService {
           [Op.or]: [{ [Op.lte]: endNow }, { [Op.gte]: startNow }],
         },
       },
-      transaction,
     })
   }
-  async getReverseKnownSessionForStrek(
-    userId: string,
-    transaction: Transaction,
-  ) {
+  async getReverseKnownSessionForStrek(userId: string) {
     const { startNow, endNow } = utils.date.getToday()
     return await this.sessionsRepo.findAll({
       attributes: ['id'],
@@ -55,7 +48,6 @@ export class SessionsService {
           [Op.or]: [{ [Op.lte]: endNow }, { [Op.gte]: startNow }],
         },
       },
-      transaction,
     })
   }
 }

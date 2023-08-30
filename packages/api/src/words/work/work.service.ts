@@ -12,7 +12,10 @@ import { Client } from './workGateway'
 import { typings, utils, _ } from 'src/utils/helpers'
 import { WordsWorkDro } from './dto/words.dto'
 import { RestoreWorkDto } from './dto/restore.dto'
-import { StatisticsService } from 'src/statistics/statistics.service'
+import {
+  StatisticsService,
+  StreakInfo,
+} from 'src/statistics/statistics.service'
 import { SessionsService } from '../sessions/sessions.service'
 
 type WordItem = {
@@ -412,8 +415,6 @@ export class WorkService {
       }
     }
 
-    let answer: string = ''
-
     if (type === 'learn') {
       await this.categoriesService.studyCategory(
         [...categoryCompletedIds],
@@ -422,17 +423,43 @@ export class WorkService {
       )
     }
 
-    // const streakResult = await this.statisticsService.checkStreak(
-    //   client.user!.id,
-    // )
+    const streakResult = await this.statisticsService.checkStreak(
+      client.user!.id,
+    )
 
-    //FIXME: Завершение:
-    // Придумать принцип формирования ответа финального с учетом всех произошедших действий
-    // реализовать CheckStreak
+    const answer = this.getFinallyAnswer(
+      wordErrorNames,
+      categoryErrorNames,
+      type === 'learnOff' ? null : streakResult,
+    )
+
     this.sendTargetMessage(client, 'complete', answer)
     await this.cacheService.del(client.id)
   }
 
+  private getFinallyAnswer(
+    wordError: string[],
+    categoryError: string[],
+    streakResult: StreakInfo | null,
+  ) {
+    let answer: string = 'Сессия завершена /n '
+    if (streakResult && Object.values(streakResult).every((result) => result)) {
+      answer += 'Серия была увеличена /n '
+      return answer
+    }
+
+    if (categoryError.length > 0) {
+      answer += `В следющих категориях была допущена ошибка: ${categoryError.join(
+        ',',
+      )} /n `
+    }
+    if (wordError.length > 0) {
+      answer += `В следующих словах была допущена ошибка: ${wordError.join(
+        ',',
+      )}`
+    }
+    return answer
+  }
   private async getRandomOptions(translate: string) {
     //FIXME: Создать базу слов, откуда цеплять варианты
     const optionList = [

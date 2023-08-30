@@ -198,36 +198,6 @@ export class CategoriesService {
       },
     })
   }
-  async getCategoriesNormalForStreak(
-    userId: string,
-    transaction: Transaction,
-  ): Promise<Pick<Category, 'id'>[]> {
-    return await this.categoryRepo.findAll({
-      attributes: ['id'],
-      where: {
-        userId,
-        nextRepeat: {
-          [Op.lte]: utils.date.getTomorrow(),
-        },
-      },
-      transaction,
-    })
-  }
-  async getCategoriesReverseForStreak(
-    userId: string,
-    transaction: Transaction,
-  ): Promise<Pick<Category, 'id'>[]> {
-    return await this.categoryRepo.findAll({
-      attributes: ['id'],
-      where: {
-        userId,
-        nextReverseRepeat: {
-          [Op.lte]: utils.date.getTomorrow(),
-        },
-      },
-      transaction,
-    })
-  }
 
   private async isHasNameCategory(
     name: string,

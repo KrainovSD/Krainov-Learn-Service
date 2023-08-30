@@ -1,12 +1,30 @@
 import dayjs from 'dayjs'
 import today from 'dayjs/plugin/isToday'
+import yesterday from 'dayjs/plugin/isYesterday'
+import tomorrow from 'dayjs/plugin/isTomorrow'
 import { DateType, Maybe } from '../types'
 
 dayjs.extend(today)
+dayjs.extend(yesterday)
+dayjs.extend(tomorrow)
 
-function isToday(date: Maybe<string>) {
+function isToday(date: Maybe<string | Date>) {
   try {
     return dayjs(date).isToday()
+  } catch {
+    return false
+  }
+}
+function isYesterday(date: Maybe<string | Date>) {
+  try {
+    return dayjs(date).isYesterday()
+  } catch {
+    return false
+  }
+}
+function isTomorrow(date: Maybe<string | Date>) {
+  try {
+    return dayjs(date).isTomorrow()
   } catch {
     return false
   }
@@ -66,6 +84,8 @@ function getToday() {
 
 export default {
   isToday,
+  isTomorrow,
+  isYesterday,
   getDate,
   getToday,
   getYesterday,
