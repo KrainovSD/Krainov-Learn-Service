@@ -19,6 +19,7 @@ import {
   RESPONSE_MESSAGES,
   SALT_ROUNDS,
 } from '../const'
+import { Request } from 'express'
 
 export type UserInfo = {
   id: string
@@ -26,7 +27,7 @@ export type UserInfo = {
   subscription: Date
 }
 
-export type TRequest = Request & { user: UserInfo }
+export type TRequest = Request & { user: UserInfo } & { traceId?: string }
 
 @Injectable()
 export class AuthService {

@@ -14,7 +14,9 @@ import { CreateLearnDto } from './dto/create-learns-dto'
 import { TRequest } from 'src/auth/auth.service'
 import { UpdateLearnsDto } from './dto/update-learns.dto'
 import { DeleteLearnsDto } from './dto/delete-learns-dto'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Слова на изучении')
 @Controller(`${API_VERSION.v1}/words/learns`)
 export class LearnsController {
   constructor(private readonly learnsService: LearnsService) {}

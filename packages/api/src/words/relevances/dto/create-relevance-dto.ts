@@ -3,8 +3,8 @@ import { IsArray, IsNotEmpty, IsString, Length, Matches } from 'class-validator'
 
 export class CreateRelevanceDto {
   @ApiProperty({
-    example: 'cat',
-    description: 'Слово на английском',
+    example: ['cat', 'dog', 'frog'],
+    description: 'Слова на английском',
   })
   @IsArray({ message: 'Должно быть массивом слов' })
   @IsNotEmpty({ each: true, message: 'Не должно быть пустым' })

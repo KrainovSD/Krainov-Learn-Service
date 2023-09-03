@@ -16,7 +16,9 @@ import { AuthGuard } from 'src/utils/guards/auth.guard'
 import { TRequest } from 'src/auth/auth.service'
 import { KnownMultipleIdDto } from './dto/known-multiple-id-dto'
 import { FullKnownsDto } from './dto/full-known-dto'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Выученные слова')
 @Controller(`${API_VERSION.v1}/words/knowns`)
 export class KnownsController {
   constructor(private readonly knownService: KnownsService) {}

@@ -7,7 +7,9 @@ import { API_VERSION } from 'src/const'
 import { AuthGuard } from 'src/utils/guards/auth.guard'
 import { TRequest } from 'src/auth/auth.service'
 import { RepeatMultipleIdDto } from './dto/repeat-multiple-id-dto'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Слова на повторении')
 @Controller(`${API_VERSION.v1}/words/repeats`)
 export class RepeatsController {
   constructor(private readonly repeatService: RepeatsService) {}

@@ -8,6 +8,7 @@ import { User } from 'src/users/users.model'
 import { Relevance } from './relevances.model'
 import { KnownsModule } from '../knowns/knowns.module'
 import { LearnsModule } from '../learns/learns.module'
+import { LoggerModule } from 'src/logger/logger.module'
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { LearnsModule } from '../learns/learns.module'
     SequelizeModule.forFeature([User, Relevance]),
     forwardRef(() => LearnsModule),
     forwardRef(() => KnownsModule),
+    LoggerModule,
   ],
   controllers: [RelevancesController],
   providers: [RelevancesService],

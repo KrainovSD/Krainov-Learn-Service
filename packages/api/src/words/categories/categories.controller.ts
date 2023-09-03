@@ -15,7 +15,9 @@ import { AuthGuard } from 'src/utils/guards/auth.guard'
 import { UpdateCategoryDto } from './dto/update-category-dro'
 import { CategoryIdDto } from './dto/category-id-dto'
 import { CategoryMultipleIdDto } from './dto/category-multiple-id-dto'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Категории')
 @Controller(`${API_VERSION.v1}/words/category`)
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}

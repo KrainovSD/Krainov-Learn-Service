@@ -6,6 +6,7 @@ import { KnownsService } from '../knowns/knowns.service'
 import { LearnsService } from '../learns/learns.service'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { utils, uuid } from 'src/utils/helpers'
+import { LoggerService } from 'src/logger/logger.service'
 
 @Injectable()
 export class RelevancesService {
@@ -15,11 +16,14 @@ export class RelevancesService {
     private readonly knownService: KnownsService,
     @Inject(forwardRef(() => LearnsService))
     private readonly learnService: LearnsService,
+    private readonly loggerService: LoggerService,
   ) {}
 
   async createRelevance(dto: CreateRelevanceDto, userId: string) {
     const hasWords = await this.getHasWords(dto.words, userId)
     const hasRelevanceWords = await this.getHasRelevanceWords(dto.words, userId)
+
+    this.loggerService.info('test', 'test')
 
     await this.updateRelevance(Array.from(hasRelevanceWords), userId)
 

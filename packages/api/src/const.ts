@@ -23,6 +23,13 @@ export const SETTINGS_DEFAULT = {
   relevanceObserveCount: 3,
 }
 
+export const SWAGGER_DESCRIPTION = {
+  success: (type: 'create' | 'delete') =>
+    `${type === 'create' ? 'Создано' : 'Удалено'} успешно.`,
+  badRequest:
+    'При возникновении ошибки валидации, возвращает объект содержащий в качестве ключей названия переменных из формы, которые не прошли валидацию. В качестве значений ключей выступает массив строк с описанием проваленных валидаций.',
+}
+
 export const RESPONSE_MESSAGES = {
   success: { message: 'Успешно' },
   sendEmail: {

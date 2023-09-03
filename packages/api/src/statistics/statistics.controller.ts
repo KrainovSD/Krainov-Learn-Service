@@ -4,7 +4,9 @@ import { Role } from 'src/utils/decorators/role.decorator'
 import { RoleGuard } from 'src/utils/guards/role.guard'
 import { StatisticsService } from './statistics.service'
 import { GetBestDto } from './dto/get-best-dto'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Статистика')
 @Controller(`${API_VERSION.v1}/statistics`)
 export class StatisticsController {
   constructor(private readonly statisticsService: StatisticsService) {}

@@ -22,7 +22,9 @@ import { SubscribeGuard } from 'src/utils/guards/subscription.guard'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { multerOptions } from 'src/multer.config'
 import { API_VERSION } from 'src/const'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Пользователи')
 @Controller(`${API_VERSION.v1}/user`)
 export class UsersController {
   constructor(private readonly userServise: UsersService) {}

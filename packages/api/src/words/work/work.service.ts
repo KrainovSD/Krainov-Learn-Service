@@ -423,6 +423,8 @@ export class WorkService {
       )
     }
 
+    await this.cacheService.del(`${client.user!.id}:streak`)
+
     const streakResult = await this.statisticsService.checkStreak(
       client.user!.id,
     )

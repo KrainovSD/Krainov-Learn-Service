@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Observable } from 'rxjs'
+import { TRequest } from 'src/auth/auth.service'
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -13,7 +14,7 @@ export class AuthGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const req = context.switchToHttp().getRequest()
+    const req = context.switchToHttp().getRequest<TRequest>()
     try {
       const authHeader = req.headers.authorization
       if (!authHeader || typeof authHeader !== 'string') throw new Error()
