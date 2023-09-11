@@ -12,11 +12,11 @@ type End = {
 }
 
 //FIXME: Выяснить что логировать и как прокидывать трейс
-// @Injectable({ scope: Scope.REQUEST })
+
 @Injectable()
 export class LoggerService {
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger, // @Inject(REQUEST) private request: TRequest,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
   start(request: TRequest) {
