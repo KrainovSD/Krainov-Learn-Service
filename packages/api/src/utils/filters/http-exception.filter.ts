@@ -5,7 +5,7 @@ import {
   ArgumentsHost,
   HttpStatus,
 } from '@nestjs/common'
-import { Response } from 'express'
+import { FastifyReply } from 'fastify'
 import { TRequest } from 'src/auth/auth.service'
 import { LoggerService } from 'src/logger/logger.service'
 
@@ -15,7 +15,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
   catch(exception: Record<string, unknown>, host: ArgumentsHost) {
     const ctx = host.switchToHttp()
-    const response = ctx.getResponse<Response>()
+    const response = ctx.getResponse<FastifyReply>()
     const request = ctx.getRequest<TRequest>()
     const status = typings.isNumber(exception?.status)
       ? exception.status
@@ -40,7 +40,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         description: validationInfo ? JSON.stringify(validationInfo) : message,
       })
 
-    response.status(status).json({
+    response.status(status).send({
       statusCode: status,
       timestamp: new Date().toISOString(),
       traceId:

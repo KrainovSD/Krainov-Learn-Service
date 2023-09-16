@@ -1,17 +1,49 @@
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { AppModule } from './app.module'
-import { ValidationPipe } from './utils/pipes/validation.pipe'
-import { TrimPipe } from './utils/pipes/trim.pipe'
-import cookieParser from 'cookie-parser'
-import { TransformToNumberPipe } from './utils/pipes/transformNumber.pipe'
 import { WsAdapter } from '@nestjs/platform-ws'
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify'
+import fastifyCookie from '@fastify/cookie'
+import { join } from 'path'
+//import fastifyHelmet from '@fastify/helmet'
+import multipart from '@fastify/multipart'
 
 async function start() {
   const PORT = process.env.PORT || 3000
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter(),
+  )
+  //FIXME: Разобраться с Helmet
+  // app.register(fastifyHelmet, {
+  //   contentSecurityPolicy: {
+  //     directives: {
+  //       defaultSrc: [`'self'`],
+  //       styleSrc: [`'self'`],
+  //       imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
+  //       scriptSrc: [`'self'`],
+  //     },
+  //   },
+  // })
+
+  app.register(multipart, {
+    throwFileSizeLimit: true,
+  })
+
+  app.useStaticAssets({
+    root: join(__dirname, '../../upload'),
+    prefix: '/static',
+  })
+
+  app.register(fastifyCookie, {
+    secret: process.env.COOKIE_SECRET ?? 'dw3424w',
+  })
   app.useWebSocketAdapter(new WsAdapter(app))
 
+  //FIXME: Разобраться с аутентификацией в swagger
   const config = new DocumentBuilder()
     .setTitle('Krainov Learn Service')
     .setDescription('Документация по API')
@@ -21,14 +53,6 @@ async function start() {
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api/docs', app, document)
 
-  app.useGlobalPipes(
-    new TrimPipe(),
-    new TransformToNumberPipe(),
-    new ValidationPipe(),
-  )
-  app.use(cookieParser())
-
-  await app.listen(PORT, () => console.log(`server started at port = ${PORT}`))
+  await app.listen(PORT)
 }
 start()
-console.log(process.env.NODE_ENV)

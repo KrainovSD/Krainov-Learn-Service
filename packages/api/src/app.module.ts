@@ -24,10 +24,11 @@ import { Relevance } from './words/relevances/relevances.model'
 import { WinstonModule } from 'nest-winston'
 import winston from 'winston'
 import path from 'path'
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core'
+import { APP_FILTER, APP_PIPE } from '@nestjs/core'
 import { HttpExceptionFilter } from './utils/filters/http-exception.filter'
-import { LoggerInterceptor } from './utils/interceptors/logger.interceptor'
 import LoggerMiddleware from './utils/middleware/logger.middleware'
+import { TrimPipe } from './utils/pipes/trim.pipe'
+import { ValidationPipe } from './utils/pipes/validation.pipe'
 
 @Module({
   imports: [
@@ -104,6 +105,14 @@ import LoggerMiddleware from './utils/middleware/logger.middleware'
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_PIPE,
+      useClass: TrimPipe,
+    },
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
     },
   ],
 })

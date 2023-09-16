@@ -25,7 +25,7 @@ export function useWebsocket<T extends Record<string, any>>({
   const [isSocketDestroy, setIsSocketDestroy] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
   //FIXME: Получить токен
-  const token = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRjNzJiMDIyLWY5NDctNGJmZC05NjkxLTIwYjc4MTJjY2Q5YyIsInJvbGUiOiJhZG1pbiIsInN1YnNjcmlwdGlvbiI6bnVsbCwiaWF0IjoxNjkxODcyMDg4LCJleHAiOjE2OTM5NDU2ODh9.s0tMq5R2WvupZhdrMaA34p87NygZfb9q3k0VeMHslUI`
+  const token = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRjNzJiMDIyLWY5NDctNGJmZC05NjkxLTIwYjc4MTJjY2Q5YyIsInJvbGUiOiJhZG1pbiIsInN1YnNjcmlwdGlvbiI6bnVsbCwiaWF0IjoxNjk0NTQ3NDcwLCJleHAiOjE2OTY2MjEwNzB9.PVb3xXStzcIL7KkMFQ3mRvTwz_CX3KTKfLluk9oX-Io`
 
   function onOpen(e: Event) {
     countErrorReconecting.current = 0

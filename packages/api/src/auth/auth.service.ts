@@ -1,3 +1,4 @@
+import { FastifyRequest } from 'fastify'
 import {
   Injectable,
   BadRequestException,
@@ -19,7 +20,6 @@ import {
   RESPONSE_MESSAGES,
   SALT_ROUNDS,
 } from '../const'
-import { Request } from 'express'
 
 export type UserInfo = {
   id: string
@@ -27,7 +27,7 @@ export type UserInfo = {
   subscription: Date
 }
 
-export type TRequest = Request & { user: UserInfo } & { traceId?: string }
+export type TRequest = FastifyRequest
 
 @Injectable()
 export class AuthService {

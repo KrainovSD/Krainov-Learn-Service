@@ -7,8 +7,8 @@ import {
   Put,
   Req,
   UseGuards,
-  UploadedFile,
   UseInterceptors,
+  Delete,
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { GetUserDto } from './dto/get-user.dto'
@@ -19,10 +19,17 @@ import { ChangePassDto } from './dto/change-pass.dto'
 import { ChangeEmailDto } from './dto/change-email.dto'
 import { ChangeNickNameDto } from './dto/change-nick-name.dto'
 import { SubscribeGuard } from 'src/utils/guards/subscription.guard'
-import { FileInterceptor } from '@nestjs/platform-express'
-import { multerOptions } from 'src/multer.config'
-import { API_VERSION } from 'src/const'
-import { ApiTags } from '@nestjs/swagger'
+import {
+  API_VERSION,
+  MAX_SIZE_AVATAR,
+  MAX_SIZE_WALLPAPER,
+  MIME_TYPE_AVATAR,
+  MIME_TYPE_WALLPAPER,
+  UPLOAD_PATH_AVATAR,
+  UPLOAD_PATH_WALLPAPER,
+} from 'src/const'
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger'
+import { UploadInterceptor } from 'src/utils/interceptors/upload.interceptor'
 
 @ApiTags('Пользователи')
 @Controller(`${API_VERSION.v1}/user`)
@@ -74,36 +81,72 @@ export class UsersController {
   }
 
   @UseGuards(AuthGuard)
-  @Post('/avatar')
+  @Delete('/avatar')
   clearAvatar(@Req() request: TRequest) {
     return this.userServise.clearAvatar(request.user.id)
   }
 
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        avatar: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @UseGuards(AuthGuard)
+  @UseInterceptors(
+    UploadInterceptor({
+      fieldName: 'avatar',
+      limits: MAX_SIZE_AVATAR,
+      mimeTypes: MIME_TYPE_AVATAR,
+      pathToSave: UPLOAD_PATH_AVATAR,
+    }),
+  )
   @Put('/avatar')
-  @UseInterceptors(FileInterceptor('avatar', multerOptions))
-  updateAvatar(
-    @UploadedFile()
-    file: Express.Multer.File,
-    @Req() request: TRequest,
-  ) {
-    return this.userServise.updateAvatar(file, request.user.id)
+  updateAvatar(@Req() request: TRequest) {
+    return this.userServise.updateAvatar(
+      request.incomingFileName,
+      request.user.id,
+    )
   }
 
   @UseGuards(AuthGuard)
-  @Post('/wallpaper')
+  @Delete('/wallpaper')
   clearWallpaper(@Req() request: TRequest) {
     return this.userServise.clearWallpaper(request.user.id)
   }
 
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        wallpaper: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @UseGuards(AuthGuard)
   @Put('/wallpaper')
-  @UseInterceptors(FileInterceptor('avatar', multerOptions))
-  updateWallpaper(
-    @UploadedFile()
-    file: Express.Multer.File,
-    @Req() request: TRequest,
-  ) {
-    return this.userServise.updateWallpaper(file, request.user.id)
+  @UseInterceptors(
+    UploadInterceptor({
+      fieldName: 'wallpaper',
+      limits: MAX_SIZE_WALLPAPER,
+      mimeTypes: MIME_TYPE_WALLPAPER,
+      pathToSave: UPLOAD_PATH_WALLPAPER,
+    }),
+  )
+  updateWallpaper(@Req() request: TRequest) {
+    return this.userServise.updateWallpaper(
+      request.incomingFileName,
+      request.user.id,
+    )
   }
 }

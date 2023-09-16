@@ -1,3 +1,4 @@
+import { FastifyReply } from 'fastify'
 import {
   Injectable,
   NestInterceptor,
@@ -9,7 +10,6 @@ import { tap } from 'rxjs/operators'
 import { TRequest } from 'src/auth/auth.service'
 import { LoggerService } from 'src/logger/logger.service'
 import { uuid } from '../helpers'
-import { Response } from 'express'
 
 @Injectable()
 export class LoggerInterceptor implements NestInterceptor {
@@ -18,7 +18,7 @@ export class LoggerInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const ctx = context.switchToHttp()
     const request = ctx.getRequest<TRequest>()
-    const response = ctx.getResponse<Response>()
+    const response = ctx.getResponse<FastifyReply>()
     request.traceId = uuid()
 
     this.loggerService.start(request)

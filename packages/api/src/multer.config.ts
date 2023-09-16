@@ -1,15 +1,15 @@
 import { HttpException, HttpStatus } from '@nestjs/common'
 import { diskStorage } from 'multer'
-import { fsAsync, utils } from './utils/helpers'
+import { fsOperation, utils } from './utils/helpers'
 import { extname } from 'path'
-import { MAX_SIZE_FILE, MIME_TYPE_FILE, UPLOAD_PATH } from './const'
+import { MAX_SIZE_AVATAR, MIME_TYPE_AVATAR, UPLOAD_PATH_AVATAR } from './const'
 
 export const multerOptions = {
   limits: {
-    fileSize: Math.floor(MAX_SIZE_FILE),
+    fileSize: Math.floor(MAX_SIZE_AVATAR),
   },
   fileFilter: (req: Request, file: Express.Multer.File, cb: any) => {
-    if (file.mimetype.match(MIME_TYPE_FILE)) {
+    if (file.mimetype.match(MIME_TYPE_AVATAR)) {
       cb(null, true)
     } else {
       cb(
@@ -24,8 +24,8 @@ export const multerOptions = {
   storage: diskStorage({
     destination: async (req: any, file: Express.Multer.File, cb: any) => {
       try {
-        const uploadPath = `.${UPLOAD_PATH}`
-        await fsAsync.checkOrCreateFolder(uploadPath)
+        const uploadPath = UPLOAD_PATH_AVATAR
+        await fsOperation.checkOrCreateFolder(uploadPath)
         cb(null, uploadPath)
       } catch (error) {
         cb(new HttpException('', HttpStatus.INTERNAL_SERVER_ERROR))

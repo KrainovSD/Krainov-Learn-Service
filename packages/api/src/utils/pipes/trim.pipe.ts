@@ -1,32 +1,29 @@
+import { typings } from '@krainov/utils'
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common'
 
 type TObject = Record<string, any>
 
 @Injectable()
 export class TrimPipe implements PipeTransform {
-  private readonly except = ['password']
+  private readonly exceptField = ['password']
+  private readonly exceptProperties = ['mimetype']
 
-  private isNotExcept(value: string) {
-    return !this.except.includes(value)
+  private isCorretObject(value: any) {
+    return (
+      typings.isObject(value) &&
+      !this.exceptProperties.some((property) => property in value)
+    )
   }
-
-  private isSimpleObject(obj: any): obj is TObject {
-    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
-      return Object.keys(obj).every((key) => typeof key === 'string')
-    }
-    return false
-  }
-
-  private isString(value: any): value is string {
-    return typeof value === 'string' && value !== ''
+  private isNotExceptField(value: string) {
+    return !this.exceptField.includes(value)
   }
 
   private trim(obj: TObject) {
     for (const key in obj) {
       const value = obj[key]
-      if (this.isNotExcept(key) && this.isString(value))
+      if (this.isNotExceptField(key) && typings.isString(value))
         obj[key] = obj[key].trim()
-      if (this.isSimpleObject(obj[key])) {
+      if (this.isCorretObject(obj[key])) {
         obj[key] = this.trim(obj[key])
       }
     }
@@ -34,7 +31,7 @@ export class TrimPipe implements PipeTransform {
   }
 
   transform(value: any, metadata: ArgumentMetadata): any {
-    if (metadata.type === 'body' && this.isSimpleObject(value)) {
+    if (metadata.type === 'body' && this.isCorretObject(value)) {
       return this.trim(value)
     }
     return value

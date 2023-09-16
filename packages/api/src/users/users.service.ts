@@ -7,13 +7,14 @@ import { StatisticsService } from 'src/statistics/statistics.service'
 import { SettingsService } from 'src/settings/settings.service'
 import { Settings } from 'src/settings/settings.model'
 import { MailerService } from '@nestjs-modules/mailer'
-import { fsAsync, utils, node } from 'src/utils/helpers'
+import { fsOperation, utils, node } from 'src/utils/helpers'
 import {
   ERROR_MESSAGES,
   MAIL_MESSAGES_OPTION,
   RESPONSE_MESSAGES,
   SALT_ROUNDS,
-  UPLOAD_PATH,
+  UPLOAD_PATH_AVATAR,
+  UPLOAD_PATH_WALLPAPER,
 } from 'src/const'
 import { ChangePassDto } from './dto/change-pass.dto'
 import { ChangeEmailDto } from './dto/change-email.dto'
@@ -178,16 +179,20 @@ export class UsersService {
     const user = await this.getUserById(userId)
     if (!user || !user.avatar)
       throw new BadRequestException(ERROR_MESSAGES.userNotFound)
-    await fsAsync.removeFile(UPLOAD_PATH, user.avatar)
+    await fsOperation.removeFile(UPLOAD_PATH_AVATAR, user.avatar)
     user.avatar = null
     await user.save()
     return RESPONSE_MESSAGES.success
   }
-  async updateAvatar(file: Express.Multer.File, userId: string) {
+  async updateAvatar(fileName: string, userId: string) {
     const user = await this.getUserById(userId)
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
-    user.avatar = file.filename
-    await user.save()
+    if (user.avatar !== fileName) {
+      if (user.avatar)
+        await fsOperation.removeFile(UPLOAD_PATH_AVATAR, user.avatar)
+      user.avatar = fileName
+      await user.save()
+    }
     return RESPONSE_MESSAGES.success
   }
 
@@ -195,16 +200,20 @@ export class UsersService {
     const user = await this.getUserById(userId)
     if (!user || !user.wallpaper)
       throw new BadRequestException(ERROR_MESSAGES.userNotFound)
-    await fsAsync.removeFile(UPLOAD_PATH, user.wallpaper)
+    await fsOperation.removeFile(UPLOAD_PATH_WALLPAPER, user.wallpaper)
     user.wallpaper = null
     await user.save()
     return RESPONSE_MESSAGES.success
   }
-  async updateWallpaper(file: Express.Multer.File, userId: string) {
+  async updateWallpaper(fileName: string, userId: string) {
     const user = await this.getUserById(userId)
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
-    user.wallpaper = file.filename
-    await user.save()
+    if (user.wallpaper !== fileName) {
+      if (user.wallpaper)
+        await fsOperation.removeFile(UPLOAD_PATH_WALLPAPER, user.wallpaper)
+      user.wallpaper = fileName
+      await user.save()
+    }
     return RESPONSE_MESSAGES.success
   }
 
