@@ -7,6 +7,7 @@ import { CreateRelevanceDto } from './dto/create-relevance-dto'
 import { RelevanceMultipleIdDto } from './dto/relevance-multiple-id-dto'
 import {
   ApiBadRequestResponse,
+  ApiBasicAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -37,6 +38,7 @@ export class RelevancesController {
     description: SWAGGER_DESCRIPTION.badRequest,
   })
   @ApiUnauthorizedResponse({ type: UnauthorizedEntity })
+  @ApiBasicAuth()
   @UseGuards(AuthGuard)
   createRelevance(
     @Body() dto: CreateRelevanceDto,

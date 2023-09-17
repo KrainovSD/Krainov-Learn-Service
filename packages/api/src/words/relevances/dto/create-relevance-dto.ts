@@ -5,6 +5,9 @@ export class CreateRelevanceDto {
   @ApiProperty({
     example: ['cat', 'dog', 'frog'],
     description: 'Слова на английском',
+    minLength: 1,
+    maxLength: 50,
+    type: [String],
   })
   @IsArray({ message: 'Должно быть массивом слов' })
   @IsNotEmpty({ each: true, message: 'Не должно быть пустым' })

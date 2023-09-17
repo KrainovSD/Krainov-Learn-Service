@@ -17,6 +17,7 @@ export class CreateKnownsDto {
     example: [],
     description: 'Информация о словах',
     required: true,
+    type: () => KnownsDto,
   })
   @IsArray({ message: 'Должно быть массивом слов' })
   @ValidateNested({ each: true, message: 'Неверный формат слов' })

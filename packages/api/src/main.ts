@@ -42,15 +42,17 @@ async function start() {
   })
   app.useWebSocketAdapter(new WsAdapter(app))
 
-  //FIXME: Разобраться с аутентификацией в swagger
   const config = new DocumentBuilder()
     .setTitle('Krainov Learn Service')
     .setDescription('Документация по API')
     .setVersion('1.0.0')
+    .addBasicAuth()
     .build()
 
   const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup('api/docs', app, document)
+  SwaggerModule.setup('api/docs', app, document, {
+    customSiteTitle: 'Swagger Krainov learn service',
+  })
 
   await app.listen(PORT)
 }

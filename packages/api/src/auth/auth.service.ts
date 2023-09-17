@@ -24,7 +24,7 @@ import {
 export type UserInfo = {
   id: string
   role: string
-  subscription: Date
+  subscription: Date | null
 }
 
 export type TRequest = FastifyRequest
