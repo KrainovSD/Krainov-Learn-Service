@@ -8,7 +8,7 @@ import {
 } from '@nestjs/platform-fastify'
 import fastifyCookie from '@fastify/cookie'
 import { join } from 'path'
-//import fastifyHelmet from '@fastify/helmet'
+import fastifyHelmet from '@fastify/helmet'
 import multipart from '@fastify/multipart'
 
 async function start() {
@@ -17,17 +17,16 @@ async function start() {
     AppModule,
     new FastifyAdapter(),
   )
-  //FIXME: Разобраться с Helmet
-  // app.register(fastifyHelmet, {
-  //   contentSecurityPolicy: {
-  //     directives: {
-  //       defaultSrc: [`'self'`],
-  //       styleSrc: [`'self'`],
-  //       imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
-  //       scriptSrc: [`'self'`],
-  //     },
-  //   },
-  // })
+  app.register(fastifyHelmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: [`'self'`],
+        styleSrc: [`'self'`],
+        imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
+        scriptSrc: [`'self'`],
+      },
+    },
+  })
 
   app.register(multipart, {
     throwFileSizeLimit: true,
