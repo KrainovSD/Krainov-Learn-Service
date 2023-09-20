@@ -9,8 +9,10 @@
     "start:api": "yarn workspace @krainov/api start:dev",
     "build:api": "yarn workspace @krainov/api build",
     "build:utils": "yarn workspace @krainov/utils build",
+    "build:api-utils": "yarn workspace @krainov/api-utils build",
     "migration:api": "yarn workspace @krainov/api migration",
-    "migration-back:api": "yarn workspace @krainov/api migration:back"
+    "migration-back:api": "yarn workspace @krainov/api migration:back",
+    "start:api-users": "yarn workspace @krainov/api-users start:dev"
   },
   "workspaces": [
     "packages/*"
