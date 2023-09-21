@@ -16,5 +16,6 @@ import { services } from 'src/const'
   ],
   controllers: [],
   providers: [ClientService],
+  exports: [ClientService],
 })
 export class ClientModule {}

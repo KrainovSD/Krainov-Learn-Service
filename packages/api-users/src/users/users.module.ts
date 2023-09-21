@@ -8,7 +8,7 @@ import { Settings } from 'src/settings/settings.model'
 import { SettingsModule } from 'src/settings/settings.module'
 import { AuthModule } from 'src/auth/auth.module'
 import { JwtModule } from '@nestjs/jwt'
-import { ClientService } from 'src/clients/client.service'
+import { ClientModule } from 'src/clients/client.module'
 
 @Module({
   imports: [
@@ -16,7 +16,7 @@ import { ClientService } from 'src/clients/client.service'
     SettingsModule,
     forwardRef(() => AuthModule),
     JwtModule,
-    ClientService,
+    ClientModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

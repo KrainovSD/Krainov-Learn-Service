@@ -7,7 +7,6 @@ import {
   Sequelize,
   Table,
 } from 'sequelize-typescript'
-import { User } from 'src/users/users.model'
 import { WorkKind, WorkType } from '../work/work.service'
 
 export interface SessionsCreationArgs {
@@ -44,7 +43,6 @@ export class Sessions extends Model<Sessions, SessionsCreationArgs> {
     example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
     description: 'Уникальный идентификатор пользователя',
   })
-  @ForeignKey(() => User)
   @Column({
     type: DataType.UUID,
     allowNull: false,

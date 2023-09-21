@@ -6,10 +6,9 @@ import {
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Statistic } from './statistics.model'
-import { utils, uuid } from 'src/utils/helpers'
+import { CacheService, cache, utils, uuid } from 'src/utils/helpers'
 import { UpdateStatisticDto } from './dto/update-statistic.dto'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { CacheService } from 'src/cache/cache.service'
 import { ClientService } from 'src/clients/client.service'
 
 export type StreakInfo = {
@@ -24,6 +23,7 @@ export type StreakInfo = {
 export class StatisticsService {
   constructor(
     @InjectModel(Statistic) private readonly statisticRepo: typeof Statistic,
+    @Inject(cache.CACHE_PROVIDER_MODULE)
     private readonly cacheService: CacheService,
     private readonly clientService: ClientService,
   ) {}
@@ -53,10 +53,11 @@ export class StatisticsService {
   }
 
   async checkStreak(userId: string) {
-    let isDone = await this.cacheService.get<Record<'result', boolean>>(
-      `${userId}:streak`,
-    )
+    let isDone = await this.cacheService.getBestStreak<
+      Record<'result', boolean>
+    >(userId)
     if (isDone) {
+      console.log(isDone)
       return isDone.result
     }
 
@@ -65,12 +66,13 @@ export class StatisticsService {
         where: { userId },
       })
 
-      const isDone =
-        await this.clientService.sendMessageToMicroservice<boolean>(
-          'words',
-          'streak',
-          userId,
-        )
+      // const isDone =
+      //   await this.clientService.sendMessageToMicroservice<boolean>(
+      //     'words',
+      //     'streak',
+      //     userId,
+      //   )
+      const isDone = true
 
       // const knownNormal =
       //   this.sessionsService.getNormalKnownSessionForStreak(userId)
@@ -95,7 +97,7 @@ export class StatisticsService {
       // ])
 
       if (isDone) await this.setStreak(statistic)
-      await this.cacheService.set(`${userId}:streak`, { result: isDone })
+      await this.cacheService.setBestStreak(userId, { result: isDone })
       return isDone
     } catch (error) {
       return null

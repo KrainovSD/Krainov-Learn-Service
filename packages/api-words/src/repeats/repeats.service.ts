@@ -1,4 +1,3 @@
-import { SettingsService } from 'src/settings/settings.service'
 import {
   BadRequestException,
   Inject,
@@ -9,7 +8,6 @@ import { InjectModel } from '@nestjs/sequelize'
 import { Repeats, RepeatsCreationArgs } from './repeats.model'
 import { utils, uuid } from 'src/utils/helpers'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { UsersService } from 'src/users/users.service'
 import { RepeatDto } from './dto/repeat-dto'
 import { Op, Transaction } from 'sequelize'
 import { WorkKind } from '../work/work.service'
@@ -18,14 +16,11 @@ import { WorkKind } from '../work/work.service'
 export class RepeatsService {
   constructor(
     @InjectModel(Repeats) private readonly repeatRepo: typeof Repeats,
-    private readonly settingsService: SettingsService,
-    @Inject(forwardRef(() => UsersService))
-    private readonly userService: UsersService,
   ) {}
 
   async createRepeat(repeats: RepeatDto[], userId: string) {
-    const user = await this.userService.getUserById(userId)
-    if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
+    //const user = await this.userService.getUserById(userId)
+    //if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
 
     const words: string[] = repeats.map((repeat) => repeat.word)
 
@@ -84,7 +79,7 @@ export class RepeatsService {
       return result
     }
 
-    const settings = await this.settingsService.getSettingsByUserId(userId)
+    const settings = {} //await this.settingsService.getSettingsByUserId(userId)
     if (!settings) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
 
     word[kind === 'normal' ? 'countRepeat' : 'countReverseRepeat'] =

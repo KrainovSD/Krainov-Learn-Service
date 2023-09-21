@@ -8,7 +8,7 @@ import { services } from 'src/const'
 @Module({
   imports: [
     ClientsModule.register(
-      getClientsOptions(services.users, process.env.RABBIT_QUEUE_USERS),
+      getClientsOptions(services.words, process.env.RABBIT_QUEUE_WORDS),
     ),
     ClientsModule.register(
       getClientsOptions(
@@ -19,5 +19,6 @@ import { services } from 'src/const'
   ],
   controllers: [],
   providers: [ClientService],
+  exports: [ClientService],
 })
 export class ClientModule {}

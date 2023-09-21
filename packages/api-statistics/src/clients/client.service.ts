@@ -1,7 +1,7 @@
-import { services } from './../../../api-words/src/const'
 import { Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { timeout } from 'rxjs'
+import { services } from 'src/const'
 
 type ClientsKeys = 'users' | 'words'
 

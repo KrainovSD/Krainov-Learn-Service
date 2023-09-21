@@ -2,17 +2,20 @@
   "name": "krainov",
   "private": true,
   "scripts": {
+    "start:api-users": "yarn workspace @krainov/api-users start:dev",
+    "start:api-statistics": "yarn workspace @krainov/api-statistics start:dev",
     "start:site": "yarn workspace @krainov/site dev",
-    "build:site": "yarn workspace @krainov/site build",
     "start:ui-kit": "yarn workspace @krainov/ui-kit dev",
-    "build:ui-kit": "yarn workspace @krainov/ui-kit build",
     "start:api": "yarn workspace @krainov/api start:dev",
-    "build:api": "yarn workspace @krainov/api build",
-    "build:utils": "yarn workspace @krainov/utils build",
-    "build:api-utils": "yarn workspace @krainov/api-utils build",
     "migration:api": "yarn workspace @krainov/api migration",
     "migration-back:api": "yarn workspace @krainov/api migration:back",
-    "start:api-users": "yarn workspace @krainov/api-users start:dev"
+    "build:api": "yarn workspace @krainov/api build",
+    "build:site": "yarn workspace @krainov/site build",
+    "build:ui-kit": "yarn workspace @krainov/ui-kit build",
+    "build:utils": "yarn workspace @krainov/utils build",
+    "build:api-utils": "yarn workspace @krainov/api-utils build",
+    "build:api-logger": "yarn workspace @krainov/kls-api-logger build",
+    "build:api-cache": "yarn workspace @krainov/kls-api-cache build"
   },
   "workspaces": [
     "packages/*"

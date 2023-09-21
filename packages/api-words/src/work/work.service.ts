@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { CategoriesService } from '../categories/categories.service'
 import { KnownsService } from '../knowns/knowns.service'
 import { RepeatsService } from '../repeats/repeats.service'
@@ -6,16 +6,10 @@ import { LearnsService } from '../learns/learns.service'
 import { JwtService } from '@nestjs/jwt'
 import { StartWorkDto } from './dto/start.dto'
 import { AuthWorkDto } from './dto/auth.dto'
-import { CacheService } from 'src/cache/cache.service'
-import { UserInfo } from 'src/auth/auth.service'
 import { Client } from './workGateway'
-import { typings, utils, _ } from 'src/utils/helpers'
+import { typings, utils, _, cache, CacheService } from 'src/utils/helpers'
 import { WordsWorkDro } from './dto/words.dto'
 import { RestoreWorkDto } from './dto/restore.dto'
-import {
-  StatisticsService,
-  StreakInfo,
-} from 'src/statistics/statistics.service'
 import { SessionsService } from '../sessions/sessions.service'
 
 type WordItem = {
@@ -58,7 +52,7 @@ export class WorkService {
     private readonly knownsService: KnownsService,
     private readonly repeatsService: RepeatsService,
     private readonly learnsService: LearnsService,
-    private readonly statisticsService: StatisticsService,
+    @Inject(cache.CACHE_PROVIDER_MODULE)
     private readonly cacheService: CacheService,
     private readonly jwtService: JwtService,
     private readonly sessionsService: SessionsService,

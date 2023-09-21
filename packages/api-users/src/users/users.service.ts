@@ -1,11 +1,12 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { User, UserCreationArgs } from './users.model'
 import { Op } from 'sequelize'
 import { SettingsService } from 'src/settings/settings.service'
 import { Settings } from 'src/settings/settings.model'
 import { MailerService } from '@nestjs-modules/mailer'
-import { fsOperation, utils, node } from 'src/utils/helpers'
+import { fsOperation, utils, node, logger } from 'src/utils/helpers'
+import type { LoggerService } from '../utils/helpers'
 import {
   ERROR_MESSAGES,
   MAIL_MESSAGES_OPTION,
@@ -25,6 +26,8 @@ export class UsersService {
     private readonly settingService: SettingsService,
     private readonly mailerService: MailerService,
     private readonly clientService: ClientService,
+    @Inject(logger.LOGGER_PROVIDER_MODULE)
+    private readonly logger: LoggerService,
   ) {}
 
   private readonly forbiddenFields = [

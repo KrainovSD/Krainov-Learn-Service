@@ -35,7 +35,7 @@ async function start() {
 
   app.useStaticAssets({
     root: join(__dirname, '../../upload'),
-    prefix: `${API_VERSION.v1}/static`,
+    prefix: `/${API_VERSION.v1}/static`,
   })
 
   app.register(fastifyCookie, {
@@ -50,7 +50,7 @@ async function start() {
     .build()
 
   const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup(`${API_VERSION.v1}/docs`, app, document, {
+  SwaggerModule.setup(`/${API_VERSION.v1}/docs`, app, document, {
     customSiteTitle: 'Swagger KLS Users',
   })
 

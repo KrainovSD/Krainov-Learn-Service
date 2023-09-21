@@ -7,7 +7,6 @@ import {
   Sequelize,
   Table,
 } from 'sequelize-typescript'
-import { User } from 'src/users/users.model'
 
 export interface RepeatsCreationArgs {
   id: string
@@ -47,7 +46,6 @@ export class Repeats extends Model<Repeats, RepeatsCreationArgs> {
     example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
     description: 'Уникальный идентификатор пользователя',
   })
-  @ForeignKey(() => User)
   @Column({
     type: DataType.UUID,
     allowNull: false,

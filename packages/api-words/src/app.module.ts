@@ -1,4 +1,3 @@
-import { LoggerModule } from './logger/logger.module'
 import { MiddlewareConsumer, Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { SequelizeModule } from '@nestjs/sequelize'
@@ -6,10 +5,6 @@ import { WinstonModule } from 'nest-winston'
 import winston from 'winston'
 import path from 'path'
 import { APP_FILTER, APP_PIPE } from '@nestjs/core'
-import { HttpExceptionFilter } from './utils/filters/http-exception.filter'
-import LoggerMiddleware from './utils/middleware/logger.middleware'
-import { TrimPipe } from './utils/pipes/trim.pipe'
-import { ValidationPipe } from './utils/pipes/validation.pipe'
 import { SessionsModule } from './sessions/sessions.module'
 import { RelevancesModule } from './relevances/relevances.module'
 import { RepeatsModule } from './repeats/repeats.module'
@@ -22,13 +17,20 @@ import { Knowns } from './knowns/knowns.model'
 import { Repeats } from './repeats/repeats.model'
 import { Relevance } from './relevances/relevances.model'
 import { WorkModule } from './work/work.module'
-import { getClientsOptions } from './options'
-import { services } from './const'
-import { ClientsModule } from '@nestjs/microservices'
+import { cache, logger, nestUtils } from './utils/helpers'
+import { EXPIRES_CACHE } from './const'
 
 @Module({
   imports: [
-    LoggerModule,
+    cache.CacheModule.forRoot({
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT,
+      ttl: EXPIRES_CACHE,
+    }),
+    logger.LoggerModule.forRoot({
+      dirCombined: path.join(__dirname, './../log/combined/'),
+      dirWarn: path.join(__dirname, './../log/warn/'),
+    }),
     SessionsModule,
     RelevancesModule,
     RepeatsModule,
@@ -87,20 +89,20 @@ import { ClientsModule } from '@nestjs/microservices'
   providers: [
     {
       provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
+      useClass: logger.LoggerFilter,
     },
     {
       provide: APP_PIPE,
-      useClass: TrimPipe,
+      useClass: nestUtils.pipes.TrimPipe,
     },
     {
       provide: APP_PIPE,
-      useClass: ValidationPipe,
+      useClass: nestUtils.pipes.ValidationPipe,
     },
   ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*')
+    consumer.apply(logger.LoggerMiddleware).forRoutes('*')
   }
 }

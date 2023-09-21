@@ -7,23 +7,15 @@ import { SequelizeModule } from '@nestjs/sequelize'
 import { User } from './users/users.model'
 import { Settings } from './settings/settings.model'
 import { APP_FILTER, APP_PIPE } from '@nestjs/core'
-import { getClientsOptions } from './options'
-import { services } from './const'
-import { ClientsModule } from '@nestjs/microservices'
-import { nestModules, nestUtils } from './utils/helpers'
+import { logger, nestUtils } from './utils/helpers'
+import path from 'path'
 
 @Module({
   imports: [
-    ClientsModule.register(
-      getClientsOptions(
-        services.statistics,
-        process.env.RABBIT_QUEUE_STATISTICS,
-      ),
-    ),
-    ClientsModule.register(
-      getClientsOptions(services.words, process.env.RABBIT_QUEUE_WORDS),
-    ),
-    nestModules.LoggerModule,
+    logger.LoggerModule.forRoot({
+      dirCombined: path.join(__dirname, './../log/combined/'),
+      dirWarn: path.join(__dirname, './../log/warn/'),
+    }),
     SettingsModule,
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`,
@@ -45,7 +37,7 @@ import { nestModules, nestUtils } from './utils/helpers'
   providers: [
     {
       provide: APP_FILTER,
-      useClass: nestUtils.filters.HttpExceptionFilter,
+      useClass: logger.LoggerFilter,
     },
     {
       provide: APP_PIPE,
@@ -59,6 +51,6 @@ import { nestModules, nestUtils } from './utils/helpers'
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(nestUtils.middleware.LoggerMiddleware).forRoutes('*')
+    consumer.apply(logger.LoggerMiddleware).forRoutes('*')
   }
 }
