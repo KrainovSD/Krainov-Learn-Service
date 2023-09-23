@@ -8,7 +8,9 @@ import {
 } from '@nestjs/common'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { LOGGER_PROVIDER_MODULE } from './logger.constants'
-import { LoggerService } from './logger.service'
+import { EventData, LoggerService } from './logger.service'
+import { RpcData } from './interfaces'
+import { throwError } from 'rxjs'
 
 @Catch()
 export class LoggerFilter implements ExceptionFilter {
@@ -17,10 +19,10 @@ export class LoggerFilter implements ExceptionFilter {
     private readonly loggerService: LoggerService,
   ) {}
 
-  catch(exception: Record<string, unknown>, host: ArgumentsHost) {
+  catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp()
-    const response = ctx.getResponse<FastifyReply>()
-    const request = ctx.getRequest<FastifyRequest>()
+    const type = host.getType()
+
     const status = typings.isNumber(exception?.status)
       ? exception.status
       : HttpStatus.INTERNAL_SERVER_ERROR
@@ -35,26 +37,46 @@ export class LoggerFilter implements ExceptionFilter {
           : undefined
         : undefined
 
-    if (status === HttpStatus.INTERNAL_SERVER_ERROR)
-      this.loggerService.error(request, exception)
-    else
-      this.loggerService.end({
-        request,
-        status: status,
-        description: validationInfo ? JSON.stringify(validationInfo) : message,
-      })
+    if (type === 'rpc') {
+      const request = ctx.getRequest<RpcData>()
+      const response = ctx.getResponse<Record<string, any>>()
 
-    response.status(status).send({
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      traceId:
-        status === HttpStatus.INTERNAL_SERVER_ERROR
-          ? request.traceId
-          : undefined,
-      path: request.url,
-      message:
-        status === HttpStatus.INTERNAL_SERVER_ERROR ? undefined : message,
-      validationInfo,
-    })
+      const eventData: EventData = {
+        pattern: response?.getPattern?.(),
+        traceId: request?.traceId,
+        sendBy: request?.sendBy,
+      }
+
+      this.loggerService.errorEvent({ ...eventData, error: exception })
+
+      return throwError(() => ({ status: 'error', message }))
+    } else if (type === 'http') {
+      const response = ctx.getResponse<FastifyReply>()
+      const request = ctx.getRequest<FastifyRequest>()
+
+      if (status === HttpStatus.INTERNAL_SERVER_ERROR)
+        this.loggerService.errorRequest(request, exception)
+      else
+        this.loggerService.endRequest({
+          request,
+          status: status,
+          description: validationInfo
+            ? JSON.stringify(validationInfo)
+            : message,
+        })
+
+      return response.status(status).send({
+        statusCode: status,
+        timestamp: new Date().toISOString(),
+        traceId: request.traceId,
+        path: request.url,
+        message:
+          status === HttpStatus.INTERNAL_SERVER_ERROR ? undefined : message,
+        validationInfo,
+      })
+    }
+
+    this.loggerService.error(exception, 'strange type exception')
+    return
   }
 }

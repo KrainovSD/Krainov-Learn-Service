@@ -1,14 +1,12 @@
 import { StatisticsModule } from './statistics/statistics.module'
-import { MiddlewareConsumer, Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { Statistic } from './statistics/statistics.model'
-import { WinstonModule } from 'nest-winston'
-import winston from 'winston'
 import path from 'path'
-import { APP_FILTER, APP_PIPE } from '@nestjs/core'
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { cache, logger, nestUtils } from './utils/helpers'
-import { EXPIRES_CACHE } from './const'
+import { EXPIRES_CACHE, service } from './const'
 
 @Module({
   imports: [
@@ -24,41 +22,11 @@ import { EXPIRES_CACHE } from './const'
     logger.LoggerModule.forRoot({
       dirCombined: path.join(__dirname, './../log/combined/'),
       dirWarn: path.join(__dirname, './../log/warn/'),
+      defaultMeta: {
+        service,
+      },
     }),
     StatisticsModule,
-    WinstonModule.forRoot({
-      transports: [
-        new winston.transports.Console({
-          level: 'info',
-          format: winston.format.combine(
-            winston.format.colorize(),
-            winston.format.simple(),
-          ),
-          handleExceptions: true,
-          handleRejections: true,
-        }),
-        new winston.transports.File({
-          dirname: path.join(__dirname, './../log/warn/'),
-          filename: 'warn.log',
-          level: 'warn',
-          format: winston.format.combine(
-            winston.format.errors({ stack: true }),
-            winston.format.timestamp(),
-            winston.format.json(),
-          ),
-          handleExceptions: true,
-          handleRejections: true,
-        }),
-        new winston.transports.File({
-          dirname: path.join(__dirname, './../log/combined/'),
-          filename: 'combined.log',
-          format: winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.json(),
-          ),
-        }),
-      ],
-    }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
       host: process.env.POSTGRES_HOST,
@@ -73,6 +41,10 @@ import { EXPIRES_CACHE } from './const'
   controllers: [],
   providers: [
     {
+      provide: APP_INTERCEPTOR,
+      useClass: logger.LoggerInterceptor,
+    },
+    {
       provide: APP_FILTER,
       useClass: logger.LoggerFilter,
     },
@@ -86,8 +58,4 @@ import { EXPIRES_CACHE } from './const'
     },
   ],
 })
-export class AppModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(logger.LoggerMiddleware).forRoutes('*')
-  }
-}
+export class AppModule {}

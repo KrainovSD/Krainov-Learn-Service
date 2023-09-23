@@ -3,6 +3,9 @@ export const EXPIRES_CACHE = 60 * 60 * 24
 export const API_VERSION = {
   v1: 'api/v1',
 }
+
+export const service = 'statistics'
+
 export const services = {
   users: {
     alias: 'USERS_SERVICE',

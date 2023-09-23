@@ -7,6 +7,7 @@ import {
   ValidationPipe,
   WSValidationPipe,
 } from './pipes'
+import { UserId } from './decorators'
 
 export default {
   entities: {
@@ -26,5 +27,8 @@ export default {
     TrimPipe,
     ValidationPipe,
     WSValidationPipe,
+  },
+  decorators: {
+    UserId,
   },
 }

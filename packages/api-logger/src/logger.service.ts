@@ -5,10 +5,20 @@ import { Logger } from 'winston'
 import { REQUEST } from '@nestjs/core'
 import { typings } from './helpers'
 
-type End = {
+export type EndRequest = {
   request: FastifyRequest
   status: number
   description?: string
+}
+
+export type EventData = {
+  traceId: string | undefined
+  pattern: string | undefined
+  sendBy: string | undefined
+}
+
+export type EventError = {
+  error: unknown & Record<string, unknown>
 }
 
 //FIXME: Выяснить что логировать и как прокидывать трейс
@@ -19,7 +29,7 @@ export class LoggerService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
-  start(request: FastifyRequest) {
+  startRequest(request: FastifyRequest) {
     const requestInfo = this.getRequestInfo(request)
     const curl = this.getCurl(request)
 
@@ -28,30 +38,79 @@ export class LoggerService {
       curl,
     })
   }
-
-  end({ request, status, description }: End) {
+  endRequest(options: EndRequest) {
+    const requestInfo = this.getRequestInfo(options?.request)
+    const curl = this.getCurl(options?.request)
+    this.logger.info('end request', {
+      ...requestInfo,
+      status: options?.status,
+      description: options?.description,
+      curl,
+    })
+  }
+  errorRequest(
+    request: FastifyRequest,
+    error: unknown & Record<string, unknown>,
+  ) {
     const requestInfo = this.getRequestInfo(request)
     const curl = this.getCurl(request)
-    this.logger.info('stop request', {
-      ...requestInfo,
-      status,
-      description,
+    if (!error) {
+      this.logger.error('unknown Error')
+      return
+    }
+    const description = typings.isString(error?.message)
+      ? error.message
+      : 'unknown error'
+    const name = typings.isString(error?.name) ? error.name : 'unknown name'
+    const stack = typings.isString(error?.stack) ? error.stack : 'unknown stack'
+    this.logger.error('error request', {
+      name,
+      stack,
       curl,
+      description,
+      ...requestInfo,
+    })
+  }
+
+  startEvent(options: EventData) {
+    this.logger.info('start event', {
+      traceId: options?.traceId,
+      pattern: options?.pattern,
+      sendBy: options?.sendBy,
+    })
+  }
+  endEvent(options: EventData) {
+    this.logger.info('end event', {
+      traceId: options?.traceId,
+      pattern: options?.pattern,
+      sendBy: options?.sendBy,
+    })
+  }
+  errorEvent(options: EventData & EventError) {
+    const description = typings.isString(options?.error?.message)
+      ? options?.error.message
+      : 'unknown message'
+    const name = typings.isString(options?.error?.name)
+      ? options?.error.name
+      : 'unknown name'
+    const stack = typings.isString(options?.error?.stack)
+      ? options?.error.stack
+      : 'unknown stack'
+    this.logger.error('error event', {
+      name,
+      stack,
+      description,
+      traceId: options?.traceId,
+      pattern: options?.pattern,
+      sendBy: options?.sendBy,
     })
   }
 
   info(message: string, traceId: string) {
     this.logger.info(message, { traceId })
   }
-
-  error(request: FastifyRequest, error: unknown & Record<string, unknown>) {
-    const requestInfo = request ? this.getRequestInfo(request) : {}
-    const curl = this.getCurl(request)
-    if (!error) {
-      this.logger.error('unknown Error')
-      return
-    }
-    const message = typings.isString(error?.message)
+  error(error: unknown & Record<string, unknown>, message: string) {
+    const description = typings.isString(error?.message)
       ? error.message
       : 'unknown message'
     const name = typings.isString(error?.name) ? error.name : 'unknown name'
@@ -59,19 +118,7 @@ export class LoggerService {
     this.logger.error(message, {
       name,
       stack,
-      curl,
-      ...requestInfo,
-    })
-  }
-  simpleError(error: unknown & Record<string, unknown>) {
-    const message = typings.isString(error?.message)
-      ? error.message
-      : 'unknown message'
-    const name = typings.isString(error?.name) ? error.name : 'unknown name'
-    const stack = typings.isString(error?.stack) ? error.stack : 'unknown stack'
-    this.logger.error(message, {
-      name,
-      stack,
+      description,
     })
   }
 

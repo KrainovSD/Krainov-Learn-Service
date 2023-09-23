@@ -45,9 +45,13 @@ export class ClientService {
   }
 
   async createStatistics(userId: string) {
-    this.sendEventToMicroservice(statistics, events.createStatistics, userId)
+    this.sendEventToMicroservice(statistics, events.createStatistics, {
+      test: userId,
+    })
   }
   async deleteStatistics(userId: string) {
-    this.sendEventToMicroservice(statistics, events.deleteStatistics, userId)
+    this.sendEventToMicroservice(statistics, events.deleteStatistics, {
+      test: userId,
+    })
   }
 }

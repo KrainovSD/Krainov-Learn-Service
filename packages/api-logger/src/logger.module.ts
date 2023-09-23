@@ -6,6 +6,9 @@ import { createLoggerProvider } from './logger.provider'
 export type LoggerModuleOptions = {
   dirWarn: string
   dirCombined: string
+  fileNameWarn?: string
+  fileNameCombined?: string
+  defaultMeta?: Record<string, string | undefined>
 }
 
 @Global()
@@ -30,7 +33,7 @@ export class LoggerModule {
             }),
             new winston.transports.File({
               dirname: options.dirWarn,
-              filename: 'warn.log',
+              filename: options.fileNameWarn ?? 'warn.log',
               level: 'warn',
               format: winston.format.combine(
                 winston.format.errors({ stack: true }),
@@ -42,13 +45,14 @@ export class LoggerModule {
             }),
             new winston.transports.File({
               dirname: options.dirCombined,
-              filename: 'combined.log',
+              filename: options.fileNameCombined ?? 'combined.log',
               format: winston.format.combine(
                 winston.format.timestamp(),
                 winston.format.json(),
               ),
             }),
           ],
+          defaultMeta: options.defaultMeta,
         }),
       ],
       controllers: [],

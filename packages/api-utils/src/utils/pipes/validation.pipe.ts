@@ -9,12 +9,17 @@ import {
 @Injectable()
 export class ValidationPipe implements PipeTransform<any> {
   async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
-    if (metadata.metatype) {
+    if (metadata.metatype && metadata.type !== 'custom' && value) {
       const obj = plainToInstance(metadata.metatype, value)
       const errors = await validate(obj, {
         whitelist: true,
         forbidNonWhitelisted: true,
       })
+
+      console.log(value)
+      console.log(metadata)
+      console.log(obj)
+      console.log(errors)
 
       if (errors.length) {
         const messages = errors.reduce(

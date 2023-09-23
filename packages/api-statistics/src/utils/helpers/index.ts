@@ -8,6 +8,7 @@ import {
   LoggerFilter,
   LoggerMiddleware,
   LoggerModule,
+  LoggerInterceptor,
 } from '@krainov/kls-api-logger'
 export type { LoggerService } from '@krainov/kls-api-logger'
 export const logger = {
@@ -15,6 +16,7 @@ export const logger = {
   LoggerFilter,
   LoggerMiddleware,
   LoggerModule,
+  LoggerInterceptor,
 }
 
 import { CACHE_PROVIDER_MODULE, CacheModule } from '@krainov/kls-api-cache'

@@ -17,10 +17,10 @@ export class LoggerMiddleware implements NestMiddleware {
     next: () => void,
   ) {
     request.traceId = uuid()
-    this.loggerService.start(request)
+    this.loggerService.startRequest(request)
 
     response.on('finish', () => {
-      this.loggerService.end({
+      this.loggerService.endRequest({
         request,
         status: response.statusCode,
       })
