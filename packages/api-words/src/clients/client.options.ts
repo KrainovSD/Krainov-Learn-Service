@@ -1,4 +1,10 @@
 import { ClientsModuleOptions, Transport } from '@nestjs/microservices'
+require('dotenv').config({
+  path:
+    process.env.NODE_ENV === 'production'
+      ? '.production.env'
+      : '.development.env',
+})
 
 export function getClientsOptions(
   name: string,

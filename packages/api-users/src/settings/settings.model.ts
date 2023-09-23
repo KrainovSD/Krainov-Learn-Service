@@ -7,8 +7,8 @@ import {
   Sequelize,
   Table,
 } from 'sequelize-typescript'
-import { SETTINGS_DEFAULT } from 'src/const'
 import { User } from 'src/users/users.model'
+import { SETTINGS_DEFAULT } from './settings.constants'
 
 type SettingCreationArgs = {
   id: string

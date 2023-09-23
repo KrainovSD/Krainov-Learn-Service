@@ -5,7 +5,7 @@ import { SettingsService } from './settings.service'
 
 import { Module } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
-import { JwtModule } from '@nestjs/jwt'
+import { JwtModule } from 'src/jwt/jwt.module'
 
 @Module({
   imports: [SequelizeModule.forFeature([Settings, User]), JwtModule],

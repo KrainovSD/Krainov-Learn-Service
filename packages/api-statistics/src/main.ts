@@ -8,10 +8,10 @@ import {
 import { join } from 'path'
 import fastifyHelmet from '@fastify/helmet'
 import { MicroserviceOptions, Transport } from '@nestjs/microservices'
-import { API_VERSION } from './const'
+import { API_VERSION, services } from './const'
 
 async function start() {
-  const PORT = process.env.PORT || 3000
+  const PORT = process.env.PORT || 3001
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
@@ -59,7 +59,7 @@ async function start() {
             password: process.env.RABBIT_PASSWORD ?? 'guest',
           },
         ],
-        queue: process.env.RABBIT_QUEUE_STATISTICS,
+        queue: services.statistics.queue,
         queueOptions: {
           durable: false,
         },

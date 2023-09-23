@@ -9,8 +9,8 @@ import {
   UnauthorizedException,
   mixin,
 } from '@nestjs/common'
+import { ClientService } from 'src/clients/client.service'
 import { typings } from '@krainov/utils'
-import { JwtService } from 'src/jwt/jwt.service'
 
 type AuthGuardOptions = {
   roles?: string[] | string
@@ -19,7 +19,9 @@ type AuthGuardOptions = {
 
 export function AuthGuard(options?: AuthGuardOptions) {
   class AuthGuardClass implements CanActivate {
-    constructor(@Inject(JwtService) private readonly jwtService: JwtService) {}
+    constructor(
+      @Inject(ClientService) private readonly clientService: ClientService,
+    ) {}
 
     private checkRole(requiredRoles: string | string[], currentRole: string) {
       if (typings.isArray(requiredRoles)) {
@@ -41,13 +43,13 @@ export function AuthGuard(options?: AuthGuardOptions) {
     async canActivate(context: ExecutionContext): Promise<boolean> {
       const requiredRoles = options?.roles
       const isRequiredSub = options?.subscription
-
       const req = context.switchToHttp().getRequest<FastifyRequest>()
       try {
         const authHeader = req.headers.authorization
         if (!authHeader || typeof authHeader !== 'string') throw new Error()
 
-        const user = await this.jwtService.getUserInfo(authHeader)
+        const user = await this.clientService.getUserInfo(authHeader)
+
         if (!user) throw new Error()
 
         if (requiredRoles && !this.checkRole(requiredRoles, user.role)) {

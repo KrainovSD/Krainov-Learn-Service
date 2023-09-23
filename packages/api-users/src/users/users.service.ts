@@ -12,12 +12,11 @@ import {
   MAIL_MESSAGES_OPTION,
   RESPONSE_MESSAGES,
   SALT_ROUNDS,
-  UPLOAD_PATH_AVATAR,
-  UPLOAD_PATH_WALLPAPER,
 } from 'src/const'
 import { ChangePassDto } from './dto/change-pass.dto'
 import { ChangeEmailDto } from './dto/change-email.dto'
 import { ClientService } from 'src/clients/client.service'
+import { UPLOAD_PATH_AVATAR, UPLOAD_PATH_WALLPAPER } from './users.constants'
 
 @Injectable()
 export class UsersService {
@@ -220,15 +219,11 @@ export class UsersService {
   }
 
   async createUser(dto: UserCreationArgs) {
-    const user = await this.userRepo.create(dto)
-    //FIXME: Добавить транзакционный режим создания юзера и его модульных баз
-    await this.clientService.sendMessageToMicroservice(
-      'statistics',
-      'create',
-      user.id,
-    )
-    await this.settingService.createSettings(user.id)
+    const user = this.userRepo.create(dto)
+    const settings = this.settingService.createSettings(dto.id)
+    this.clientService.createStatistics(dto.id)
 
+    await Promise.all([user, settings])
     return RESPONSE_MESSAGES.success
   }
 

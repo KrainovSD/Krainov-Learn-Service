@@ -62,7 +62,7 @@ export class AuthController {
     return this.authService.token(request.cookies['token'])
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard())
   @Put('/logout')
   async logout(
     @Req() request: TRequest,

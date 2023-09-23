@@ -2,26 +2,26 @@ import { services } from '../const'
 import { Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { timeout } from 'rxjs'
+import { events, messages, statistics } from './client.constants'
+import { Transaction } from 'sequelize'
 
-type ClientsKeys = 'statistics' | 'words'
+type ClientsKeys = 'statistics'
 
 @Injectable()
 export class ClientService {
   private clients: Record<ClientsKeys, ClientProxy> = {
     statistics: this.clientStatistics,
-    words: this.clientWords,
   }
 
   constructor(
-    @Inject(services.statistics) private clientStatistics: ClientProxy,
-    @Inject(services.words) private clientWords: ClientProxy,
+    @Inject(services.statistics.alias) private clientStatistics: ClientProxy,
   ) {}
 
   async sendMessageToMicroservice<T extends unknown>(
     microservice: ClientsKeys,
     pattern: string,
     value: unknown,
-  ): Promise<T> {
+  ): Promise<T | null> {
     return new Promise((resolve, reject) => {
       this.clients[microservice]
         .send(pattern, value)
@@ -31,7 +31,7 @@ export class ClientService {
             resolve(result)
           },
           error: (error) => {
-            reject(error)
+            resolve(null)
           },
         })
     })
@@ -42,5 +42,12 @@ export class ClientService {
     value: unknown,
   ) {
     this.clients[microservice].emit(pattern, value)
+  }
+
+  async createStatistics(userId: string) {
+    this.sendEventToMicroservice(statistics, events.createStatistics, userId)
+  }
+  async deleteStatistics(userId: string) {
+    this.sendEventToMicroservice(statistics, events.deleteStatistics, userId)
   }
 }

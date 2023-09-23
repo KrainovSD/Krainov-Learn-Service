@@ -4,7 +4,6 @@ import {
   BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import { CreateUserDto } from 'src/users/dto/create-user.dto'
 import { UsersService } from 'src/users/users.service'
 import { utils, node, uuid } from 'src/utils/helpers'
@@ -14,12 +13,11 @@ import { LoginDto } from './dto/login.dto'
 import { User } from 'src/users/users.model'
 import {
   ERROR_MESSAGES,
-  EXPIRES_ACCESS_TOKEN,
-  EXPIRES_REFRESH_TOKEN,
   MAIL_MESSAGES_OPTION,
   RESPONSE_MESSAGES,
   SALT_ROUNDS,
 } from '../const'
+import { JwtService } from 'src/jwt/jwt.service'
 
 export type UserInfo = {
   id: string
@@ -80,10 +78,10 @@ export class AuthService {
     if (!user.confirmed) throw new BadRequestException('Аккаунт не подтвержден')
 
     user.token =
-      user.token && (await this.verifyToken(user.token, 'refresh'))
+      user.token && (await this.jwtService.verifyToken(user.token, 'refresh'))
         ? user.token
-        : await this.generateToken(user, 'refresh')
-    const access = await this.generateToken(user, 'access')
+        : await this.jwtService.generateToken(user, 'refresh')
+    const access = await this.jwtService.generateToken(user, 'access')
     user.lastLogin = new Date()
     await user.save()
 
@@ -91,14 +89,17 @@ export class AuthService {
   }
 
   async token(refreshToken: string | undefined) {
-    const decodedToken = await this.verifyToken(refreshToken, 'refresh')
+    const decodedToken = await this.jwtService.verifyToken(
+      refreshToken,
+      'refresh',
+    )
     if (!decodedToken || !refreshToken) throw new UnauthorizedException()
     const user = await this.userService.getUserByTokenAndId(
       refreshToken,
       decodedToken.id,
     )
     if (!user) throw new UnauthorizedException()
-    const accessToken = await this.generateToken(user, 'access')
+    const accessToken = await this.jwtService.generateToken(user, 'access')
     return { token: accessToken }
   }
 
@@ -127,45 +128,7 @@ export class AuthService {
       html: `${text.trim()}: ${code.trim()}`,
     })
   }
-  private async generateToken(user: User, type: 'refresh' | 'access') {
-    const payload = {
-      id: user.id,
-      role: user.role,
-      subscription: user.subscription,
-    }
-    const options =
-      type === 'refresh'
-        ? {
-            expiresIn: EXPIRES_REFRESH_TOKEN,
-            secret: process.env.REFRESH_TOKEN_SECRET,
-          }
-        : {
-            expiresIn: EXPIRES_ACCESS_TOKEN,
-            secret: process.env.ACCESS_TOKEN_SECRET,
-          }
-    return this.jwtService.sign(payload, options)
-  }
-  private async verifyToken(
-    token: any,
-    type: 'refresh' | 'access',
-  ): Promise<UserInfo | null> {
-    const options =
-      type === 'refresh'
-        ? {
-            secret: process.env.REFRESH_TOKEN_SECRET,
-          }
-        : {
-            secret: process.env.ACCESS_TOKEN_SECRET,
-          }
 
-    try {
-      if (!token || typeof token !== 'string') throw new Error()
-      const decoded = await this.jwtService.verify(token, options)
-      return decoded
-    } catch (e) {
-      return null
-    }
-  }
   private async getCreateUserDto(userDto: CreateUserDto) {
     const hash = await node.hash(userDto.password, SALT_ROUNDS)
     const registrationDate = new Date()

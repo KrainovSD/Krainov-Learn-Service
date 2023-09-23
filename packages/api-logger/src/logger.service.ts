@@ -45,7 +45,7 @@ export class LoggerService {
   }
 
   error(request: FastifyRequest, error: unknown & Record<string, unknown>) {
-    const requestInfo = this.getRequestInfo(request)
+    const requestInfo = request ? this.getRequestInfo(request) : {}
     const curl = this.getCurl(request)
     if (!error) {
       this.logger.error('unknown Error')
@@ -61,6 +61,17 @@ export class LoggerService {
       stack,
       curl,
       ...requestInfo,
+    })
+  }
+  simpleError(error: unknown & Record<string, unknown>) {
+    const message = typings.isString(error?.message)
+      ? error.message
+      : 'unknown message'
+    const name = typings.isString(error?.name) ? error.name : 'unknown name'
+    const stack = typings.isString(error?.stack) ? error.stack : 'unknown stack'
+    this.logger.error(message, {
+      name,
+      stack,
     })
   }
 

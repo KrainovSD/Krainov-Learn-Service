@@ -11,7 +11,7 @@ import { ApiTags } from '@nestjs/swagger'
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard())
   @Put('')
   updateSetting(
     @Body() dto: UpdateSettingsDto,

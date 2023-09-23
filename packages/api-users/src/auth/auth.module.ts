@@ -1,19 +1,15 @@
 import { AuthService } from './auth.service'
 import { AuthController } from './auth.controller'
-import { JwtModule } from '@nestjs/jwt/dist'
 
-import { Module, forwardRef } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { UsersModule } from 'src/users/users.module'
 import { MailerModule } from '@nestjs-modules/mailer'
-import { ConfigModule } from '@nestjs/config'
+import { JwtModule } from 'src/jwt/jwt.module'
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: `.${process.env.NODE_ENV}.env`,
-    }),
     JwtModule,
-    forwardRef(() => UsersModule),
+    UsersModule,
     MailerModule.forRoot({
       transport: {
         host: 'smtp.gmail.com',
@@ -29,6 +25,6 @@ import { ConfigModule } from '@nestjs/config'
   ],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService, MailerModule],
+  exports: [AuthService],
 })
 export class AuthModule {}

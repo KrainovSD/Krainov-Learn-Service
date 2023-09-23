@@ -2,8 +2,8 @@ import { ClientsModule } from '@nestjs/microservices'
 import { ClientService } from './client.service'
 
 import { Module } from '@nestjs/common'
-import { getClientsOptions } from 'src/options'
 import { services } from 'src/const'
+import { getClientsOptions } from './client.options'
 
 @Module({
   imports: [

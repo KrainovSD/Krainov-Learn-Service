@@ -9,16 +9,8 @@ import { Statistic } from './statistics.model'
 import { CacheService, cache, utils, uuid } from 'src/utils/helpers'
 import { UpdateStatisticDto } from './dto/update-statistic.dto'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { ClientService } from 'src/clients/client.service'
+import { ClientService, StreakInfo } from 'src/clients/client.service'
 
-export type StreakInfo = {
-  knownNormal: boolean
-  knownReverse: boolean
-  learnNormal: boolean
-  learnReverse: boolean
-  repeatNormal: boolean
-  repeatReverse: boolean
-}
 @Injectable()
 export class StatisticsService {
   constructor(
@@ -37,11 +29,14 @@ export class StatisticsService {
   }
   async updateStatistic(dto: UpdateStatisticDto, userId: string) {
     const statistic = await this.getStatisticByUserId(userId)
-    if (!statistic) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
+    if (!statistic) throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
 
     utils.common.updateNewValue(statistic, dto)
     await statistic.save()
     return RESPONSE_MESSAGES.success
+  }
+  async deleteStatistic(userId: string) {
+    return await this.statisticRepo.destroy({ where: { userId } })
   }
 
   async getStatisticByUserId(userId: string) {
@@ -53,12 +48,9 @@ export class StatisticsService {
   }
 
   async checkStreak(userId: string) {
-    let isDone = await this.cacheService.getBestStreak<
-      Record<'result', boolean>
-    >(userId)
-    if (isDone) {
-      console.log(isDone)
-      return isDone.result
+    let streakInfo = await this.cacheService.getBestStreak<StreakInfo>(userId)
+    if (streakInfo) {
+      return streakInfo
     }
 
     try {
@@ -66,39 +58,12 @@ export class StatisticsService {
         where: { userId },
       })
 
-      // const isDone =
-      //   await this.clientService.sendMessageToMicroservice<boolean>(
-      //     'words',
-      //     'streak',
-      //     userId,
-      //   )
-      const isDone = true
+      const streakInfo = await this.clientService.getStreakInfo(userId)
+      if (!streakInfo) throw new Error()
 
-      // const knownNormal =
-      //   this.sessionsService.getNormalKnownSessionForStreak(userId)
-      // const knownReverse =
-      //   this.sessionsService.getReverseKnownSessionForStrek(userId)
-      // const learnNormal =
-      //   this.categoriesService.getCategoriesForNormalSession(userId)
-      // const learnReverse =
-      //   this.categoriesService.getCategoriesForReverseSession(userId)
-      // const repeatNormal = this.repeatsService.getRepeatForNormalSession(userId)
-      // const repeatReverse =
-      //   this.repeatsService.getRepeatForReverseSession(userId)
-
-      // const result = await Promise.all([
-      //   statistic,
-      //   knownNormal,
-      //   knownReverse,
-      //   learnNormal,
-      //   learnReverse,
-      //   repeatNormal,
-      //   repeatReverse,
-      // ])
-
-      if (isDone) await this.setStreak(statistic)
-      await this.cacheService.setBestStreak(userId, { result: isDone })
-      return isDone
+      if (streakInfo.result) await this.setStreak(statistic)
+      await this.cacheService.setBestStreak(userId, streakInfo)
+      return streakInfo
     } catch (error) {
       return null
     }

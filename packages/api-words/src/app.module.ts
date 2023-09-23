@@ -22,10 +22,14 @@ import { EXPIRES_CACHE } from './const'
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: `.${process.env.NODE_ENV}.env`,
+    }),
     cache.CacheModule.forRoot({
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT,
       ttl: EXPIRES_CACHE,
+      password: process.env.REDIS_PASSWORD,
     }),
     logger.LoggerModule.forRoot({
       dirCombined: path.join(__dirname, './../log/combined/'),
@@ -69,9 +73,6 @@ import { EXPIRES_CACHE } from './const'
           ),
         }),
       ],
-    }),
-    ConfigModule.forRoot({
-      envFilePath: `.${process.env.NODE_ENV}.env`,
     }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
