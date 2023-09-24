@@ -23,7 +23,12 @@ export type EventError = {
   body?: string
 }
 
-//FIXME: Выяснить что логировать и как прокидывать трейс
+export type SendEvent = {
+  traceId: string
+  pattern: string
+  data: string
+  consumer: string
+}
 
 @Injectable()
 export class LoggerService {
@@ -108,6 +113,15 @@ export class LoggerService {
       pattern: options?.pattern,
       sendBy: options?.sendBy,
       body: options?.body,
+    })
+  }
+
+  sendEvent(options: SendEvent) {
+    this.logger.info('send event', {
+      traceId: options.traceId,
+      data: options.data,
+      consumer: options.consumer,
+      pattern: options.pattern,
     })
   }
 

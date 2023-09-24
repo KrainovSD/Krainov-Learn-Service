@@ -49,7 +49,15 @@ export class ClientService {
     microservice: ClientsKeys,
     pattern: string,
     value: MessageValue,
+    traceId: string,
   ): Promise<T | undefined> {
+    this.logger.sendEvent({
+      consumer: microservice,
+      data: JSON.stringify(value),
+      pattern,
+      traceId,
+    })
+
     return new Promise((resolve, reject) => {
       this.clients[microservice]
         .send(pattern, value)
@@ -68,7 +76,15 @@ export class ClientService {
     microservice: ClientsKeys,
     pattern: string,
     value: unknown,
+    traceId: string,
   ) {
+    this.logger.sendEvent({
+      consumer: microservice,
+      data: JSON.stringify(value),
+      pattern,
+      traceId,
+    })
+
     this.clients[microservice].emit(pattern, value)
   }
 
@@ -84,6 +100,7 @@ export class ClientService {
       words,
       messages.getStreak,
       args,
+      traceId,
     )
   }
   async getUserInfo(header: string, traceId: string) {
@@ -98,6 +115,7 @@ export class ClientService {
       users,
       messages.checkAuth,
       args,
+      traceId,
     )
   }
 }
