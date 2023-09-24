@@ -218,10 +218,10 @@ export class UsersService {
     return RESPONSE_MESSAGES.success
   }
 
-  async createUser(dto: UserCreationArgs) {
+  async createUser(dto: UserCreationArgs, traceId: string) {
     const user = this.userRepo.create(dto)
     const settings = this.settingService.createSettings(dto.id)
-    this.clientService.createStatistics(dto.id)
+    this.clientService.createStatistics(dto.id, traceId)
 
     await Promise.all([user, settings])
     return RESPONSE_MESSAGES.success

@@ -6,15 +6,19 @@ import { ConfigModule } from '@nestjs/config'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { User } from './users/users.model'
 import { Settings } from './settings/settings.model'
-import { APP_FILTER, APP_PIPE } from '@nestjs/core'
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { logger, nestUtils } from './utils/helpers'
 import path from 'path'
+import { service } from './const'
 
 @Module({
   imports: [
     logger.LoggerModule.forRoot({
       dirCombined: path.join(__dirname, './../log/combined/'),
       dirWarn: path.join(__dirname, './../log/warn/'),
+      defaultMeta: {
+        service,
+      },
     }),
     SettingsModule,
     ConfigModule.forRoot({
@@ -36,6 +40,10 @@ import path from 'path'
   controllers: [],
   providers: [
     {
+      provide: APP_INTERCEPTOR,
+      useClass: logger.LoggerInterceptor,
+    },
+    {
       provide: APP_FILTER,
       useClass: logger.LoggerFilter,
     },
@@ -49,8 +57,4 @@ import path from 'path'
     },
   ],
 })
-export class AppModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(logger.LoggerMiddleware).forRoutes('*')
-  }
-}
+export class AppModule {}

@@ -16,11 +16,6 @@ export class ValidationPipe implements PipeTransform<any> {
         forbidNonWhitelisted: true,
       })
 
-      console.log(value)
-      console.log(metadata)
-      console.log(obj)
-      console.log(errors)
-
       if (errors.length) {
         const messages = errors.reduce(
           (result: ValidationExceptionMessage, err) => {

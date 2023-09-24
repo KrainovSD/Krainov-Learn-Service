@@ -123,18 +123,18 @@ export class LoggerService {
   }
 
   private getCurl(request: FastifyRequest) {
-    if (!request) return null
+    if (!typings.isObject(request)) return null
 
     let headers = ''
-    Object.keys(request?.headers ?? {}).forEach(
+    Object.keys(request.headers ?? {}).forEach(
       (r) => (headers += `--header '${r}: ${request.headers?.[String(r)]}' `),
     )
 
-    const body = request?.body
-      ? `--data-raw '${JSON.stringify(request?.body)}'`
+    const body = request.body
+      ? `--data-raw '${JSON.stringify(request.body)}'`
       : ''
 
-    const curl = `curl --location -g --request ${request.method.toUpperCase()} '${
+    const curl = `curl --location -g --request ${request.method?.toUpperCase()} '${
       request.url
     }' ${headers} ${body}`
 

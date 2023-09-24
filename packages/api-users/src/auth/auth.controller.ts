@@ -1,3 +1,4 @@
+import { nestUtils } from '../utils'
 import {
   Controller,
   Post,
@@ -7,7 +8,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common'
-import { AuthService, TRequest, UserInfo } from './auth.service'
+import { AuthService, TRequest } from './auth.service'
 import { CreateUserDto } from 'src/users/dto/create-user.dto'
 import { ConfirmDto } from './dto/confirm.dto'
 import { ApiTags } from '@nestjs/swagger'
@@ -38,28 +39,36 @@ export class AuthController {
   }
 
   @Post('/register')
-  register(@Body() userDto: CreateUserDto) {
-    return this.authService.register(userDto)
+  register(
+    @Body() userDto: CreateUserDto,
+    @nestUtils.decorators.TraceId() traceId: string,
+  ) {
+    console.log(traceId)
+    return this.authService.register(userDto, traceId)
   }
 
   @Post('/confirm')
-  confirm(@Body() confirmDto: ConfirmDto) {
-    return this.authService.confirm(confirmDto)
+  confirm(
+    @Body() confirmDto: ConfirmDto,
+    @nestUtils.decorators.TraceId() traceId: string,
+  ) {
+    return this.authService.confirm(confirmDto, traceId)
   }
 
   @Post('/login')
   async login(
     @Body() loginDto: LoginDto,
+    @nestUtils.decorators.TraceId() traceId: string,
     @Res({ passthrough: true }) response: FastifyReply,
   ) {
-    const tokens = await this.authService.login(loginDto)
+    const tokens = await this.authService.login(loginDto, traceId)
     response.setCookie('token', tokens.refresh, this.getCookieOptions('create'))
     return { token: tokens.access }
   }
 
   @Put('/token')
   token(@Req() request: TRequest) {
-    return this.authService.token(request.cookies['token'])
+    return this.authService.token(request.cookies['token'], request.traceId)
   }
 
   @UseGuards(AuthGuard())
@@ -68,7 +77,11 @@ export class AuthController {
     @Req() request: TRequest,
     @Res({ passthrough: true }) response: FastifyReply,
   ) {
-    await this.authService.logout(request.cookies['token'], request.user)
+    await this.authService.logout(
+      request.cookies['token'],
+      request.user,
+      request.traceId,
+    )
     response.clearCookie('token', this.getCookieOptions('delete'))
     return RESPONSE_MESSAGES.success
   }

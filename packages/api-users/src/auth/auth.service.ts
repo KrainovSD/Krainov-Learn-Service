@@ -35,11 +35,11 @@ export class AuthService {
     private readonly mailerService: MailerService,
   ) {}
 
-  async register(userDto: CreateUserDto) {
+  async register(userDto: CreateUserDto, traceId: string) {
     await this.userService.checkUniqueEmail(userDto.email)
     await this.userService.checkUniqueNickName(userDto.nickName)
     const createUserDto = await this.getCreateUserDto(userDto)
-    await this.userService.createUser(createUserDto)
+    await this.userService.createUser(createUserDto, traceId)
 
     //TODO: Починить email
     // await this.sendMail(
@@ -51,7 +51,7 @@ export class AuthService {
     return RESPONSE_MESSAGES.sendEmail
   }
 
-  async confirm(confirmDto: ConfirmDto) {
+  async confirm(confirmDto: ConfirmDto, traceId: string) {
     const user = await this.userService.getUserByEmailChangeKey(confirmDto.key)
     if (
       !user ||
@@ -69,7 +69,7 @@ export class AuthService {
     return RESPONSE_MESSAGES.success
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto, traceId: string) {
     const user = await this.userService.getUserByEmailOrNickName(loginDto.login)
     if (!user) throw new BadRequestException('Неверный логин или пароль')
     const checkPassword = await node.compare(loginDto.password, user.hash)
@@ -88,7 +88,7 @@ export class AuthService {
     return { access, refresh: user.token }
   }
 
-  async token(refreshToken: string | undefined) {
+  async token(refreshToken: string | undefined, traceId: string) {
     const decodedToken = await this.jwtService.verifyToken(
       refreshToken,
       'refresh',
@@ -103,7 +103,11 @@ export class AuthService {
     return { token: accessToken }
   }
 
-  async logout(refreshToken: string | undefined, userInfo: UserInfo) {
+  async logout(
+    refreshToken: string | undefined,
+    userInfo: UserInfo,
+    traceId: string,
+  ) {
     if (!refreshToken) throw new UnauthorizedException()
     const user = await this.userService.getUserByTokenAndId(
       refreshToken,

@@ -18,9 +18,8 @@ export class StatisticsController {
   }
 
   @EventPattern('create_statistics')
-  create(@Payload() dto: string, @Ctx() context: RmqContext) {
-    return
-    //this.statisticsService.createStatistic(userId)
+  create(@Payload() dto: GetBestDto, @Ctx() context: RmqContext) {
+    this.statisticsService.createStatistic(dto.userId)
   }
 
   @Get()
