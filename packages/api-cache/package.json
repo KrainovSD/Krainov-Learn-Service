@@ -40,6 +40,6 @@
   "peerDependencies": {
     "@nestjs/common": "10.0.3",
     "uuid": "9.0.0",
-    "@krainov/utils": "*"
+    "@krainov/kls-utils": "*"
   }
 }

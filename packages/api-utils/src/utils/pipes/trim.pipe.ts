@@ -1,4 +1,4 @@
-import { typings } from '@krainov/utils'
+import { typings } from '@krainov/kls-utils'
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common'
 
 type TObject = Record<string, any>

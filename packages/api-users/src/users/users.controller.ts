@@ -20,7 +20,6 @@ import { ChangeEmailDto } from './dto/change-email.dto'
 import { ChangeNickNameDto } from './dto/change-nick-name.dto'
 import { API_VERSION } from 'src/const'
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger'
-import { nestUtils } from '../utils/helpers'
 import {
   MAX_SIZE_AVATAR,
   MAX_SIZE_WALLPAPER,
@@ -29,6 +28,7 @@ import {
   UPLOAD_PATH_AVATAR,
   UPLOAD_PATH_WALLPAPER,
 } from './users.constants'
+import { UploadInterceptor } from '../utils'
 
 @ApiTags('Пользователи')
 @Controller(`${API_VERSION.v1}/user`)
@@ -99,7 +99,7 @@ export class UsersController {
   })
   @UseGuards(AuthGuard())
   @UseInterceptors(
-    nestUtils.interceptors.UploadInterceptor({
+    UploadInterceptor({
       fieldName: 'avatar',
       limits: MAX_SIZE_AVATAR,
       mimeTypes: MIME_TYPE_AVATAR,
@@ -135,7 +135,7 @@ export class UsersController {
   @UseGuards(AuthGuard())
   @Put('/wallpaper')
   @UseInterceptors(
-    nestUtils.interceptors.UploadInterceptor({
+    UploadInterceptor({
       fieldName: 'wallpaper',
       limits: MAX_SIZE_WALLPAPER,
       mimeTypes: MIME_TYPE_WALLPAPER,

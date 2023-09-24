@@ -9,7 +9,7 @@ import {
   UnauthorizedException,
   mixin,
 } from '@nestjs/common'
-import { typings } from '@krainov/utils'
+import { typings } from '@krainov/kls-utils'
 import { JwtService } from 'src/jwt/jwt.service'
 
 type AuthGuardOptions = {

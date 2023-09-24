@@ -1,6 +1,20 @@
 export * as fsOperation from './fsOperation'
-export { _, typings, utils, node } from '@krainov/utils'
-export { nestUtils } from '@krainov/api-utils'
+export { _, typings, utils, node } from '@krainov/kls-utils'
+export {
+  BadRequestEntity,
+  ClientMessageDto,
+  ForbiddenException,
+  SuccessEntity,
+  TraceId,
+  TransformToNumberPipe,
+  TrimPipe,
+  UnauthorizedEntity,
+  UploadInterceptor,
+  UserId,
+  ValidationException,
+  ValidationPipe,
+  WSValidationPipe,
+} from '@krainov/kls-api-utils'
 export { v4 as uuid } from 'uuid'
 
 import {

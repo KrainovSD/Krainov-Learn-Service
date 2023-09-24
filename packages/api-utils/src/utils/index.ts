@@ -8,28 +8,20 @@ import {
   WSValidationPipe,
 } from './pipes'
 import { UserId, TraceId } from './decorators'
+import { ClientMessageDto } from './dto'
 
-export default {
-  entities: {
-    BadRequestEntity,
-    SuccessEntity,
-    UnauthorizedEntity,
-  },
-  exceptions: {
-    ForbiddenException,
-    ValidationException,
-  },
-  interceptors: {
-    UploadInterceptor,
-  },
-  pipes: {
-    TransformToNumberPipe,
-    TrimPipe,
-    ValidationPipe,
-    WSValidationPipe,
-  },
-  decorators: {
-    UserId,
-    TraceId,
-  },
+export {
+  BadRequestEntity,
+  SuccessEntity,
+  UnauthorizedEntity,
+  ForbiddenException,
+  ValidationException,
+  UploadInterceptor,
+  TransformToNumberPipe,
+  TrimPipe,
+  ValidationPipe,
+  WSValidationPipe,
+  UserId,
+  TraceId,
+  ClientMessageDto,
 }

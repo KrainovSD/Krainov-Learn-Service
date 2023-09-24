@@ -1,13 +1,13 @@
 import { SettingsModule } from './settings/settings.module'
 import { UsersModule } from './users/users.module'
 import { AuthModule } from './auth/auth.module'
-import { MiddlewareConsumer, Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { User } from './users/users.model'
 import { Settings } from './settings/settings.model'
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
-import { logger, nestUtils } from './utils/helpers'
+import { TrimPipe, ValidationPipe, logger } from './utils'
 import path from 'path'
 import { service } from './const'
 
@@ -49,11 +49,11 @@ import { service } from './const'
     },
     {
       provide: APP_PIPE,
-      useClass: nestUtils.pipes.TrimPipe,
+      useClass: TrimPipe,
     },
     {
       provide: APP_PIPE,
-      useClass: nestUtils.pipes.ValidationPipe,
+      useClass: ValidationPipe,
     },
   ],
 })

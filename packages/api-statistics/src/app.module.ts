@@ -5,7 +5,7 @@ import { SequelizeModule } from '@nestjs/sequelize'
 import { Statistic } from './statistics/statistics.model'
 import path from 'path'
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
-import { cache, logger, nestUtils } from './utils/helpers'
+import { TrimPipe, ValidationPipe, cache, logger } from './utils/helpers'
 import { EXPIRES_CACHE, service } from './const'
 
 @Module({
@@ -50,11 +50,11 @@ import { EXPIRES_CACHE, service } from './const'
     },
     {
       provide: APP_PIPE,
-      useClass: nestUtils.pipes.TrimPipe,
+      useClass: TrimPipe,
     },
     {
       provide: APP_PIPE,
-      useClass: nestUtils.pipes.ValidationPipe,
+      useClass: ValidationPipe,
     },
   ],
 })

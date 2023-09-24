@@ -1,5 +1,5 @@
 {
-  "name": "@krainov/api-users",
+  "name": "@krainov/kls-api-users",
   "version": "0.0.1",
   "description": "Krainov service API",
   "author": "KrainovSD <denislosev48@gmail.com>",
@@ -20,8 +20,8 @@
     "@fastify/helmet": "11.1.1",
     "@fastify/multipart": "7.7.3",
     "@fastify/static": "6.11.0",
-    "@krainov/utils": "*",
-    "@krainov/api-utils": "*",
+    "@krainov/kls-utils": "*",
+    "@krainov/kls-api-utils": "*",
     "@krainov/kls-api-logger": "*",
     "@nestjs-modules/mailer": "1.8.1",
     "@nestjs/common": "10.0.3",

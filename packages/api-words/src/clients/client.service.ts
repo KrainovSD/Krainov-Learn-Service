@@ -43,4 +43,6 @@ export class ClientService {
   ) {
     this.clients[microservice].emit(pattern, value)
   }
+
+  async getUserInfo(header: string) {}
 }

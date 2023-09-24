@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Cache } from 'cache-manager'
-import { typings, utils } from '@krainov/utils'
+import { typings, utils } from '@krainov/kls-utils'
 
 @Injectable()
 export class CacheService {

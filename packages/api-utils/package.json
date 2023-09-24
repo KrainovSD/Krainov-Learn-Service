@@ -1,5 +1,5 @@
 {
-  "name": "@krainov/api-utils",
+  "name": "@krainov/kls-api-utils",
   "version": "0.0.1",
   "description": "Krainov service API",
   "author": "KrainovSD <denislosev48@gmail.com>",
@@ -37,6 +37,6 @@
     "class-transformer": "0.5.1",
     "class-validator": "0.14.0",
     "uuid": "9.0.0",
-    "@krainov/utils": "*"
+    "@krainov/kls-utils": "*"
   }
 }

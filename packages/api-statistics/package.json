@@ -1,5 +1,5 @@
 {
-  "name": "@krainov/api-statistics",
+  "name": "@krainov/kls-api-statistics",
   "version": "0.0.1",
   "description": "Krainov service API",
   "author": "KrainovSD <denislosev48@gmail.com>",
@@ -18,8 +18,8 @@
     "amqplib": "0.10.3",
     "@fastify/helmet": "11.1.1",
     "@fastify/static": "6.11.0",
-    "@krainov/utils": "*",
-    "@krainov/api-utils": "*",
+    "@krainov/kls-utils": "*",
+    "@krainov/kls-api-utils": "*",
     "@krainov/kls-api-logger": "*",
     "@krainov/kls-api-cache": "*",
     "@nestjs/common": "10.0.3",

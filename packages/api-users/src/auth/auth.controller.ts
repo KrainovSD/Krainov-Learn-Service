@@ -1,4 +1,4 @@
-import { nestUtils } from '../utils'
+import { TraceId } from '../utils'
 import {
   Controller,
   Post,
@@ -39,26 +39,19 @@ export class AuthController {
   }
 
   @Post('/register')
-  register(
-    @Body() userDto: CreateUserDto,
-    @nestUtils.decorators.TraceId() traceId: string,
-  ) {
-    console.log(traceId)
+  register(@Body() userDto: CreateUserDto, @TraceId() traceId: string) {
     return this.authService.register(userDto, traceId)
   }
 
   @Post('/confirm')
-  confirm(
-    @Body() confirmDto: ConfirmDto,
-    @nestUtils.decorators.TraceId() traceId: string,
-  ) {
+  confirm(@Body() confirmDto: ConfirmDto, @TraceId() traceId: string) {
     return this.authService.confirm(confirmDto, traceId)
   }
 
   @Post('/login')
   async login(
     @Body() loginDto: LoginDto,
-    @nestUtils.decorators.TraceId() traceId: string,
+    @TraceId() traceId: string,
     @Res({ passthrough: true }) response: FastifyReply,
   ) {
     const tokens = await this.authService.login(loginDto, traceId)

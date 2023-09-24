@@ -17,7 +17,7 @@ import { Knowns } from './knowns/knowns.model'
 import { Repeats } from './repeats/repeats.model'
 import { Relevance } from './relevances/relevances.model'
 import { WorkModule } from './work/work.module'
-import { cache, logger, nestUtils } from './utils/helpers'
+import { TrimPipe, ValidationPipe, cache, logger } from './utils'
 import { EXPIRES_CACHE } from './const'
 
 @Module({
@@ -94,11 +94,11 @@ import { EXPIRES_CACHE } from './const'
     },
     {
       provide: APP_PIPE,
-      useClass: nestUtils.pipes.TrimPipe,
+      useClass: TrimPipe,
     },
     {
       provide: APP_PIPE,
-      useClass: nestUtils.pipes.ValidationPipe,
+      useClass: ValidationPipe,
     },
   ],
 })
