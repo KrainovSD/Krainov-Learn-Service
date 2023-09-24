@@ -11,8 +11,12 @@ export class SettingsService {
     @InjectModel(Settings) private readonly settingRepo: typeof Settings,
   ) {}
 
-  async updateSettings(dto: UpdateSettingsDto, userId: string) {
-    const settings = await this.getSettingsByUserId(userId)
+  async updateSettings(
+    dto: UpdateSettingsDto,
+    userId: string,
+    traceId: string,
+  ) {
+    const settings = await this.getSettingsByUserId(userId, traceId)
     if (!settings) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
 
     utils.common.updateNewValue(settings, dto)
@@ -28,7 +32,7 @@ export class SettingsService {
     return settings
   }
 
-  async getSettingsByUserId(userId: string) {
+  async getSettingsByUserId(userId: string, traceId: string) {
     return await this.settingRepo.findOne({
       where: {
         userId,

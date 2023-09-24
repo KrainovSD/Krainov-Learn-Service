@@ -33,7 +33,14 @@ export class LoggerFilter implements ExceptionFilter {
     const validationInfo =
       status === HttpStatus.BAD_REQUEST
         ? typings.isObject(exception?.messages)
-          ? exception.messages
+          ? JSON.stringify(exception.messages)
+          : undefined
+        : undefined
+
+    const initialValidateData =
+      status === HttpStatus.BAD_REQUEST
+        ? typings.isString(exception?.initialData)
+          ? JSON.stringify(exception.initialData)
           : undefined
         : undefined
 
@@ -47,7 +54,12 @@ export class LoggerFilter implements ExceptionFilter {
         sendBy: request?.sendBy,
       }
 
-      this.loggerService.errorEvent({ ...eventData, error: exception })
+      this.loggerService.errorEvent({
+        ...eventData,
+        error: exception,
+        description: validationInfo,
+        body: initialValidateData,
+      })
 
       return throwError(() => ({ status: 'error', message }))
     } else if (type === 'http') {

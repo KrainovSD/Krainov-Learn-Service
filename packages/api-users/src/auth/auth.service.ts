@@ -10,7 +10,6 @@ import { utils, node, uuid } from 'src/utils/helpers'
 import { ConfirmDto } from './dto/confirm.dto'
 import { MailerService } from '@nestjs-modules/mailer'
 import { LoginDto } from './dto/login.dto'
-import { User } from 'src/users/users.model'
 import {
   ERROR_MESSAGES,
   MAIL_MESSAGES_OPTION,
@@ -18,12 +17,6 @@ import {
   SALT_ROUNDS,
 } from '../const'
 import { JwtService } from 'src/jwt/jwt.service'
-
-export type UserInfo = {
-  id: string
-  role: string
-  subscription: Date | null
-}
 
 export type TRequest = FastifyRequest
 

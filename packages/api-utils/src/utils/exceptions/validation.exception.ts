@@ -6,8 +6,11 @@ export type ValidationExceptionMessage = {
 
 export class ValidationException extends HttpException {
   messages: ValidationExceptionMessage
-  constructor(response: ValidationExceptionMessage) {
+  initialData: string
+
+  constructor(response: ValidationExceptionMessage, initialData: string) {
     super(response, HttpStatus.BAD_REQUEST)
     this.messages = response
+    this.initialData = initialData
   }
 }

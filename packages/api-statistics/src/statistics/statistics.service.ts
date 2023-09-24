@@ -20,26 +20,30 @@ export class StatisticsService {
     private readonly clientService: ClientService,
   ) {}
 
-  async createStatistic(userId: string) {
+  async createStatistic(userId: string, traceId: string) {
     const statistic = await this.statisticRepo.create({
       id: uuid(),
       userId,
     })
     return statistic
   }
-  async updateStatistic(dto: UpdateStatisticDto, userId: string) {
-    const statistic = await this.getStatisticByUserId(userId)
+  async updateStatistic(
+    dto: UpdateStatisticDto,
+    userId: string,
+    traceId: string,
+  ) {
+    const statistic = await this.getStatisticByUserId(userId, traceId)
     if (!statistic) throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
 
     utils.common.updateNewValue(statistic, dto)
     await statistic.save()
     return RESPONSE_MESSAGES.success
   }
-  async deleteStatistic(userId: string) {
+  async deleteStatistic(userId: string, traceId: string) {
     return await this.statisticRepo.destroy({ where: { userId } })
   }
 
-  async getStatisticByUserId(userId: string) {
+  async getStatisticByUserId(userId: string, traceId: string) {
     return await this.statisticRepo.findOne({
       where: {
         userId,
@@ -47,7 +51,7 @@ export class StatisticsService {
     })
   }
 
-  async checkStreak(userId: string) {
+  async checkStreak(userId: string, traceId: string) {
     let streakInfo = await this.cacheService.getBestStreak<StreakInfo>(userId)
     if (streakInfo) {
       return streakInfo
@@ -58,7 +62,7 @@ export class StatisticsService {
         where: { userId },
       })
 
-      const streakInfo = await this.clientService.getStreakInfo(userId)
+      const streakInfo = await this.clientService.getStreakInfo(userId, traceId)
       if (!streakInfo) throw new Error()
 
       if (streakInfo.result) await this.setStreak(statistic)

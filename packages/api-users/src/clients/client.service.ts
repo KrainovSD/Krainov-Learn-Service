@@ -2,15 +2,18 @@ import { service, services } from '../const'
 import { Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { timeout } from 'rxjs'
-import { events, messages, statistics } from './client.constants'
-import { Transaction } from 'sequelize'
+import { events, statistics } from './client.constants'
 
 type ClientsKeys = 'statistics'
 
-type MessageValue = {
+type MessageValue<T = unknown> = {
   traceId: string | undefined
   sendBy: string | undefined
-  data: unknown
+  data: T
+}
+
+type CRUDStatistic = {
+  userId: string
 }
 
 @Injectable()
@@ -51,21 +54,23 @@ export class ClientService {
   }
 
   async createStatistics(userId: string, traceId: string) {
-    this.sendEventToMicroservice(statistics, events.createStatistics, {
+    const args: MessageValue<CRUDStatistic> = {
       traceId,
       sendBy: service,
       data: {
         userId,
       },
-    })
+    }
+    this.sendEventToMicroservice(statistics, events.createStatistics, args)
   }
   async deleteStatistics(userId: string, traceId: string) {
-    this.sendEventToMicroservice(statistics, events.deleteStatistics, {
+    const args: MessageValue<CRUDStatistic> = {
       traceId,
       sendBy: service,
       data: {
         userId,
       },
-    })
+    }
+    this.sendEventToMicroservice(statistics, events.deleteStatistics, args)
   }
 }

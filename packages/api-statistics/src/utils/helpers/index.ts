@@ -15,6 +15,7 @@ export {
   ValidationException,
   ValidationPipe,
   WSValidationPipe,
+  GetMessageDto,
 } from '@krainov/kls-api-utils'
 
 import {

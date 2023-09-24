@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common'
 import { typings } from '@krainov/kls-utils'
 import { JwtService } from 'src/jwt/jwt.service'
+import { uuid } from '../helpers'
 
 type AuthGuardOptions = {
   roles?: string[] | string
@@ -43,11 +44,14 @@ export function AuthGuard(options?: AuthGuardOptions) {
       const isRequiredSub = options?.subscription
 
       const req = context.switchToHttp().getRequest<FastifyRequest>()
+
+      req.traceId = req.traceId ?? uuid()
+
       try {
         const authHeader = req.headers.authorization
         if (!authHeader || typeof authHeader !== 'string') throw new Error()
 
-        const user = await this.jwtService.getUserInfo(authHeader)
+        const user = await this.jwtService.getUserInfo(authHeader, req.traceId)
         if (!user) throw new Error()
 
         if (requiredRoles && !this.checkRole(requiredRoles, user.role)) {

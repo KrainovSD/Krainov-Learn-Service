@@ -5,32 +5,30 @@ import {
   ValidationException,
   ValidationExceptionMessage,
 } from '../exceptions/validation.exception'
+import { typings } from '@krainov/kls-utils'
 
 @Injectable()
 export class ValidationPipe implements PipeTransform<any> {
   async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
     if (metadata.metatype && metadata.type !== 'custom' && value) {
-      console.log(metadata.metatype)
-
       const obj = plainToInstance(metadata.metatype, value)
       const errors = await validate(obj, {
         whitelist: true,
         forbidNonWhitelisted: true,
       })
 
-      console.log(obj)
-      console.log(errors)
-
       if (errors.length) {
         const messages = errors.reduce(
           (result: ValidationExceptionMessage, err) => {
-            if (!err.constraints) return result
-            result[err.property] = [...Object.values(err.constraints)]
+            if (!err.property) return result
+            result[err.property] = typings.isObject(err.constraints)
+              ? [...Object.values(err.constraints)]
+              : ['not valid']
             return result
           },
           {},
         )
-        throw new ValidationException(messages)
+        throw new ValidationException(messages, JSON.stringify(value))
       }
     }
     return value

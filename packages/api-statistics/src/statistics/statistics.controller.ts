@@ -5,8 +5,8 @@ import { GetBestDto } from './dto/get-best-dto'
 import { ApiTags } from '@nestjs/swagger'
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices'
 import { AuthGuard } from 'src/utils/guards/auth.guard'
-import { CreateStatisticDto } from './dto/create-statistic.dto'
-import { ClientMessageDto, UserId } from 'src/utils'
+import { CRUDStatisticDto } from './dto/crud-statistic.dto'
+import { TraceId, UserId } from 'src/utils'
 
 @ApiTags('Статистика')
 @Controller(`${API_VERSION.v1}/statistics`)
@@ -14,28 +14,24 @@ export class StatisticsController {
   constructor(private readonly statisticsService: StatisticsService) {}
 
   @EventPattern('delete_statistics')
-  delete(@Payload() userId: string, @Ctx() context: RmqContext) {
-    this.statisticsService.deleteStatistic(userId)
+  delete(@Payload() dto: CRUDStatisticDto, @Ctx() context: RmqContext) {
+    this.statisticsService.deleteStatistic(dto.data.userId, dto.traceId)
   }
 
   @EventPattern('create_statistics')
-  create(
-    @Payload() dto: ClientMessageDto<CreateStatisticDto>,
-    @Ctx() context: RmqContext,
-  ) {
-    console.log(dto.data.test)
-    //this.statisticsService.createStatistic(dto.userId)
+  create(@Payload() dto: CRUDStatisticDto, @Ctx() context: RmqContext) {
+    this.statisticsService.createStatistic(dto.data.userId, dto.traceId)
   }
 
   @Get()
   @UseGuards(AuthGuard())
-  get(@UserId() userId: string) {
-    return this.statisticsService.getStatisticByUserId(userId)
+  get(@UserId() userId: string, @TraceId() traceId: string) {
+    return this.statisticsService.getStatisticByUserId(userId, traceId)
   }
 
   @Get('/best')
   @UseGuards(AuthGuard())
-  checkStreak(@Query() dto: GetBestDto) {
-    return this.statisticsService.checkStreak(dto.userId)
+  checkStreak(@Query() dto: GetBestDto, @TraceId() traceId: string) {
+    return this.statisticsService.checkStreak(dto.userId, traceId)
   }
 }

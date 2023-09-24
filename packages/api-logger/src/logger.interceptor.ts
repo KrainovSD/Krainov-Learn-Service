@@ -44,7 +44,7 @@ export class LoggerInterceptor implements NestInterceptor {
     } else if (type === 'http') {
       const request = ctx.getRequest<FastifyRequest>()
       const response = ctx.getResponse<FastifyReply>()
-      request.traceId = uuid()
+      request.traceId = request.traceId ?? uuid()
       this.loggerService.startRequest(request)
 
       return next.handle().pipe(

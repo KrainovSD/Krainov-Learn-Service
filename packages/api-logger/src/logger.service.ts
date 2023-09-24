@@ -19,6 +19,8 @@ export type EventData = {
 
 export type EventError = {
   error: unknown & Record<string, unknown>
+  description?: string
+  body?: string
 }
 
 //FIXME: Выяснить что логировать и как прокидывать трейс
@@ -60,7 +62,7 @@ export class LoggerService {
     }
     const description = typings.isString(error?.message)
       ? error.message
-      : 'unknown error'
+      : 'unknown description'
     const name = typings.isString(error?.name) ? error.name : 'unknown name'
     const stack = typings.isString(error?.stack) ? error.stack : 'unknown stack'
     this.logger.error('error request', {
@@ -87,9 +89,11 @@ export class LoggerService {
     })
   }
   errorEvent(options: EventData & EventError) {
-    const description = typings.isString(options?.error?.message)
+    const description = options?.description
+      ? options.description
+      : typings.isString(options?.error?.message)
       ? options?.error.message
-      : 'unknown message'
+      : 'unknown description'
     const name = typings.isString(options?.error?.name)
       ? options?.error.name
       : 'unknown name'
@@ -103,6 +107,7 @@ export class LoggerService {
       traceId: options?.traceId,
       pattern: options?.pattern,
       sendBy: options?.sendBy,
+      body: options?.body,
     })
   }
 
@@ -112,7 +117,7 @@ export class LoggerService {
   error(error: unknown & Record<string, unknown>, message: string) {
     const description = typings.isString(error?.message)
       ? error.message
-      : 'unknown message'
+      : 'unknown description'
     const name = typings.isString(error?.name) ? error.name : 'unknown name'
     const stack = typings.isString(error?.stack) ? error.stack : 'unknown stack'
     this.logger.error(message, {

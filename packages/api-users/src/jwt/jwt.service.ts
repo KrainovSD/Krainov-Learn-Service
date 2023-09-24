@@ -7,7 +7,7 @@ import { JwtService as JWT } from '@nestjs/jwt'
 export class JwtService {
   constructor(private readonly jwtService: JWT) {}
 
-  async getUserInfo(header: string) {
+  async getUserInfo(header: string, traceId: string) {
     const authInfo = header.split(' ')
     if (authInfo.length !== 2) return null
     const bearer = authInfo[0]

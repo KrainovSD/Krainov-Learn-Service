@@ -4,7 +4,7 @@ import { SequelizeModule } from '@nestjs/sequelize'
 import { WinstonModule } from 'nest-winston'
 import winston from 'winston'
 import path from 'path'
-import { APP_FILTER, APP_PIPE } from '@nestjs/core'
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { SessionsModule } from './sessions/sessions.module'
 import { RelevancesModule } from './relevances/relevances.module'
 import { RepeatsModule } from './repeats/repeats.module'
@@ -88,6 +88,10 @@ import { EXPIRES_CACHE } from './const'
   ],
   controllers: [],
   providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: logger.LoggerInterceptor,
+    },
     {
       provide: APP_FILTER,
       useClass: logger.LoggerFilter,

@@ -8,7 +8,7 @@ import {
   WSValidationPipe,
 } from './pipes'
 import { UserId, TraceId } from './decorators'
-import { ClientMessageDto } from './dto'
+import { ClientMessageDto, GetMessageDto } from './dto'
 
 export {
   BadRequestEntity,
@@ -24,4 +24,5 @@ export {
   UserId,
   TraceId,
   ClientMessageDto,
+  GetMessageDto,
 }
