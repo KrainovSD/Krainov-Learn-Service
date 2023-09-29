@@ -8,6 +8,7 @@ import { KnownsModule } from 'src/knowns/knowns.module'
 import { RepeatsModule } from 'src/repeats/repeats.module'
 import { RelevancesModule } from 'src/relevances/relevances.module'
 import { SessionsModule } from 'src/sessions/sessions.module'
+import { ClientsModule } from '@nestjs/microservices'
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { SessionsModule } from 'src/sessions/sessions.module'
     forwardRef(() => RepeatsModule),
     forwardRef(() => RelevancesModule),
     forwardRef(() => SessionsModule),
+    ClientsModule,
   ],
   controllers: [WordsController],
   providers: [WordsService],

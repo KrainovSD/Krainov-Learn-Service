@@ -9,36 +9,28 @@ import { Knowns, KnownsCreationArgs } from './knowns.model'
 import { utils, uuid } from 'src/utils/helpers'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { UpdateKnownsDto } from './dto/update-knowns-dto'
-import { LearnsService } from '../learns/learns.service'
-import { RelevancesService } from '../relevances/relevances.service'
 import { KnownsDto } from './dto/knowns-dto'
-import { UsersService } from 'src/users/users.service'
 import { FullKnownsDto } from './dto/full-known-dto'
 import { Op } from 'sequelize'
-import { SettingsService } from 'src/settings/settings.service'
 import { WorkKind } from '../work/work.service'
-import { RepeatsService } from '../repeats/repeats.service'
+import { WordsService } from 'src/words/words.service'
 
 @Injectable()
 export class KnownsService {
   constructor(
     @InjectModel(Knowns) private readonly knownRepo: typeof Knowns,
-    @Inject(forwardRef(() => LearnsService))
-    private readonly learnService: LearnsService,
-    @Inject(forwardRef(() => RelevancesService))
-    private readonly relevanceService: RelevancesService,
-    @Inject(forwardRef(() => RepeatsService))
-    private readonly repeatService: RepeatsService,
-    private readonly userService: UsersService,
-    private readonly settingsService: SettingsService,
+    private readonly wordsService: WordsService,
   ) {}
 
-  async createKnown(knowns: KnownsDto[], userId: string) {
-    const user = await this.userService.getUserById(userId)
-    if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
-
+  async createKnown(knowns: KnownsDto[], userId: string, traceId: string) {
     const words: string[] = knowns.map((known) => known.word)
-    const hasWords = await this.getHasWords(words, userId)
+    const { similarKnowns, similarLearns, similarRelevances } =
+      await this.wordsService.getAllSimilarWords(words, userId, traceId)
+    const hasWords = new Set([
+      ...similarKnowns,
+      ...similarLearns,
+      ...similarRelevances,
+    ])
 
     const checkedWords = knowns.reduce(
       (result: KnownsCreationArgs[], known) => {
@@ -61,7 +53,7 @@ export class KnownsService {
       ? RESPONSE_MESSAGES.success
       : RESPONSE_MESSAGES.existWords(hasWords)
   }
-  async deleteKnown(ids: string[], userId: string) {
+  async deleteKnown(ids: string[], userId: string, traceId: string) {
     const knowns = await this.getAllKnownsById(ids)
 
     const checkedIds: string[] = []
@@ -74,19 +66,25 @@ export class KnownsService {
 
     return RESPONSE_MESSAGES.success
   }
-  async updateKnown(dto: FullKnownsDto, userId: string) {
+  async updateKnown(dto: FullKnownsDto, userId: string, traceId: string) {
     const known = await this.getKnownById(dto.id)
     if (!known || (known && known.userId !== userId))
       throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
 
-    await this.checkHasWord(dto.word, dto.id, userId)
+    await this.wordsService.checkHasWord({
+      currentWord: dto.word,
+      traceId,
+      userId,
+      id: dto.id,
+      type: 'known',
+    })
 
     known.isIrregularVerb = utils.common.checkIrregularVerb(dto.word)
     utils.common.updateNewValue(known, dto, ['id'])
     await known.save()
     return RESPONSE_MESSAGES.success
   }
-  async updateKnowns(dto: UpdateKnownsDto, userId: string) {
+  async updateKnowns(dto: UpdateKnownsDto, userId: string, traceId: string) {
     const wordList: string[] = []
     const idList: string[] = []
     for (const word of dto.words) {
@@ -94,15 +92,19 @@ export class KnownsService {
       idList.push(word.id)
     }
 
-    const hasWords = await this.getHasWordsWithId(wordList, userId)
+    const similarWords = await this.wordsService.getAllSimilarWordsWithId(
+      wordList,
+      userId,
+      traceId,
+    )
     const notBelongToUser = new Set<string>()
-    ;(await this.getAllKnownsByIdAndNotUserId(idList, userId)).forEach(
-      (word: Knowns) => notBelongToUser.add(word.id),
+    ;(await this.getAllKnownsByIdAndNotUserId(idList, userId)).forEach((word) =>
+      notBelongToUser.add(word.id),
     )
 
     const checkedWords: KnownsCreationArgs[] = dto.words.reduce(
       (result: KnownsCreationArgs[], word) => {
-        const hasWordId = hasWords.get(word.word)
+        const hasWordId = similarWords.get(word.word)
         if (
           (hasWordId && hasWordId !== word.id) ||
           notBelongToUser.has(word.id)
@@ -123,43 +125,51 @@ export class KnownsService {
     await this.knownRepo.bulkCreate(checkedWords, {
       updateOnDuplicate: ['id'],
     })
+
+    return RESPONSE_MESSAGES.success
   }
-  async getAllKnowns(userId: string) {
+  async getAllKnowns(userId: string, traceId: string) {
     return await this.getAllKnownsByUserId(userId)
   }
-  async studyKnown(id: string, userId: string, option: string, kind: WorkKind) {
+  async studyKnown(
+    id: string,
+    userId: string,
+    option: string,
+    kind: WorkKind,
+    traceId: string,
+  ) {
     const word = await this.getKnownById(id)
     if (!word || (word && word.userId !== userId))
-      throw new BadRequestException(ERROR_MESSAGES.userNotFound)
+      throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
     const result =
       kind === 'normal' ? word.word === option : word.translate === option
 
     if (!result) {
-      const settings = await this.settingsService.getSettingsByUserId(userId)
-      if (!settings) throw new BadRequestException()
+      const settings = await this.wordsService.getUserSettings(userId, traceId)
+      if (!settings)
+        throw new BadRequestException(ERROR_MESSAGES.settingsNotFound)
       const countMistakes = settings.mistakesInWordsCount
       word.mistakes++
       word.mistakesTotal++
       if (word.mistakes === countMistakes) {
-        await this.repeatService.createRepeat(
-          [
-            {
-              word: word.word,
-              transcription: word.transcription,
-              translate: word.translate,
-              description: word.description,
-              example: word.example,
-            },
-          ],
+        await this.wordsService.registerWordWithMistakes(
+          {
+            word: word.word,
+            transcription: word.transcription,
+            translate: word.translate,
+            description: word.description,
+            example: word.example,
+          },
           userId,
+          traceId,
         )
         word.mistakes = 0
       }
       await word.save()
       return result
     }
-    word[kind === 'normal' ? 'lastRepeat' : 'lastReverseRepeat'] = new Date()
 
+    word[kind === 'normal' ? 'lastRepeat' : 'lastReverseRepeat'] = new Date()
     await word.save()
     return result
   }
@@ -179,8 +189,12 @@ export class KnownsService {
   async getAllKnownsByWordAndUserId(words: string | string[], userId: string) {
     return await this.knownRepo.findAll({ where: { userId, word: words } })
   }
-  async getAllKnownsByIdAndNotUserId(ids: string[], userId: string) {
+  async getAllKnownsByIdAndNotUserId(
+    ids: string[],
+    userId: string,
+  ): Promise<Pick<Knowns, 'id'>[]> {
     return await this.knownRepo.findAll({
+      attributes: ['id'],
       where: {
         id: ids,
         userId: {
@@ -189,11 +203,14 @@ export class KnownsService {
       },
     })
   }
+
   async getKnownForNormalSession(
     userId: string,
+    traceId: string,
   ): Promise<Pick<Knowns, 'id' | 'word' | 'translate'>[]> {
-    const settings = await this.settingsService.getSettingsByUserId(userId)
-    if (!settings) throw new BadRequestException()
+    const settings = await this.wordsService.getUserSettings(userId, traceId)
+    if (!settings)
+      throw new BadRequestException(ERROR_MESSAGES.settingsNotFound)
 
     return await this.knownRepo.findAll({
       attributes: ['id', 'translate', 'word'],
@@ -206,9 +223,11 @@ export class KnownsService {
   }
   async getKnownForReverseSession(
     userId: string,
+    traceId: string,
   ): Promise<Pick<Knowns, 'id' | 'word' | 'translate'>[]> {
-    const settings = await this.settingsService.getSettingsByUserId(userId)
-    if (!settings) throw new BadRequestException()
+    const settings = await this.wordsService.getUserSettings(userId, traceId)
+    if (!settings)
+      throw new BadRequestException(ERROR_MESSAGES.settingsNotFound)
 
     return await this.knownRepo.findAll({
       attributes: ['id', 'translate', 'word'],
@@ -218,52 +237,5 @@ export class KnownsService {
       order: [['lastReverseRepeat', 'ASC NULLS FIRST']],
       limit: settings.knownWordsCount,
     })
-  }
-
-  private async getHasWords(words: string | string[], userId: string) {
-    const hasWords = new Set<string>()
-
-    const knownWords = (
-      await this.getAllKnownsByWordAndUserId(words, userId)
-    ).forEach((known) => hasWords.add(known.word))
-    const learnWords = (
-      await this.learnService.getAllLearnsByWordAndUserId(words, userId)
-    ).forEach((learn) => hasWords.add(learn.word))
-    const relevanceWords = (
-      await this.relevanceService.getAllRelevancesByWordAndUserId(words, userId)
-    ).forEach((relevance) => hasWords.add(relevance.word))
-
-    return hasWords
-  }
-  private async getHasWordsWithId(words: string[], userId: string) {
-    const hasWords = new Map<string, string>()
-
-    const knownWords = (
-      await this.getAllKnownsByWordAndUserId(words, userId)
-    ).forEach((known) => hasWords.set(known.word, known.id))
-    const learnWords = (
-      await this.learnService.getAllLearnsByWordAndUserId(words, userId)
-    ).forEach((learn) => hasWords.set(learn.word, learn.id))
-    const relevanceWords = (
-      await this.relevanceService.getAllRelevancesByWordAndUserId(words, userId)
-    ).forEach((relevance) => hasWords.set(relevance.word, relevance.id))
-
-    return hasWords
-  }
-
-  private async checkHasWord(word: string, id: string, userId: string) {
-    const knownWords = await this.getKnownByWordAndUserId(word, userId)
-    if (knownWords && knownWords.id !== id)
-      throw new BadRequestException(ERROR_MESSAGES.hasWord)
-
-    const learnWords = await this.learnService.getLearnByWordAndUserId(
-      word,
-      userId,
-    )
-    if (learnWords) throw new BadRequestException(ERROR_MESSAGES.hasWord)
-
-    const relevanceWords =
-      await this.relevanceService.getRelevanceByWordAndUserId(word, userId)
-    if (relevanceWords) throw new BadRequestException(ERROR_MESSAGES.hasWord)
   }
 }

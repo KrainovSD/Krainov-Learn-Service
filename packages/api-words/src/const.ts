@@ -30,6 +30,7 @@ export const RESPONSE_MESSAGES = {
 export const ERROR_MESSAGES = {
   userNotFound: 'Информация о пользователе не найдена',
   infoNotFound: 'Служебная информация не найдена',
+  settingsNotFound: 'Настройки пользователя не найдены',
   hasCategory: 'Категория с таким именем уже существует',
   isLearnCategory: 'Категория в режиме изучения',
   lowWordsInCategory: `Для начала изучения категории, она должна содержать не менее ${ALLOW_WORDS_TO_START_CATEGORY} слов`,

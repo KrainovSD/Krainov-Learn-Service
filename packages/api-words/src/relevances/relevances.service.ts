@@ -7,6 +7,7 @@ import { LearnsService } from '../learns/learns.service'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { utils, uuid } from 'src/utils/helpers'
 import { LoggerService } from 'src/logger/logger.service'
+import { WordsService } from 'src/words/words.service'
 
 @Injectable()
 export class RelevancesService {
@@ -17,19 +18,19 @@ export class RelevancesService {
     @Inject(forwardRef(() => LearnsService))
     private readonly learnService: LearnsService,
     private readonly loggerService: LoggerService,
+    private readonly wordsService: WordsService,
   ) {}
 
   async createRelevance(dto: CreateRelevanceDto, userId: string) {
-    const hasWords = await this.getHasWords(dto.words, userId)
-    const hasRelevanceWords = await this.getHasRelevanceWords(dto.words, userId)
+    const { similarKnowns, similarLearns, similarRelevances } =
+      await this.wordsService.getAllSimilarWords(dto.words, userId, '')
+    const hasWords = new Set([...similarKnowns, ...similarLearns])
 
-    this.loggerService.info('test', 'test')
-
-    await this.updateRelevance(Array.from(hasRelevanceWords), userId)
+    await this.updateRelevance(Array.from(similarRelevances), userId)
 
     const checkedWords = dto.words.reduce(
       (result: RelevanceCreationArgs[], word) => {
-        if (hasWords.has(word) || hasRelevanceWords.has(word)) return result
+        if (hasWords.has(word) || similarRelevances.has(word)) return result
 
         result.push({
           id: uuid(),
@@ -106,27 +107,5 @@ export class RelevancesService {
     return await this.relevanceRepo.findAll({
       where: { word: words, userId },
     })
-  }
-
-  private async getHasWords(words: string[], userId: string) {
-    const hasWords = new Set<string>()
-
-    const knownWords = (
-      await this.knownService.getAllKnownsByWordAndUserId(words, userId)
-    ).forEach((known) => hasWords.add(known.word))
-    const learnWords = (
-      await this.learnService.getAllLearnsByWordAndUserId(words, userId)
-    ).forEach((learn) => hasWords.add(learn.word))
-
-    return hasWords
-  }
-  private async getHasRelevanceWords(words: string[], userId: string) {
-    const hasWords = new Set<string>()
-
-    const relevances = (
-      await this.getAllRelevancesByWordAndUserId(words, userId)
-    ).forEach((relevance) => hasWords.add(relevance.word))
-
-    return hasWords
   }
 }

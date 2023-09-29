@@ -17,6 +17,15 @@ declare global {
     role: string
     subscription: Date | null
   }
+  interface UserSettings {
+    id: string
+    userId: string
+    knownWordsCount: number
+    mistakesInWordsCount: number
+    repeatWordsRegularity: number[]
+    relevanceObserveDay: number
+    relevanceObserveCount: number
+  }
 }
 
 declare module 'fastify' {

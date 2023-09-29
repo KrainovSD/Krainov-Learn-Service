@@ -1,10 +1,27 @@
-import { Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common'
 import { CategoriesService } from 'src/categories/categories.service'
+import { ClientService } from 'src/clients/client.service'
+import { ERROR_MESSAGES } from 'src/const'
 import { KnownsService } from 'src/knowns/knowns.service'
 import { LearnsService } from 'src/learns/learns.service'
 import { RelevancesService } from 'src/relevances/relevances.service'
+import { RepeatDto } from 'src/repeats/dto/repeat-dto'
 import { RepeatsService } from 'src/repeats/repeats.service'
 import { SessionsService } from 'src/sessions/sessions.service'
+
+type CheckHasWordsOptions = {
+  currentWord: string
+  id?: string
+  userId: string
+  type: 'known' | 'learn' | 'relevance'
+  traceId: string
+  learnForce?: boolean
+}
 
 @Injectable()
 export class WordsService {
@@ -15,6 +32,7 @@ export class WordsService {
     private readonly repeatsService: RepeatsService,
     private readonly relevancesService: RelevancesService,
     private readonly sessionsService: SessionsService,
+    private readonly clientService: ClientService,
   ) {}
 
   async checkStreak(userId: string, traceId: string) {
@@ -48,7 +66,6 @@ export class WordsService {
 
     return streakInfo
   }
-
   async completeCategory(
     completedCategoryInfo: Map<string, Date>,
     userId: string,
@@ -65,7 +82,174 @@ export class WordsService {
           completedCategoryInfo.get(word.categoryId) ?? new Date(),
       }
     })
-    await this.knownsService.createKnown(completedWords, userId)
+    await this.knownsService.createKnown(completedWords, userId, traceId)
     await this.categoriesService.deleteCategory(categoryIds, userId, traceId)
+  }
+  async getAllSimilarWords(
+    words: string | string[],
+    userId: string,
+    traceId: string,
+  ) {
+    const similarKnowns = new Set<string>()
+    const similarLearns = new Set<string>()
+    const similarRelevances = new Set<string>()
+
+    const knownWords = this.knownsService.getAllKnownsByWordAndUserId(
+      words,
+      userId,
+    )
+    const learnWords = this.learnsService.getAllLearnsByWordAndUserId(
+      words,
+      userId,
+    )
+    const relevanceWords =
+      this.relevancesService.getAllRelevancesByWordAndUserId(words, userId)
+
+    const similarWords = await Promise.all([
+      knownWords,
+      learnWords,
+      relevanceWords,
+    ])
+
+    similarWords.forEach((wordsArr, index) => {
+      wordsArr.forEach((word) => {
+        switch (index) {
+          case 0: {
+            similarKnowns.add(word.word)
+            break
+          }
+          case 1: {
+            similarLearns.add(word.word)
+            break
+          }
+          case 2: {
+            similarRelevances.add(word.word)
+            break
+          }
+        }
+      })
+    })
+
+    return { similarKnowns, similarLearns, similarRelevances }
+  }
+  async checkHasWord({
+    currentWord,
+    traceId,
+    type,
+    userId,
+    id = undefined,
+    learnForce,
+  }: CheckHasWordsOptions) {
+    const knownWords = this.knownsService.getKnownByWordAndUserId(
+      currentWord,
+      userId,
+    )
+    const learnWords = this.learnsService.getLearnByWordAndUserId(
+      currentWord,
+      userId,
+    )
+    const relevanceWords = this.relevancesService.getRelevanceByWordAndUserId(
+      currentWord,
+      userId,
+    )
+    const words = await Promise.all([knownWords, learnWords, relevanceWords])
+
+    // if known update word has the same id not error
+    const conditionKnownError = (wordId: string | undefined) =>
+      Boolean(
+        (wordId && wordId !== id && type === 'known') ||
+          (wordId && type !== 'known'),
+      )
+
+    // if learn update word has the same id not error, but if create undefined !== wordId
+    const conditionLearnError = (wordId: string | undefined) =>
+      Boolean(
+        (wordId && wordId !== id && type === 'learn') ||
+          (wordId && type !== 'learn'),
+      )
+
+    words.forEach((word, index) => {
+      switch (index) {
+        case 0: {
+          if (conditionKnownError(word?.id))
+            throw new BadRequestException(ERROR_MESSAGES.hasWord)
+          break
+        }
+        case 1: {
+          if (conditionLearnError(word?.id))
+            throw new BadRequestException(ERROR_MESSAGES.hasWord)
+          break
+        }
+        case 2: {
+          if (word && type === 'known')
+            throw new BadRequestException(ERROR_MESSAGES.hasWord)
+          if (word && type === 'learn' && !learnForce)
+            throw new HttpException(
+              ERROR_MESSAGES.hasRelevanceWord,
+              HttpStatus.CONFLICT,
+            )
+          if (word && type === 'learn' && learnForce) {
+            this.relevancesService.deleteRelevance([word.id], userId)
+          }
+          break
+        }
+      }
+    })
+  }
+  async getAllSimilarWordsWithId(
+    words: string[],
+    userId: string,
+    traceId: string,
+  ) {
+    const similarWords = new Map<string, string>()
+
+    const similarKnowns = this.knownsService.getAllKnownsByWordAndUserId(
+      words,
+      userId,
+    )
+    const similarLearns = this.learnsService.getAllLearnsByWordAndUserId(
+      words,
+      userId,
+    )
+    const similarRelevances =
+      this.relevancesService.getAllRelevancesByWordAndUserId(words, userId)
+
+    const allSimilarWords = await Promise.all([
+      similarKnowns,
+      similarLearns,
+      similarRelevances,
+    ])
+
+    allSimilarWords.forEach((wordArr) => {
+      wordArr.forEach((similarWord) => {
+        similarWords.set(similarWord.word, similarWord.id)
+      })
+    })
+
+    return similarWords
+  }
+  async registerWordWithMistakes(
+    word: RepeatDto,
+    userId: string,
+    traceId: string,
+  ) {
+    await this.repeatsService.createRepeat(
+      [
+        {
+          word: word.word,
+          transcription: word.transcription,
+          translate: word.translate,
+          description: word.description,
+          example: word.example,
+        },
+      ],
+      userId,
+    )
+  }
+  async getUserSettings(
+    userId: string,
+    traceId: string,
+  ): Promise<UserSettings> {
+    return {} as any
   }
 }
