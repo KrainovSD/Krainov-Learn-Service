@@ -1,13 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import {
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  Sequelize,
-  Table,
-} from 'sequelize-typescript'
-import { User } from 'src/users/users.model'
+import { Column, DataType, Model, Sequelize, Table } from 'sequelize-typescript'
 
 export interface KnownsCreationArgs {
   userId: string
@@ -43,7 +35,6 @@ export class Knowns extends Model<Knowns, KnownsCreationArgs> {
     example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
     description: 'Уникальный идентификатор пользователя',
   })
-  @ForeignKey(() => User)
   @Column({
     type: DataType.UUID,
     allowNull: false,

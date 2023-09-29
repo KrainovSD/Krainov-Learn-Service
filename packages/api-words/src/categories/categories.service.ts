@@ -1,43 +1,42 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
-  forwardRef,
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Category, CategoryCreationArgs } from './categories.model'
 import { CreateCategoryDto } from './dto/create-category-dto'
 import { UpdateCategoryDto } from './dto/update-category-dro'
-import {
-  ALLOW_WORDS_TO_START_CATEGORY,
-  ERROR_MESSAGES,
-  RESPONSE_MESSAGES,
-} from 'src/const'
+import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { _, utils, uuid } from 'src/utils/helpers'
 import { CategoryIdDto } from './dto/category-id-dto'
 import { Learns } from '../learns/learns.model'
-import { Op, Transaction } from 'sequelize'
+import { Op } from 'sequelize'
 import { WorkKind } from '../work/work.service'
-import { LearnsService } from '../learns/learns.service'
-import { KnownsService } from '../knowns/knowns.service'
+import { ALLOW_WORDS_TO_START_CATEGORY } from './categories.constants'
+import { WordsService } from 'src/words/words.service'
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectModel(Category) private readonly categoryRepo: typeof Category,
-    @Inject(forwardRef(() => LearnsService))
-    private readonly learnService: LearnsService,
-    @Inject(forwardRef(() => KnownsService))
-    private readonly knownsService: KnownsService,
+    private readonly wordsService: WordsService,
   ) {}
 
-  async createCategory(dto: CreateCategoryDto, userId: string) {
+  async createCategory(
+    dto: CreateCategoryDto,
+    userId: string,
+    traceId: string,
+  ) {
     await this.isHasNameCategory(dto.name, userId)
     await this.categoryRepo.create({ ...dto, userId, id: uuid() })
     return RESPONSE_MESSAGES.success
   }
-  async updateCategory(dto: UpdateCategoryDto, userId: string) {
+  async updateCategory(
+    dto: UpdateCategoryDto,
+    userId: string,
+    traceId: string,
+  ) {
     await this.isHasNameCategory(dto.name, userId, dto.id)
     const category = await this.getCategoryById(dto.id)
     if (!category || (category && category.userId !== userId))
@@ -49,19 +48,19 @@ export class CategoriesService {
     await category.save()
     return RESPONSE_MESSAGES.success
   }
-  async deleteCategory(ids: string[], userId: string) {
-    const categories = await this.getAllCategoriesById(ids)
+  async deleteCategory(ids: string[], userId: string, traceId: string) {
+    const categories = await this.getAllCategoriesByIdAndUserId(ids, userId)
 
-    const checkedIds: string[] = []
-    for (const category of categories) {
-      if (category.userId !== userId) continue
-      checkedIds.push(category.id)
-    }
-
-    await this.categoryRepo.destroy({ where: { id: checkedIds } })
+    await this.categoryRepo.destroy({
+      where: { id: categories.map((category) => category.id) },
+    })
     return RESPONSE_MESSAGES.success
   }
-  async startLearnCategory(dto: CategoryIdDto, userId: string) {
+  async startLearnCategory(
+    dto: CategoryIdDto,
+    userId: string,
+    traceId: string,
+  ) {
     const category = await this.getCategoryById(dto.id)
     if (!category || (category && category.userId !== userId))
       throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
@@ -76,12 +75,17 @@ export class CategoriesService {
     await category.save()
     return RESPONSE_MESSAGES.success
   }
-  async getAllCategories(userId: string) {
+  async getAllCategories(userId: string, traceId: string) {
     const categories = await this.getAllCategoriesByUserId(userId)
     if (!categories) throw new NotFoundException(ERROR_MESSAGES.infoNotFound)
     return categories
   }
-  async studyCategory(ids: string[], userId: string, kind: WorkKind) {
+  async studyCategory(
+    ids: string[],
+    userId: string,
+    kind: WorkKind,
+    traceId: string,
+  ) {
     if (ids.length === 0) return
 
     const categories = await this.getAllCategoriesById(ids)
@@ -95,20 +99,20 @@ export class CategoriesService {
         const countRepeat =
           category[kind === 'normal' ? 'countRepeat' : 'countReverseRepeat'] + 1
         /* if done word */
-        if (category.repeatRegularity.length >= countRepeat) {
+        if (category.repeatRegularity.length <= countRepeat) {
           const countAnotherRepeat =
             category[kind === 'normal' ? 'countReverseRepeat' : 'countRepeat']
-          if (category.repeatRegularity.length >= countAnotherRepeat) {
+          if (category.repeatRegularity.length <= countAnotherRepeat) {
             completedCategoryInfo.set(category.id, category.learnStartDate)
             return result
           }
         }
 
         /* if not done */
-        const nextRepeat = utils.date.getDate(
-          category.repeatRegularity[countRepeat],
-          'days',
-        )
+        const nextRepeat =
+          category.repeatRegularity.length <= countRepeat
+            ? null
+            : utils.date.getDate(category.repeatRegularity[countRepeat], 'days')
 
         result.push({
           ...category,
@@ -125,19 +129,7 @@ export class CategoriesService {
     })
 
     if (completedCategoryInfo.size > 0) {
-      const completedWords = (
-        await this.learnService.getAllLearnsByCategoryIds([
-          ...completedCategoryInfo.keys(),
-        ])
-      ).map((word) => {
-        return {
-          ...word,
-          dateStartLearn:
-            completedCategoryInfo.get(word.categoryId) ?? new Date(),
-        }
-      })
-      await this.knownsService.createKnown(completedWords, userId)
-      await this.deleteCategory([...completedCategoryInfo.keys()], userId)
+      this.wordsService.completeCategory(completedCategoryInfo, userId, traceId)
     }
   }
 
@@ -153,6 +145,9 @@ export class CategoriesService {
     return await this.categoryRepo.findByPk(id, {
       include: [Learns],
     })
+  }
+  async getAllCategoriesByIdAndUserId(ids: string[], userId: string) {
+    return await this.categoryRepo.findAll({ where: { id: ids, userId } })
   }
   async getAllCategoriesById(ids: string[]) {
     return await this.categoryRepo.findAll({ where: { id: ids } })

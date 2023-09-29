@@ -1,6 +1,8 @@
 export const statistics = 'statistics'
-export const words = 'words'
+export const users = 'users'
 
-export const messages = {}
+export const messages = {
+  checkAuth: 'check_auth',
+}
 
 export const events = {}

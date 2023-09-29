@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common'
 import { ClientService } from 'src/clients/client.service'
 import { typings } from '@krainov/kls-utils'
+import { uuid } from '../helpers'
 
 type AuthGuardOptions = {
   roles?: string[] | string
@@ -37,18 +38,27 @@ export function AuthGuard(options?: AuthGuardOptions) {
     private checkSubscription(subscription: Date | null) {
       if (!subscription) return false
       const now = new Date()
-      return subscription > now
+      const subscriptionDate = new Date(subscription)
+
+      //FIXME: проверить в каком формате возвращается из постгри переменные с Date
+      return subscriptionDate > now
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
       const requiredRoles = options?.roles
       const isRequiredSub = options?.subscription
       const req = context.switchToHttp().getRequest<FastifyRequest>()
+
+      req.traceId = req.traceId ?? uuid()
+
       try {
         const authHeader = req.headers.authorization
         if (!authHeader || typeof authHeader !== 'string') throw new Error()
 
-        const user = await this.clientService.getUserInfo(authHeader)
+        const user = await this.clientService.getUserInfo(
+          authHeader,
+          req.traceId,
+        )
 
         if (!user) throw new Error()
 

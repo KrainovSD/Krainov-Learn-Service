@@ -38,7 +38,10 @@ export function AuthGuard(options?: AuthGuardOptions) {
     private checkSubscription(subscription: Date | null) {
       if (!subscription) return false
       const now = new Date()
-      return subscription > now
+      const subscriptionDate = new Date(subscription)
+
+      //FIXME: проверить в каком формате возвращается из постгри переменные с Date
+      return subscriptionDate > now
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {

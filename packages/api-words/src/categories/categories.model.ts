@@ -2,13 +2,11 @@ import { ApiProperty } from '@nestjs/swagger'
 import {
   Column,
   DataType,
-  ForeignKey,
   HasMany,
   Model,
   Sequelize,
   Table,
 } from 'sequelize-typescript'
-import { User } from 'src/users/users.model'
 import { Learns } from '../learns/learns.model'
 
 export interface CategoryCreationArgs {
@@ -44,7 +42,6 @@ export class Category extends Model<Category, CategoryCreationArgs> {
     example: '3850de1c-6b55-47e5-817f-bd02aaa69cf9',
     description: 'Уникальный идентификатор пользователя',
   })
-  @ForeignKey(() => User)
   @Column({
     type: DataType.UUID,
     allowNull: false,

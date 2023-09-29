@@ -1,8 +1,9 @@
-import { services } from './../../../api-words/src/const'
+import { service, services } from './../../../api-words/src/const'
 import { Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { timeout } from 'rxjs'
 import { logger, LoggerService } from 'src/utils'
+import { messages, users } from './client.constants'
 
 type ClientsKeys = 'users' | 'statistics'
 
@@ -10,6 +11,10 @@ type MessageValue<T = unknown> = {
   traceId: string | undefined
   sendBy: string | undefined
   data: T
+}
+
+type Auth = {
+  header: string
 }
 
 @Injectable()
@@ -81,5 +86,19 @@ export class ClientService {
     this.clients[microservice].emit(pattern, value)
   }
 
-  async getUserInfo(header: string) {}
+  async getUserInfo(header: string, traceId: string) {
+    const args: MessageValue<Auth> = {
+      traceId,
+      sendBy: service,
+      data: {
+        header,
+      },
+    }
+    return await this.sendMessageToMicroservice<UserInfo | null>(
+      users,
+      messages.checkAuth,
+      args,
+      traceId,
+    )
+  }
 }
