@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import {
   ArrayMaxSize,
   IsArray,
+  IsBoolean,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -99,4 +100,13 @@ export class CreateLearnDto {
   })
   @ArrayMaxSize(3, { message: 'Количество примеров должно быть не более 3' })
   example!: string[]
+
+  @ApiProperty({
+    example: true,
+    description:
+      'Флаг для принудительного затирания слова из раздела актуальности, при наличии конфликта',
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'Должно быть логическим да/нет' })
+  force?: boolean
 }

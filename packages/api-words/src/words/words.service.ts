@@ -250,6 +250,25 @@ export class WordsService {
     userId: string,
     traceId: string,
   ): Promise<UserSettings> {
+    //FIXME: Добавить обработку клиента
     return {} as any
+  }
+  async getWordsCategory(categoryId: string, userId: string, traceId: string) {
+    const category = await this.categoriesService.getCategoryById(categoryId)
+    if (!category || (category && category.userId !== userId))
+      throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
+    return category
+  }
+  async getWordsCategoryIdsForSession(
+    type: 'reverse' | 'normal',
+    userId: string,
+    traceId: string,
+  ) {
+    const categories =
+      type === 'normal'
+        ? await this.categoriesService.getCategoriesForNormalSession(userId)
+        : await this.categoriesService.getCategoriesForReverseSession(userId)
+
+    return categories.map((category) => category.id)
   }
 }
