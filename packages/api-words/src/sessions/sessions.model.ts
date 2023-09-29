@@ -7,12 +7,11 @@ import {
   Sequelize,
   Table,
 } from 'sequelize-typescript'
-import { WorkKind, WorkType } from '../work/work.service'
 
 export interface SessionsCreationArgs {
   id?: string
   userId: string
-  kind: WorkKind
+  kind: SessionType
   type: WorkType
   successCount: number
   errorCount: number
@@ -67,7 +66,7 @@ export class Sessions extends Model<Sessions, SessionsCreationArgs> {
     type: DataType.STRING,
     allowNull: false,
   })
-  kind!: WorkKind
+  kind!: SessionType
 
   @ApiProperty({
     example: 5,

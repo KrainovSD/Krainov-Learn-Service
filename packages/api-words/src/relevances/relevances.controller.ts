@@ -14,10 +14,14 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
-import { SuccessEntity } from 'src/utils/entities/success.entity'
 import { Relevance } from './relevances.model'
-import { UnauthorizedEntity } from 'src/utils/entities/unauthorized.entity'
-import { BadRequestEntity } from 'src/utils/entities/bad-request.entity'
+import {
+  BadRequestEntity,
+  SuccessEntity,
+  TraceId,
+  UnauthorizedEntity,
+  UserId,
+} from '../utils'
 
 @ApiTags('Актуализатор')
 @Controller(`${API_VERSION.v1}/words/relevances`)
@@ -42,24 +46,26 @@ export class RelevancesController {
   @UseGuards(AuthGuard)
   createRelevance(
     @Body() dto: CreateRelevanceDto,
-    @Request() request: FastifyRequest,
+    @UserId() userId: string,
+    @TraceId() traceId: string,
   ) {
-    return this.relevanceService.createRelevance(dto, request.user.id)
+    return this.relevanceService.createRelevance(dto, userId, traceId)
   }
 
   @Post('/delete')
   @UseGuards(AuthGuard)
   deleteRelevance(
     @Body() dto: RelevanceMultipleIdDto,
-    @Request() request: FastifyRequest,
+    @UserId() userId: string,
+    @TraceId() traceId: string,
   ) {
-    return this.relevanceService.deleteRelevance(dto.ids, request.user.id)
+    return this.relevanceService.deleteRelevance(dto.ids, userId, traceId)
   }
 
   @Get()
   @ApiOkResponse({ type: [Relevance] })
   @UseGuards(AuthGuard)
-  getAllRelevance(@Request() request: FastifyRequest) {
-    return this.relevanceService.getAllRelevances(request.user.id)
+  getAllRelevance(@UserId() userId: string, @TraceId() traceId: string) {
+    return this.relevanceService.getAllRelevances(userId, traceId)
   }
 }

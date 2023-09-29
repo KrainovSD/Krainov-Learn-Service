@@ -7,7 +7,6 @@ import { utils, uuid } from 'src/utils/helpers'
 import { UpdateLearnsDto } from './dto/update-learns.dto'
 import { Category } from '../categories/categories.model'
 import { Op } from 'sequelize'
-import { WorkKind } from '../work/work.service'
 import { WordsService } from 'src/words/words.service'
 import { ALLOW_WORDS_AFTER_DELETE_FROM_START_CATEGORY } from './learns.constants'
 
@@ -114,7 +113,7 @@ export class LearnsService {
     id: string,
     userId: string,
     option: string,
-    kind: WorkKind,
+    kind: SessionType,
     traceId: string,
   ) {
     const word = await this.getLearnById(id)

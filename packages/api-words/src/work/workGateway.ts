@@ -12,16 +12,10 @@ import { Server } from 'ws'
 import { WorkService } from './work.service'
 import { StartWorkDto } from './dto/start.dto'
 import { UsePipes } from '@nestjs/common'
-import { WSValidationPipe } from 'src/utils/pipes/wsValidation.pipe'
 import { AuthWorkDto } from './dto/auth.dto'
-import { UserInfo } from 'src/auth/auth.service'
 import { WordsWorkDro } from './dto/words.dto'
 import { RestoreWorkDto } from './dto/restore.dto'
-
-export type Client = {
-  user?: UserInfo
-  id?: string
-} & Record<string, any>
+import { WSValidationPipe } from '../utils'
 
 @WebSocketGateway({
   cors: {

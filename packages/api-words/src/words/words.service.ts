@@ -72,6 +72,9 @@ export class WordsService {
 
     return streakInfo
   }
+  async registerStreak(userId: string, traceId: string) {
+    return true
+  }
   async completeCategory(
     completedCategoryInfo: Map<string, Date>,
     userId: string,
@@ -195,7 +198,7 @@ export class WordsService {
               HttpStatus.CONFLICT,
             )
           if (word && type === 'learn' && learnForce) {
-            this.relevancesService.deleteRelevance([word.id], userId)
+            this.relevancesService.deleteRelevance([word.id], userId, traceId)
           }
           break
         }
@@ -266,8 +269,9 @@ export class WordsService {
       throw new BadRequestException(ERROR_MESSAGES.infoNotFound)
     return category
   }
+
   async getWordsCategoryIdsForSession(
-    type: 'reverse' | 'normal',
+    type: SessionType,
     userId: string,
     traceId: string,
   ) {
@@ -277,5 +281,96 @@ export class WordsService {
         : await this.categoriesService.getCategoriesForReverseSession(userId)
 
     return categories.map((category) => category.id)
+  }
+  async getKnownForSession(type: SessionType, userId: string, traceId: string) {
+    return type === 'normal'
+      ? await this.knownsService.getKnownForNormalSession(userId, traceId)
+      : await this.knownsService.getKnownForReverseSession(userId, traceId)
+  }
+  async getLearnForSession(
+    type: SessionType,
+    userId: string,
+    traceId: string,
+    categoryId?: string[],
+  ) {
+    return type === 'normal'
+      ? await this.learnsService.getLearnsForNormalSession(
+          userId,
+          traceId,
+          categoryId,
+        )
+      : await this.learnsService.getLearnsForReverseSession(
+          userId,
+          traceId,
+          categoryId,
+        )
+  }
+  async getRepeatForSession(
+    type: SessionType,
+    userId: string,
+    traceId: string,
+  ) {
+    return type === 'normal'
+      ? await this.repeatsService.getRepeatForNormalSession(userId, traceId)
+      : await this.repeatsService.getRepeatForReverseSession(userId, traceId)
+  }
+
+  async checkKnown(
+    id: string,
+    userId: string,
+    option: string,
+    type: SessionType,
+    traceId: string,
+  ) {
+    return await this.knownsService.studyKnown(
+      id,
+      userId,
+      option,
+      type,
+      traceId,
+    )
+  }
+  async checkLearn(
+    id: string,
+    userId: string,
+    option: string,
+    type: SessionType,
+    traceId: string,
+  ) {
+    return await this.learnsService.studyLearn(
+      id,
+      userId,
+      option,
+      type,
+      traceId,
+    )
+  }
+  async checkRepeat(
+    id: string,
+    userId: string,
+    option: string,
+    type: SessionType,
+    traceId: string,
+  ) {
+    return await this.repeatsService.studyRepeat(
+      id,
+      userId,
+      option,
+      type,
+      traceId,
+    )
+  }
+  async checkCategory(
+    ids: string[],
+    userId: string,
+    type: SessionType,
+    traceId: string,
+  ) {
+    return await this.categoriesService.studyCategory(
+      ids,
+      userId,
+      type,
+      traceId,
+    )
   }
 }

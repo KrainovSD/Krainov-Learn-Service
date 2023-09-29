@@ -26,6 +26,15 @@ declare global {
     relevanceObserveDay: number
     relevanceObserveCount: number
   }
+
+  type WorkType = 'known' | 'repeat' | 'learn' | 'learnOff'
+  type SessionType = 'normal' | 'reverse'
+
+  interface Client extends Record<string, any> {
+    user?: UserInfo
+    id?: string
+    traceId: string
+  }
 }
 
 declare module 'fastify' {

@@ -12,7 +12,6 @@ import { _, utils, uuid } from 'src/utils/helpers'
 import { CategoryIdDto } from './dto/category-id-dto'
 import { Learns } from '../learns/learns.model'
 import { Op } from 'sequelize'
-import { WorkKind } from '../work/work.service'
 import { ALLOW_WORDS_TO_START_CATEGORY } from './categories.constants'
 import { WordsService } from 'src/words/words.service'
 
@@ -83,7 +82,7 @@ export class CategoriesService {
   async studyCategory(
     ids: string[],
     userId: string,
-    kind: WorkKind,
+    kind: SessionType,
     traceId: string,
   ) {
     if (ids.length === 0) return

@@ -12,7 +12,6 @@ import { UpdateKnownsDto } from './dto/update-knowns-dto'
 import { KnownsDto } from './dto/knowns-dto'
 import { FullKnownsDto } from './dto/full-known-dto'
 import { Op } from 'sequelize'
-import { WorkKind } from '../work/work.service'
 import { WordsService } from 'src/words/words.service'
 
 @Injectable()
@@ -135,7 +134,7 @@ export class KnownsService {
     id: string,
     userId: string,
     option: string,
-    kind: WorkKind,
+    kind: SessionType,
     traceId: string,
   ) {
     const word = await this.getKnownById(id)

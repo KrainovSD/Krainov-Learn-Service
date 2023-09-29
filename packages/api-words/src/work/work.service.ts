@@ -6,11 +6,11 @@ import { LearnsService } from '../learns/learns.service'
 import { JwtService } from '@nestjs/jwt'
 import { StartWorkDto } from './dto/start.dto'
 import { AuthWorkDto } from './dto/auth.dto'
-import { Client } from './workGateway'
 import { typings, utils, _, cache, CacheService } from 'src/utils/helpers'
 import { WordsWorkDro } from './dto/words.dto'
 import { RestoreWorkDto } from './dto/restore.dto'
 import { SessionsService } from '../sessions/sessions.service'
+import { WordsService } from 'src/words/words.service'
 
 type WordItem = {
   id: string
@@ -40,9 +40,6 @@ type ClientInfo = {
   wordWithError: string[]
 }
 
-export type WorkKind = 'normal' | 'reverse'
-export type WorkType = 'known' | 'repeat' | 'learn' | 'learnOff'
-
 @Injectable()
 export class WorkService {
   clients = new Map<string, ClientInfo>()
@@ -56,6 +53,8 @@ export class WorkService {
     private readonly cacheService: CacheService,
     private readonly jwtService: JwtService,
     private readonly sessionsService: SessionsService,
+
+    private readonly wordsService: WordsService,
   ) {}
 
   getUserInfoFromClient(dto: AuthWorkDto) {
@@ -131,13 +130,11 @@ export class WorkService {
     switch (payload.type) {
       case 'known': {
         const words = _.shuffle(
-          payload.kind === 'normal'
-            ? await this.knownsService.getKnownForNormalSession(
-                client.user?.id!,
-              )
-            : await this.knownsService.getKnownForReverseSession(
-                client.user?.id!,
-              ),
+          await this.wordsService.getKnownForSession(
+            payload.kind,
+            client.user!.id,
+            client.id,
+          ),
         )
 
         await this.defineNextWord(client, cache, words)
@@ -145,41 +142,34 @@ export class WorkService {
       }
       case 'learn': {
         const words = _.shuffle(
-          payload.kind === 'normal'
-            ? await this.learnsService.getLearnsForNormalSession(
-                client.user?.id!,
-              )
-            : await this.learnsService.getLearnsForReverseSession(
-                client.user?.id!,
-              ),
+          await this.wordsService.getLearnForSession(
+            payload.kind,
+            client.user!.id,
+            client.id,
+          ),
         )
         await this.defineNextWord(client, cache, words)
         break
       }
       case 'repeat': {
         const words = _.shuffle(
-          payload.kind === 'normal'
-            ? await this.repeatsService.getRepeatForNormalSession(
-                client.user?.id!,
-              )
-            : await this.repeatsService.getRepeatForReverseSession(
-                client.user?.id!,
-              ),
+          await this.wordsService.getRepeatForSession(
+            payload.kind,
+            client.user!.id,
+            client.id,
+          ),
         )
         await this.defineNextWord(client, cache, words)
         break
       }
       case 'learnOff': {
         const words = _.shuffle(
-          payload.kind === 'normal'
-            ? await this.learnsService.getLearnsForNormalSession(
-                client.user?.id!,
-                payload.categories,
-              )
-            : await this.learnsService.getLearnsForReverseSession(
-                client.user?.id!,
-                payload.categories,
-              ),
+          await this.wordsService.getLearnForSession(
+            payload.kind,
+            client.user!.id,
+            client.id,
+            payload.categories,
+          ),
         )
         await this.defineNextWord(client, cache, words)
         break
@@ -197,31 +187,34 @@ export class WorkService {
 
     switch (type) {
       case 'known': {
-        const result = await this.knownsService.studyKnown(
+        const result = await this.wordsService.checkKnown(
           payload.id,
-          client.user?.id!,
+          client.user!.id,
           payload.option,
-          kind as WorkKind,
+          kind,
+          client.traceId,
         )
         await this.setWordCacheAfterCheck(client, result, payload.id)
         break
       }
       case 'learn': {
-        const result = await this.learnsService.studyLearn(
+        const result = await this.wordsService.checkLearn(
           payload.id,
-          client.user?.id!,
+          client.user!.id,
           payload.option,
-          kind as WorkKind,
+          kind,
+          client.traceId,
         )
         await this.setWordCacheAfterCheck(client, result, payload.id)
         break
       }
       case 'repeat': {
-        const result = await this.repeatsService.studyRepeat(
+        const result = await this.wordsService.checkRepeat(
           payload.id,
-          client.user?.id!,
+          client.user!.id,
           payload.option,
-          kind as WorkKind,
+          kind,
+          client.traceId,
         )
         await this.setWordCacheAfterCheck(client, result, payload.id)
         break
@@ -326,7 +319,7 @@ export class WorkService {
     client: Client,
     cache: CacheWords,
     type: WorkType,
-    kind: WorkKind,
+    kind: SessionType,
   ) {
     /* if work complete */
     if (cache.currentIndex > cache.maxLength) {
@@ -367,7 +360,7 @@ export class WorkService {
     client: Client,
     cache: CacheWords,
     type: WorkType,
-    kind: WorkKind,
+    kind: SessionType,
   ) {
     if (type !== 'learnOff' && client.user) {
       const errorCount = cache.errors.length
@@ -410,17 +403,19 @@ export class WorkService {
     }
 
     if (type === 'learn') {
-      await this.categoriesService.studyCategory(
+      await this.wordsService.checkCategory(
         [...categoryCompletedIds],
         client.user!.id,
         kind,
+        client.traceId,
       )
     }
 
     await this.cacheService.del(`${client.user!.id}:streak`)
 
-    const streakResult = await this.statisticsService.checkStreak(
+    const streakResult = await this.wordsService.registerStreak(
       client.user!.id,
+      client.traceId,
     )
 
     const answer = this.getFinallyAnswer(
@@ -436,10 +431,10 @@ export class WorkService {
   private getFinallyAnswer(
     wordError: string[],
     categoryError: string[],
-    streakResult: StreakInfo | null,
+    streakResult: boolean | null,
   ) {
     let answer: string = 'Сессия завершена /n '
-    if (streakResult && Object.values(streakResult).every((result) => result)) {
+    if (streakResult) {
       answer += 'Серия была увеличена /n '
       return answer
     }
@@ -482,7 +477,10 @@ export class WorkService {
       ? this.getRandomOption(optionList, options)
       : result
   }
-  private getOperationInfo(client: Client): { type: WorkType; kind: WorkKind } {
+  private getOperationInfo(client: Client): {
+    type: WorkType
+    kind: SessionType
+  } {
     if (!client.id)
       throw new BadRequestException(
         'Id пользователя при получении данных о сессии не обнаружено',
@@ -491,6 +489,6 @@ export class WorkService {
     const id = client.id.split(':')
     const type = id[1]
     const kind = id[2]
-    return { type: type as WorkType, kind: kind as WorkKind }
+    return { type: type as WorkType, kind: kind as SessionType }
   }
 }

@@ -5,7 +5,6 @@ import { utils, uuid } from 'src/utils/helpers'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { RepeatDto } from './dto/repeat-dto'
 import { Op } from 'sequelize'
-import { WorkKind } from '../work/work.service'
 import { WordsService } from 'src/words/words.service'
 
 @Injectable()
@@ -62,7 +61,7 @@ export class RepeatsService {
     id: string,
     userId: string,
     option: string,
-    kind: WorkKind,
+    kind: SessionType,
     traceId: string,
   ) {
     const word = await this.getRepeatById(id)

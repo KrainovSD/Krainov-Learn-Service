@@ -4,23 +4,11 @@ import { LearnsModule } from '../learns/learns.module'
 import { RepeatsModule } from '../repeats/repeats.module'
 import { Module } from '@nestjs/common'
 import { WorkGateway } from './workGateway'
-import { JwtModule } from '@nestjs/jwt'
 import { WorkService } from './work.service'
-import { CacheModule } from 'src/cache/cache.module'
-import { StatisticsModule } from 'src/statistics/statistics.module'
-import { SessionsModule } from '../sessions/sessions.module'
+import { WordsModule } from 'src/words/words.module'
 
 @Module({
-  imports: [
-    SessionsModule,
-    JwtModule,
-    CacheModule,
-    CategoriesModule,
-    RepeatsModule,
-    LearnsModule,
-    KnownsModule,
-    StatisticsModule,
-  ],
+  imports: [WordsModule],
   providers: [WorkGateway, WorkService],
 })
 export class WorkModule {}

@@ -6,27 +6,26 @@ import { KnownsService } from '../knowns/knowns.service'
 import { LearnsService } from '../learns/learns.service'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { utils, uuid } from 'src/utils/helpers'
-import { LoggerService } from 'src/logger/logger.service'
 import { WordsService } from 'src/words/words.service'
 
 @Injectable()
 export class RelevancesService {
   constructor(
     @InjectModel(Relevance) private readonly relevanceRepo: typeof Relevance,
-    @Inject(forwardRef(() => KnownsService))
-    private readonly knownService: KnownsService,
-    @Inject(forwardRef(() => LearnsService))
-    private readonly learnService: LearnsService,
-    private readonly loggerService: LoggerService,
+
     private readonly wordsService: WordsService,
   ) {}
 
-  async createRelevance(dto: CreateRelevanceDto, userId: string) {
+  async createRelevance(
+    dto: CreateRelevanceDto,
+    userId: string,
+    traceId: string,
+  ) {
     const { similarKnowns, similarLearns, similarRelevances } =
       await this.wordsService.getAllSimilarWords(dto.words, userId, '')
     const hasWords = new Set([...similarKnowns, ...similarLearns])
 
-    await this.updateRelevance(Array.from(similarRelevances), userId)
+    await this.updateRelevance(Array.from(similarRelevances), userId, traceId)
 
     const checkedWords = dto.words.reduce(
       (result: RelevanceCreationArgs[], word) => {
@@ -50,7 +49,7 @@ export class RelevancesService {
       ? RESPONSE_MESSAGES.success
       : RESPONSE_MESSAGES.existWords(hasWords)
   }
-  async deleteRelevance(ids: string[], userId: string) {
+  async deleteRelevance(ids: string[], userId: string, traceId: string) {
     const relevances = await this.getAllRelevancesById(ids)
 
     const checkedIds: string[] = []
@@ -65,7 +64,7 @@ export class RelevancesService {
 
     return RESPONSE_MESSAGES.success
   }
-  async updateRelevance(words: string[], userId: string) {
+  async updateRelevance(words: string[], userId: string, traceId: string) {
     const updatedRelevances: RelevanceCreationArgs[] = (
       await this.getAllRelevancesByWordAndUserId(words, userId)
     ).map((relevance) => {
@@ -82,7 +81,7 @@ export class RelevancesService {
       updateOnDuplicate: ['dateDetected'],
     })
   }
-  async getAllRelevances(userId: string) {
+  async getAllRelevances(userId: string, traceId: string) {
     return await this.getAllRelevancesByUserId(userId)
   }
 
