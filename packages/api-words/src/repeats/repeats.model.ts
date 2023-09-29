@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import {
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  Sequelize,
-  Table,
-} from 'sequelize-typescript'
+import { Column, DataType, Model, Sequelize, Table } from 'sequelize-typescript'
 
 export interface RepeatsCreationArgs {
   id: string

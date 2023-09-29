@@ -1,33 +1,28 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  forwardRef,
-} from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Repeats, RepeatsCreationArgs } from './repeats.model'
 import { utils, uuid } from 'src/utils/helpers'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
 import { RepeatDto } from './dto/repeat-dto'
-import { Op, Transaction } from 'sequelize'
+import { Op } from 'sequelize'
 import { WorkKind } from '../work/work.service'
+import { WordsService } from 'src/words/words.service'
 
 @Injectable()
 export class RepeatsService {
   constructor(
     @InjectModel(Repeats) private readonly repeatRepo: typeof Repeats,
+    private readonly wordsService: WordsService,
   ) {}
 
-  async createRepeat(repeats: RepeatDto[], userId: string) {
-    //const user = await this.userService.getUserById(userId)
-    //if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
-
+  async createRepeat(repeats: RepeatDto[], userId: string, traceId: string) {
     const words: string[] = repeats.map((repeat) => repeat.word)
 
     const hasRepeatsIds: string[] = (
       await this.getAllRepeatsByWordAndUserId(words, userId)
     ).map((repeat) => repeat.id)
-    if (hasRepeatsIds.length > 0) this.deleteRepeat(hasRepeatsIds, userId)
+    if (hasRepeatsIds.length > 0)
+      this.deleteRepeat(hasRepeatsIds, userId, traceId)
 
     const checkedWords = repeats.reduce(
       (result: RepeatsCreationArgs[], repeat) => {
@@ -48,10 +43,10 @@ export class RepeatsService {
     await this.repeatRepo.bulkCreate(checkedWords)
     return RESPONSE_MESSAGES.success
   }
-  async getAllRepeats(userId: string) {
+  async getAllRepeats(userId: string, traceId: string) {
     return await this.getAllRepeatsByUserId(userId)
   }
-  async deleteRepeat(ids: string[], userId: string) {
+  async deleteRepeat(ids: string[], userId: string, traceId: string) {
     const repeats = await this.getAllRepeatsById(ids)
 
     const checkedIds: string[] = []
@@ -68,6 +63,7 @@ export class RepeatsService {
     userId: string,
     option: string,
     kind: WorkKind,
+    traceId: string,
   ) {
     const word = await this.getRepeatById(id)
     if (!word || (word && word.userId !== userId))
@@ -79,7 +75,7 @@ export class RepeatsService {
       return result
     }
 
-    const settings = {} //await this.settingsService.getSettingsByUserId(userId)
+    const settings = await this.wordsService.getUserSettings(userId, traceId)
     if (!settings) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
 
     word[kind === 'normal' ? 'countRepeat' : 'countReverseRepeat'] =
@@ -126,6 +122,7 @@ export class RepeatsService {
   }
   async getRepeatForNormalSession(
     userId: string,
+    traceId: string,
   ): Promise<Pick<Repeats, 'id' | 'word' | 'translate'>[]> {
     return await this.repeatRepo.findAll({
       attributes: ['id', 'translate', 'word'],
@@ -139,6 +136,7 @@ export class RepeatsService {
   }
   async getRepeatForReverseSession(
     userId: string,
+    traceId: string,
   ): Promise<Pick<Repeats, 'id' | 'word' | 'translate'>[]> {
     return await this.repeatRepo.findAll({
       attributes: ['id', 'translate', 'word'],

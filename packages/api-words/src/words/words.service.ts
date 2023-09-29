@@ -44,8 +44,14 @@ export class WordsService {
       this.categoriesService.getCategoriesForNormalSession(userId)
     const learnReverse =
       this.categoriesService.getCategoriesForReverseSession(userId)
-    const repeatNormal = this.repeatsService.getRepeatForNormalSession(userId)
-    const repeatReverse = this.repeatsService.getRepeatForReverseSession(userId)
+    const repeatNormal = this.repeatsService.getRepeatForNormalSession(
+      userId,
+      traceId,
+    )
+    const repeatReverse = this.repeatsService.getRepeatForReverseSession(
+      userId,
+      traceId,
+    )
 
     const result = await Promise.all([
       knownNormal,
@@ -244,6 +250,7 @@ export class WordsService {
         },
       ],
       userId,
+      traceId,
     )
   }
   async getUserSettings(

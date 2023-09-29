@@ -1,3 +1,4 @@
+import { AuthGuard, TraceId, UserId } from 'src/utils'
 import { FastifyRequest } from 'fastify'
 import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common'
 import { RepeatsService } from './repeats.service'
@@ -12,24 +13,24 @@ export class RepeatsController {
   constructor(private readonly repeatService: RepeatsService) {}
 
   @Post('')
-  //@Role('admin')
-  //@UseGuards(RoleGuard)
-  createRepeat(@Body() dto: CreateRepeatDto) {
-    return this.repeatService.createRepeat(dto.words, dto.userId)
+  @UseGuards(AuthGuard({ roles: 'admin' }))
+  createRepeat(@Body() dto: CreateRepeatDto, @TraceId() traceId: string) {
+    return this.repeatService.createRepeat(dto.words, dto.userId, traceId)
   }
 
   @Get('')
-  //@UseGuards(AuthGuard)
-  getAllRepeat(@Request() request: FastifyRequest) {
-    return this.repeatService.getAllRepeats(request.user.id)
+  @UseGuards(AuthGuard)
+  getAllRepeat(@UserId() userId: string, @TraceId() traceId: string) {
+    return this.repeatService.getAllRepeats(userId, traceId)
   }
 
   @Post('/delete')
-  //@UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   deleteRepeat(
     @Body() dto: RepeatMultipleIdDto,
-    @Request() request: FastifyRequest,
+    @UserId() userId: string,
+    @TraceId() traceId: string,
   ) {
-    return this.repeatService.deleteRepeat(dto.ids, request.user.id)
+    return this.repeatService.deleteRepeat(dto.ids, userId, traceId)
   }
 }
