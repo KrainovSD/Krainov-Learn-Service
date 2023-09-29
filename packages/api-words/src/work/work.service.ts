@@ -121,7 +121,7 @@ export class WorkService {
           await this.wordsService.getKnownForSession(
             payload.kind,
             client.user!.id,
-            client.id,
+            client.traceId,
           ),
         )
 
@@ -133,7 +133,7 @@ export class WorkService {
           await this.wordsService.getLearnForSession(
             payload.kind,
             client.user!.id,
-            client.id,
+            client.traceId,
           ),
         )
         await this.defineNextWord(client, cache, words)
@@ -144,7 +144,7 @@ export class WorkService {
           await this.wordsService.getRepeatForSession(
             payload.kind,
             client.user!.id,
-            client.id,
+            client.traceId,
           ),
         )
         await this.defineNextWord(client, cache, words)
@@ -155,7 +155,7 @@ export class WorkService {
           await this.wordsService.getLearnForSession(
             payload.kind,
             client.user!.id,
-            client.id,
+            client.traceId,
             payload.categories,
           ),
         )
