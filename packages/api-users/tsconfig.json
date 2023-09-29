@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "declaration": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "baseUrl": "./",
+    "rootDirs": ["."],
+    "outDir": "./dist",
+    "typeRoots": ["node_modules/@types", "./typings"],
+    "incremental": true
+  },
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+}

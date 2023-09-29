@@ -1,5 +1,5 @@
 {
-  "name": "@krainov/site",
+  "name": "@krainov/kls-site",
   "version": "0.0.1",
   "private": true,
   "description": "Krainov Service для изучения английского языка",
@@ -12,8 +12,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@krainov/ui-kit": "^0.0.1",
-    "@krainov/utils": "*",
+    "@krainov/kls-ui-kit": "^0.0.1",
+    "@krainov/kls-utils": "*",
     "@reduxjs/toolkit": "^1.9.5",
     "axios": "^1.4.0",
     "clsx": "^1.2.1",

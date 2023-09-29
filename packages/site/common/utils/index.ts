@@ -1,1 +1,1 @@
-export { _, typings, utils, node } from '@krainov/utils'
+export { _, typings, utils, node } from '@krainov/kls-utils'

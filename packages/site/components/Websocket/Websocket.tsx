@@ -2,7 +2,7 @@ import { SocketMessage, useWebsocket } from 'helpers'
 import React from 'react'
 import styles from './Websocket.module.scss'
 import clsx from 'clsx'
-import { typings, utils } from '@krainov/utils'
+import { typings, utils } from '@krainov/kls-utils'
 
 type Messages = WordsMessage | AnswerMessage | RestoreMessage | CompleteMessage
 type WordsMessage = {
@@ -46,7 +46,7 @@ export function WebsocketComponent() {
   const [currentType, setCurrentType] = React.useState('known')
 
   const { sendMessage, isSocketDestroy } = useWebsocket<Messages>({
-    url: 'ws://localhost:3000/word',
+    url: 'ws://localhost:3002/word',
     handleMessage,
     handleClose,
   })
