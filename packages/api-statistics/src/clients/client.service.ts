@@ -7,27 +7,17 @@ import { LoggerService, logger } from 'src/utils/helpers'
 
 type ClientsKeys = 'users' | 'words'
 
-export type StreakInfo = {
-  knownNormal: boolean
-  knownReverse: boolean
-  learnNormal: boolean
-  learnReverse: boolean
-  repeatNormal: boolean
-  repeatReverse: boolean
-  result: boolean
-}
-
 type MessageValue<T = unknown> = {
   traceId: string | undefined
   sendBy: string | undefined
   data: T
 }
 
-type Streak = {
+type StreakOptions = {
   userId: string
 }
 
-type Auth = {
+type AuthOptions = {
   header: string
 }
 
@@ -101,7 +91,7 @@ export class ClientService {
   }
 
   async getStreakInfo(userId: string, traceId: string) {
-    const args: MessageValue<Streak> = {
+    const args: MessageValue<StreakOptions> = {
       traceId,
       sendBy: service,
       data: {
@@ -116,7 +106,7 @@ export class ClientService {
     )
   }
   async getUserInfo(header: string, traceId: string) {
-    const args: MessageValue<Auth> = {
+    const args: MessageValue<AuthOptions> = {
       traceId,
       sendBy: service,
       data: {

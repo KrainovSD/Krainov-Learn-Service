@@ -421,7 +421,7 @@ export class WorkService {
     const answer = this.getFinallyAnswer(
       wordErrorNames,
       categoryErrorNames,
-      type === 'learnOff' ? null : streakResult,
+      type === 'learnOff' ? null : streakResult ?? false,
     )
 
     this.sendTargetMessage(client, 'complete', answer)

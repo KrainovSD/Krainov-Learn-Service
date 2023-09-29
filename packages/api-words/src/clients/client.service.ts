@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { timeout } from 'rxjs'
 import { logger, LoggerService } from 'src/utils'
-import { messages, users } from './client.constants'
+import { messages, statistics, users } from './client.constants'
 
 type ClientsKeys = 'users' | 'statistics'
 
@@ -13,8 +13,22 @@ type MessageValue<T = unknown> = {
   data: T
 }
 
-type Auth = {
+type AuthOptions = {
   header: string
+}
+
+type RegisterStreakOptions = {
+  userId: string
+  knownNormal: boolean
+  knownReverse: boolean
+  learnNormal: boolean
+  learnReverse: boolean
+  repeatNormal: boolean
+  repeatReverse: boolean
+}
+
+type GetUserSettingsOptions = {
+  userId: string
 }
 
 @Injectable()
@@ -87,7 +101,7 @@ export class ClientService {
   }
 
   async getUserInfo(header: string, traceId: string) {
-    const args: MessageValue<Auth> = {
+    const args: MessageValue<AuthOptions> = {
       traceId,
       sendBy: service,
       data: {
@@ -97,6 +111,43 @@ export class ClientService {
     return await this.sendMessageToMicroservice<UserInfo | null>(
       users,
       messages.checkAuth,
+      args,
+      traceId,
+    )
+  }
+  async registerStreak(
+    streakInfo: StreakInfo,
+    userId: string,
+    traceId: string,
+  ) {
+    const args: MessageValue<RegisterStreakOptions> = {
+      traceId,
+      sendBy: service,
+      data: {
+        userId,
+        ...streakInfo,
+      },
+    }
+
+    return await this.sendMessageToMicroservice<boolean>(
+      statistics,
+      messages.registerStreak,
+      args,
+      traceId,
+    )
+  }
+  async getUserSettings(userId: string, traceId: string) {
+    const args: MessageValue<GetUserSettingsOptions> = {
+      traceId,
+      sendBy: service,
+      data: {
+        userId,
+      },
+    }
+
+    return await this.sendMessageToMicroservice<UserSettings | null>(
+      users,
+      messages.userSettings,
       args,
       traceId,
     )

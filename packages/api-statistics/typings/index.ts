@@ -17,6 +17,15 @@ declare global {
     role: string
     subscription: Date | null
   }
+
+  interface StreakInfo {
+    knownNormal: boolean
+    knownReverse: boolean
+    learnNormal: boolean
+    learnReverse: boolean
+    repeatNormal: boolean
+    repeatReverse: boolean
+  }
 }
 
 declare module 'fastify' {

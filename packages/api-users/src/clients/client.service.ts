@@ -13,7 +13,7 @@ type MessageValue<T = unknown> = {
   data: T
 }
 
-type CRUDStatistic = {
+type CRUDStatisticOptions = {
   userId: string
 }
 
@@ -85,7 +85,7 @@ export class ClientService {
   }
 
   async createStatistics(userId: string, traceId: string) {
-    const args: MessageValue<CRUDStatistic> = {
+    const args: MessageValue<CRUDStatisticOptions> = {
       traceId,
       sendBy: service,
       data: {
@@ -100,7 +100,7 @@ export class ClientService {
     )
   }
   async deleteStatistics(userId: string, traceId: string) {
-    const args: MessageValue<CRUDStatistic> = {
+    const args: MessageValue<CRUDStatisticOptions> = {
       traceId,
       sendBy: service,
       data: {

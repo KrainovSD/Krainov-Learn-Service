@@ -9,7 +9,7 @@ import { Statistic } from './statistics.model'
 import { CacheService, cache, utils, uuid } from 'src/utils/helpers'
 import { UpdateStatisticDto } from './dto/update-statistic.dto'
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { ClientService, StreakInfo } from 'src/clients/client.service'
+import { ClientService } from 'src/clients/client.service'
 
 @Injectable()
 export class StatisticsService {
@@ -65,7 +65,8 @@ export class StatisticsService {
       const streakInfo = await this.clientService.getStreakInfo(userId, traceId)
       if (!streakInfo) throw new Error()
 
-      if (streakInfo.result) await this.setStreak(statistic)
+      if (Object.values(streakInfo).every((result) => result))
+        await this.setStreak(statistic)
       await this.cacheService.setBestStreak(userId, streakInfo)
       return streakInfo
     } catch (error) {
@@ -74,7 +75,7 @@ export class StatisticsService {
   }
   async setStreak(statistic: Statistic | null) {
     const { startNow } = utils.date.getToday()
-    if (!statistic) throw new Error("couldn't set streak")
+    if (!statistic) return null
 
     if (
       (statistic.lastStreakDate && statistic.lastStreakDate < startNow) ||
@@ -92,7 +93,22 @@ export class StatisticsService {
         statistic.currentStreak = 1
       }
       await statistic.save()
-      return
+      return true
     }
+
+    return null
+  }
+  async registerStreak(
+    streakInfo: StreakInfo,
+    userId: string,
+    traceId: string,
+  ) {
+    const statistic = await this.statisticRepo.findOne({
+      where: { userId },
+    })
+    await this.cacheService.setBestStreak(userId, streakInfo)
+
+    if (Object.values(streakInfo).every((result) => result))
+      return await this.setStreak(statistic)
   }
 }

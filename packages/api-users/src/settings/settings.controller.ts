@@ -6,7 +6,7 @@ import { API_VERSION } from 'src/const'
 import { ApiTags } from '@nestjs/swagger'
 import { TraceId, UserId } from '../utils'
 import { MessagePattern, Payload } from '@nestjs/microservices'
-import { GetSettingsClientDto } from './dto/get-settings-client.dto'
+import { GetSettingsMessageDto } from './dto/get-settings-message.dto'
 
 @ApiTags('Настройки')
 @Controller(`${API_VERSION.v1}/settings`)
@@ -30,7 +30,7 @@ export class SettingsController {
   }
 
   @MessagePattern('user_settings')
-  checkAuth(@Payload() dto: GetSettingsClientDto) {
+  checkAuth(@Payload() dto: GetSettingsMessageDto) {
     return this.settingsService.getSettingsByUserId(
       dto.data.userId,
       dto.traceId,

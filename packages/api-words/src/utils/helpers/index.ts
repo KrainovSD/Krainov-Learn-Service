@@ -13,6 +13,7 @@ export {
   ValidationException,
   ValidationPipe,
   WSValidationPipe,
+  GetMessageDto,
 } from '@krainov/kls-api-utils'
 export { v4 as uuid } from 'uuid'
 

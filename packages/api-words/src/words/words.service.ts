@@ -73,7 +73,8 @@ export class WordsService {
     return streakInfo
   }
   async registerStreak(userId: string, traceId: string) {
-    return true
+    const streakInfo = await this.checkStreak(userId, traceId)
+    return this.clientService.registerStreak(streakInfo, userId, traceId)
   }
   async completeCategory(
     completedCategoryInfo: Map<string, Date>,
@@ -259,9 +260,8 @@ export class WordsService {
   async getUserSettings(
     userId: string,
     traceId: string,
-  ): Promise<UserSettings> {
-    //FIXME: Добавить обработку клиента
-    return {} as any
+  ): Promise<UserSettings | null> {
+    return (await this.clientService.getUserSettings(userId, traceId)) ?? null
   }
   async getWordsCategory(categoryId: string, userId: string, traceId: string) {
     const category = await this.categoriesService.getCategoryById(categoryId)

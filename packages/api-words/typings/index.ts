@@ -35,6 +35,15 @@ declare global {
     id?: string
     traceId: string
   }
+
+  interface StreakInfo {
+    knownNormal: boolean
+    knownReverse: boolean
+    learnNormal: boolean
+    learnReverse: boolean
+    repeatNormal: boolean
+    repeatReverse: boolean
+  }
 }
 
 declare module 'fastify' {
