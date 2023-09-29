@@ -12,7 +12,7 @@ import { WordsService } from 'src/words/words.service'
 export class RelevancesService {
   constructor(
     @InjectModel(Relevance) private readonly relevanceRepo: typeof Relevance,
-
+    @Inject(forwardRef(() => WordsService))
     private readonly wordsService: WordsService,
   ) {}
 

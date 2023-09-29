@@ -1,14 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
-import {
-  IsArray,
-  IsIn,
-  IsInt,
-  IsNotEmpty,
-  IsString,
-  ValidateNested,
-} from 'class-validator'
-import { Type } from 'class-transformer'
-import { workKindList, workTypeList } from 'src/words/work/dto/start.dto'
+import { IsIn, IsInt, IsNotEmpty, IsString } from 'class-validator'
+import { workKindList, workTypeList } from 'src/work/dto/start.dto'
 
 export class CreateSessionDto {
   @ApiProperty({

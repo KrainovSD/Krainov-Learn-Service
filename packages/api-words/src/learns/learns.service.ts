@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common'
 import { Learns } from './learns.model'
 import { InjectModel } from '@nestjs/sequelize'
 import { CreateLearnDto } from './dto/create-learns-dto'
@@ -14,6 +19,7 @@ import { ALLOW_WORDS_AFTER_DELETE_FROM_START_CATEGORY } from './learns.constants
 export class LearnsService {
   constructor(
     @InjectModel(Learns) private readonly learnsRepo: typeof Learns,
+    @Inject(forwardRef(() => WordsService))
     private readonly wordsService: WordsService,
   ) {}
 

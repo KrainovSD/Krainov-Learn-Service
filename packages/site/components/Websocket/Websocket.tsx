@@ -46,7 +46,7 @@ export function WebsocketComponent() {
   const [currentType, setCurrentType] = React.useState('known')
 
   const { sendMessage, isSocketDestroy } = useWebsocket<Messages>({
-    url: 'ws://localhost:3000/word',
+    url: 'ws://localhost:3002/word',
     handleMessage,
     handleClose,
   })

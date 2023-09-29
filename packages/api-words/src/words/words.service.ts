@@ -2,7 +2,9 @@ import {
   BadRequestException,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
+  forwardRef,
 } from '@nestjs/common'
 import { CategoriesService } from 'src/categories/categories.service'
 import { ClientService } from 'src/clients/client.service'
@@ -23,14 +25,28 @@ type CheckHasWordsOptions = {
   learnForce?: boolean
 }
 
+type CreateSessionOptions = {
+  type: WorkType
+  kind: SessionType
+  errorCount: number
+  successCount: number
+  userId: string
+}
+
 @Injectable()
 export class WordsService {
   constructor(
+    @Inject(forwardRef(() => CategoriesService))
     private readonly categoriesService: CategoriesService,
+    @Inject(forwardRef(() => LearnsService))
     private readonly learnsService: LearnsService,
+    @Inject(forwardRef(() => KnownsService))
     private readonly knownsService: KnownsService,
+    @Inject(forwardRef(() => RepeatsService))
     private readonly repeatsService: RepeatsService,
+    @Inject(forwardRef(() => RelevancesService))
     private readonly relevancesService: RelevancesService,
+
     private readonly sessionsService: SessionsService,
     private readonly clientService: ClientService,
   ) {}
@@ -263,6 +279,11 @@ export class WordsService {
   ): Promise<UserSettings | null> {
     return (await this.clientService.getUserSettings(userId, traceId)) ?? null
   }
+  async getCategoryNamesByIds(ids: string[], traceId: string) {
+    const categories = await this.categoriesService.getCategoriesNameByIds(ids)
+    return categories.map((category) => category.name)
+  }
+
   async getWordsCategory(categoryId: string, userId: string, traceId: string) {
     const category = await this.categoriesService.getCategoryById(categoryId)
     if (!category || (category && category.userId !== userId))
@@ -371,6 +392,24 @@ export class WordsService {
       userId,
       type,
       traceId,
+    )
+  }
+
+  async createSession({
+    errorCount,
+    kind,
+    type,
+    userId,
+    successCount,
+  }: CreateSessionOptions) {
+    await this.sessionsService.createSession(
+      {
+        kind,
+        type,
+        errorCount,
+        successCount,
+      },
+      userId,
     )
   }
 }

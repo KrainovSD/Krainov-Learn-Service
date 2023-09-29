@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Repeats, RepeatsCreationArgs } from './repeats.model'
 import { utils, uuid } from 'src/utils/helpers'
@@ -11,6 +16,7 @@ import { WordsService } from 'src/words/words.service'
 export class RepeatsService {
   constructor(
     @InjectModel(Repeats) private readonly repeatRepo: typeof Repeats,
+    @Inject(forwardRef(() => WordsService))
     private readonly wordsService: WordsService,
   ) {}
 

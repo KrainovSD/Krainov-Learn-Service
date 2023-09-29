@@ -11,6 +11,7 @@ import { WordsWorkDro } from './dto/words.dto'
 import { RestoreWorkDto } from './dto/restore.dto'
 import { SessionsService } from '../sessions/sessions.service'
 import { WordsService } from 'src/words/words.service'
+import { ClientService } from 'src/clients/client.service'
 
 type WordItem = {
   id: string
@@ -45,30 +46,17 @@ export class WorkService {
   clients = new Map<string, ClientInfo>()
 
   constructor(
-    private readonly categoriesService: CategoriesService,
-    private readonly knownsService: KnownsService,
-    private readonly repeatsService: RepeatsService,
-    private readonly learnsService: LearnsService,
     @Inject(cache.CACHE_PROVIDER_MODULE)
     private readonly cacheService: CacheService,
-    private readonly jwtService: JwtService,
-    private readonly sessionsService: SessionsService,
-
     private readonly wordsService: WordsService,
+    private readonly clientsService: ClientService,
   ) {}
 
-  getUserInfoFromClient(dto: AuthWorkDto) {
+  async getUserInfoFromClient(dto: AuthWorkDto, traceId: string) {
     try {
       const authHeader = dto.token
       if (!authHeader || typeof authHeader !== 'string') throw new Error()
-      const authInfo = authHeader.split(' ')
-      if (authInfo.length !== 2) throw new Error()
-      const bearer = authInfo[0]
-      const token = authInfo[1]
-      if (bearer !== 'Bearer') throw new Error()
-      const user = this.jwtService.verify<UserInfo>(token, {
-        secret: process.env.ACCESS_TOKEN_SECRET,
-      })
+      const user = await this.clientsService.getUserInfo(authHeader, traceId)
       return user
     } catch (e) {
       return false
@@ -364,15 +352,13 @@ export class WorkService {
   ) {
     if (type !== 'learnOff' && client.user) {
       const errorCount = cache.errors.length
-      await this.sessionsService.createSession(
-        {
-          kind,
-          type,
-          errorCount,
-          successCount: cache.words.length - errorCount,
-        },
-        client.user.id,
-      )
+      await this.wordsService.createSession({
+        errorCount,
+        kind,
+        type,
+        userId: client.user?.id!,
+        successCount: cache.words.length - errorCount,
+      })
     }
 
     const wordErrorNames: string[] = []
@@ -394,11 +380,10 @@ export class WorkService {
         }
       }
       if (type === 'learn' || type === 'learnOff') {
-        categoryErrorNames = (
-          await this.categoriesService.getCategoriesNameByIds([
-            ...categoryErrorIds,
-          ])
-        ).map((word) => word.name)
+        categoryErrorNames = await this.wordsService.getCategoryNamesByIds(
+          [...categoryErrorIds],
+          client.traceId,
+        )
       }
     }
 

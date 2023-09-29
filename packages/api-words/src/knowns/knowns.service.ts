@@ -18,6 +18,7 @@ import { WordsService } from 'src/words/words.service'
 export class KnownsService {
   constructor(
     @InjectModel(Knowns) private readonly knownRepo: typeof Knowns,
+    @Inject(forwardRef(() => WordsService))
     private readonly wordsService: WordsService,
   ) {}
 

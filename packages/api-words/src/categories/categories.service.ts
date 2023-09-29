@@ -1,7 +1,9 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Category, CategoryCreationArgs } from './categories.model'
@@ -19,6 +21,7 @@ import { WordsService } from 'src/words/words.service'
 export class CategoriesService {
   constructor(
     @InjectModel(Category) private readonly categoryRepo: typeof Category,
+    @Inject(forwardRef(() => WordsService))
     private readonly wordsService: WordsService,
   ) {}
 

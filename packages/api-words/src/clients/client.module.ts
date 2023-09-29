@@ -11,7 +11,7 @@ import { getClientsOptions } from './client.options'
       getClientsOptions(services.users, process.env.RABBIT_QUEUE_USERS),
     ),
     ClientsModule.register(
-      getClientsOptions(services.words, process.env.RABBIT_QUEUE_WORDS),
+      getClientsOptions(services.statistics, process.env.RABBIT_QUEUE_WORDS),
     ),
   ],
   controllers: [],

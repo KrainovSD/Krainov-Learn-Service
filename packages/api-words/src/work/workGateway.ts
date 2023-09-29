@@ -15,7 +15,7 @@ import { UsePipes } from '@nestjs/common'
 import { AuthWorkDto } from './dto/auth.dto'
 import { WordsWorkDro } from './dto/words.dto'
 import { RestoreWorkDto } from './dto/restore.dto'
-import { WSValidationPipe } from '../utils'
+import { WSValidationPipe, uuid } from '../utils'
 
 @WebSocketGateway({
   cors: {
@@ -34,7 +34,9 @@ export class WorkGateway
 
   afterInit(server: Server): void {}
 
-  handleConnection(client: Client) {}
+  handleConnection(client: Client) {
+    client.traceId = uuid()
+  }
 
   async handleDisconnect(client: Client) {
     if (this.workService.validateClient(client, true)) {
@@ -50,7 +52,10 @@ export class WorkGateway
     @MessageBody() dto: AuthWorkDto,
   ) {
     try {
-      const user = this.workService.getUserInfoFromClient(dto)
+      const user = await this.workService.getUserInfoFromClient(
+        dto,
+        client.traceId,
+      )
       if (user) {
         client.user = user
         this.workService.sendTargetMessage(

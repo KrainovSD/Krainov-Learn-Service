@@ -14,7 +14,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { API_VERSION } from './const'
 
 async function start() {
-  const PORT = process.env.PORT || 3000
+  const PORT = process.env.PORT || 3002
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),

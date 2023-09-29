@@ -19,6 +19,8 @@ import { Relevance } from './relevances/relevances.model'
 import { WorkModule } from './work/work.module'
 import { TrimPipe, ValidationPipe, cache, logger } from './utils'
 import { EXPIRES_CACHE } from './const'
+import { WordsModule } from './words/words.module'
+import { ClientModule } from './clients/client.module'
 
 @Module({
   imports: [
@@ -35,12 +37,7 @@ import { EXPIRES_CACHE } from './const'
       dirCombined: path.join(__dirname, './../log/combined/'),
       dirWarn: path.join(__dirname, './../log/warn/'),
     }),
-    SessionsModule,
-    RelevancesModule,
-    RepeatsModule,
-    KnownsModule,
-    LearnsModule,
-    CategoriesModule,
+
     WinstonModule.forRoot({
       transports: [
         new winston.transports.Console({
@@ -84,7 +81,15 @@ import { EXPIRES_CACHE } from './const'
       models: [Category, Learns, Knowns, Repeats, Relevance],
       autoLoadModels: true,
     }),
+    WordsModule,
     WorkModule,
+    SessionsModule,
+    RelevancesModule,
+    RepeatsModule,
+    KnownsModule,
+    LearnsModule,
+    CategoriesModule,
+    ClientModule,
   ],
   controllers: [],
   providers: [

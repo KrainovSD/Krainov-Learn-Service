@@ -1,5 +1,7 @@
 import { ALLOW_WORDS_TO_START_CATEGORY } from './categories/categories.constants'
 
+export const EXPIRES_CACHE = 60 * 60 * 24
+
 export const API_VERSION = {
   v1: 'api/v1',
 }
