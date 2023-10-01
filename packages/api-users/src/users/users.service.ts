@@ -17,6 +17,7 @@ import { ChangePassDto } from './dto/change-pass.dto'
 import { ChangeEmailDto } from './dto/change-email.dto'
 import { ClientService } from 'src/clients/client.service'
 import { UPLOAD_PATH_AVATAR, UPLOAD_PATH_WALLPAPER } from './users.constants'
+import { DeleteUsersDto } from './dto/delete-users.dto'
 
 @Injectable()
 export class UsersService {
@@ -25,8 +26,6 @@ export class UsersService {
     private readonly settingService: SettingsService,
     private readonly mailerService: MailerService,
     private readonly clientService: ClientService,
-    @Inject(logger.LOGGER_PROVIDER_MODULE)
-    private readonly logger: LoggerService,
   ) {}
 
   private readonly forbiddenFields = [
@@ -46,7 +45,7 @@ export class UsersService {
     'nickNameChangeDate',
   ]
 
-  async callChangePass(email: string) {
+  async callChangePass(email: string, userId: string, traceId: string) {
     const user = await this.getUserByEmail(email)
 
     if (!user) throw new BadRequestException('Неверный адрес электронной почты')
@@ -76,7 +75,7 @@ export class UsersService {
 
     return RESPONSE_MESSAGES.sendEmail
   }
-  async changePass(dto: ChangePassDto) {
+  async changePass(dto: ChangePassDto, userId: string, traceId: string) {
     const user = await this.getUserByPasswordChangeKey(dto.key)
     if (
       !user ||
@@ -97,7 +96,7 @@ export class UsersService {
     return RESPONSE_MESSAGES.success
   }
 
-  async callChangeEmail(userId: string) {
+  async callChangeEmail(userId: string, traceId: string) {
     const user = await this.getUserByIdService(userId)
 
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
@@ -127,7 +126,7 @@ export class UsersService {
 
     return RESPONSE_MESSAGES.sendEmail
   }
-  async changeEmail(dto: ChangeEmailDto, userId: string) {
+  async changeEmail(dto: ChangeEmailDto, userId: string, traceId: string) {
     const user = await this.getUserByEmailChangeKey(dto.key)
     if (
       !user ||
@@ -138,7 +137,7 @@ export class UsersService {
     )
       throw new BadRequestException(ERROR_MESSAGES.badKeyOrTime)
 
-    await this.checkUniqueEmail(dto.email)
+    await this.checkUniqueEmail(dto.email, traceId)
 
     user.emailToChange = dto.email
     const emailChangeKey = utils.common.getId()
@@ -159,7 +158,7 @@ export class UsersService {
     return RESPONSE_MESSAGES.sendNewEmail
   }
 
-  async changeNickName(nickName: string, userId: string) {
+  async changeNickName(nickName: string, userId: string, traceId: string) {
     const user = await this.getUserByIdService(userId)
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
     if (user.nickNameChangeDate) {
@@ -168,7 +167,7 @@ export class UsersService {
       if (lastDateChange > new Date())
         throw new BadRequestException(ERROR_MESSAGES.changeNickName)
     }
-    await this.checkUniqueNickName(nickName)
+    await this.checkUniqueNickName(nickName, traceId)
 
     user.nickName = nickName
     user.nickNameChangeDate = new Date()
@@ -176,8 +175,8 @@ export class UsersService {
     return RESPONSE_MESSAGES.success
   }
 
-  async clearAvatar(userId: string) {
-    const user = await this.getUserById(userId)
+  async clearAvatar(userId: string, traceId: string) {
+    const user = await this.getUserById(userId, traceId)
     if (!user || !user.avatar)
       throw new BadRequestException(ERROR_MESSAGES.userNotFound)
     await fsOperation.removeFile(UPLOAD_PATH_AVATAR, user.avatar)
@@ -185,8 +184,8 @@ export class UsersService {
     await user.save()
     return RESPONSE_MESSAGES.success
   }
-  async updateAvatar(fileName: string, userId: string) {
-    const user = await this.getUserById(userId)
+  async updateAvatar(fileName: string, userId: string, traceId: string) {
+    const user = await this.getUserById(userId, traceId)
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
     if (user.avatar !== fileName) {
       if (user.avatar)
@@ -197,8 +196,8 @@ export class UsersService {
     return RESPONSE_MESSAGES.success
   }
 
-  async clearWallpaper(userId: string) {
-    const user = await this.getUserById(userId)
+  async clearWallpaper(userId: string, traceId: string) {
+    const user = await this.getUserById(userId, traceId)
     if (!user || !user.wallpaper)
       throw new BadRequestException(ERROR_MESSAGES.userNotFound)
     await fsOperation.removeFile(UPLOAD_PATH_WALLPAPER, user.wallpaper)
@@ -206,8 +205,8 @@ export class UsersService {
     await user.save()
     return RESPONSE_MESSAGES.success
   }
-  async updateWallpaper(fileName: string, userId: string) {
-    const user = await this.getUserById(userId)
+  async updateWallpaper(fileName: string, userId: string, traceId: string) {
+    const user = await this.getUserById(userId, traceId)
     if (!user) throw new BadRequestException(ERROR_MESSAGES.userNotFound)
     if (user.wallpaper !== fileName) {
       if (user.wallpaper)
@@ -227,6 +226,18 @@ export class UsersService {
     return RESPONSE_MESSAGES.success
   }
 
+  async deleteUsers(dto: DeleteUsersDto, traceId: string) {
+    this.clientService.deleteStatistics(dto.ids, traceId)
+    this.clientService.deleteWords(dto.ids, traceId)
+    await this.userRepo.destroy({
+      where: {
+        id: dto.ids,
+      },
+    })
+
+    return RESPONSE_MESSAGES.success
+  }
+
   async getUserByEmail(email: string) {
     return await this.userRepo.findOne({ where: { email } })
   }
@@ -238,7 +249,11 @@ export class UsersService {
       include: [Settings],
     })
   }
-  async getUserById(id: string, privateFields: boolean = false) {
+  async getUserById(
+    id: string,
+    traceId: string,
+    privateFields: boolean = false,
+  ) {
     return await this.userRepo.findByPk(id, {
       attributes: {
         exclude: privateFields
@@ -248,7 +263,7 @@ export class UsersService {
       include: [Settings],
     })
   }
-  async getAllUser(userId: string) {
+  async getAllUser(userId: string, traceId: string) {
     return await this.userRepo.findAll({
       where: {
         id: {
@@ -289,26 +304,27 @@ export class UsersService {
       },
     })
   }
-  async deleteUserById(id: string) {
+  async deleteUserById(id: string, traceId: string) {
+    this.clientService.deleteStatistics([id], traceId)
     return await this.userRepo.destroy({ where: { id } })
   }
 
-  async checkUniqueEmail(email: string) {
+  async checkUniqueEmail(email: string, traceId: string) {
     const userByEmail = await this.getUserByEmail(email)
     if (userByEmail) {
       if (userByEmail.confirmed) {
         throw new BadRequestException(ERROR_MESSAGES.hasEmail)
       }
-      await this.deleteUserById(userByEmail.id)
+      await this.deleteUserById(userByEmail.id, traceId)
     }
   }
-  async checkUniqueNickName(nickName: string) {
+  async checkUniqueNickName(nickName: string, traceId: string) {
     const userByNickName = await this.getUserByNickName(nickName)
     if (userByNickName) {
       if (userByNickName.confirmed) {
         throw new BadRequestException(ERROR_MESSAGES.hasNickName)
       }
-      await this.deleteUserById(userByNickName.id)
+      await this.deleteUserById(userByNickName.id, traceId)
     }
   }
   private async sendMail(

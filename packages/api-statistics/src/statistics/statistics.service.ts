@@ -42,6 +42,9 @@ export class StatisticsService {
   async deleteStatistic(userId: string, traceId: string) {
     return await this.statisticRepo.destroy({ where: { userId } })
   }
+  async deleteStatistics(userIds: string, traceId: string) {
+    return await this.statisticRepo.destroy({ where: { userId: userIds } })
+  }
 
   async getStatisticByUserId(userId: string, traceId: string) {
     return await this.statisticRepo.findOne({

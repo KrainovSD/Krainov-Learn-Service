@@ -28,7 +28,8 @@ import {
   UPLOAD_PATH_AVATAR,
   UPLOAD_PATH_WALLPAPER,
 } from './users.constants'
-import { UploadInterceptor } from '../utils'
+import { TraceId, UploadInterceptor, UserId } from '../utils'
+import { DeleteUsersDto } from './dto/delete-users.dto'
 
 @ApiTags('Пользователи')
 @Controller(`${API_VERSION.v1}/user`)
@@ -36,53 +37,69 @@ export class UsersController {
   constructor(private readonly userServise: UsersService) {}
 
   @Get('/:id')
-  getUser(@Param() getUserDto: GetUserDto) {
-    return this.userServise.getUserById(getUserDto.id)
+  getUser(@Param() getUserDto: GetUserDto, @TraceId() traceId: string) {
+    return this.userServise.getUserById(getUserDto.id, traceId)
   }
 
   @UseGuards(AuthGuard())
   @Get('')
-  getYourself(@Req() request: TRequest) {
-    return this.userServise.getUserById(request.user.id, true)
+  getYourself(@UserId() userId: string, @TraceId() traceId: string) {
+    return this.userServise.getUserById(userId, traceId, true)
   }
 
   @UseGuards(AuthGuard())
   @Get('/all')
-  getAllUser(@Req() request: TRequest) {
-    return this.userServise.getAllUser(request.user.id)
+  getAllUser(@UserId() userId: string, @TraceId() traceId: string) {
+    return this.userServise.getAllUser(userId, traceId)
   }
 
   @Post('/pass')
-  callChangePass(@Body() dto: CallChangePassDto) {
-    return this.userServise.callChangePass(dto.email)
+  callChangePass(
+    @Body() dto: CallChangePassDto,
+    @UserId() userId: string,
+    @TraceId() traceId: string,
+  ) {
+    return this.userServise.callChangePass(dto.email, userId, traceId)
   }
   @Put('/pass')
-  changePass(@Body() dto: ChangePassDto) {
-    return this.userServise.changePass(dto)
+  changePass(
+    @Body() dto: ChangePassDto,
+    @UserId() userId: string,
+    @TraceId() traceId: string,
+  ) {
+    return this.userServise.changePass(dto, userId, traceId)
   }
 
   @UseGuards(AuthGuard())
   @Post('/email')
-  callChangeEmail(@Req() request: TRequest) {
-    return this.userServise.callChangeEmail(request.user.id)
+  callChangeEmail(@UserId() userId: string, @TraceId() traceId: string) {
+    return this.userServise.callChangeEmail(userId, traceId)
   }
 
   @UseGuards(AuthGuard())
   @Put('/email')
-  changeEmail(@Body() dto: ChangeEmailDto, @Req() request: TRequest) {
-    return this.userServise.changeEmail(dto, request.user.id)
+  changeEmail(
+    @Body() dto: ChangeEmailDto,
+    @UserId() userId: string,
+    @TraceId() traceId: string,
+  ) {
+    return this.userServise.changeEmail(dto, userId, traceId)
   }
 
   @UseGuards(AuthGuard({ subscription: true }))
   @Put('/nickName')
-  changeNickName(@Body() dto: ChangeNickNameDto, @Req() request: TRequest) {
-    return this.userServise.changeNickName(dto.nickName, request.user.id)
+  changeNickName(
+    @Body() dto: ChangeNickNameDto,
+    @UserId() userId: string,
+    @TraceId() traceId: string,
+  ) {
+    return this.userServise.changeNickName(dto.nickName, userId, traceId)
   }
 
   @UseGuards(AuthGuard())
   @Delete('/avatar')
-  clearAvatar(@Req() request: TRequest) {
-    return this.userServise.clearAvatar(request.user.id)
+  clearAvatar(@UserId() userId: string, @TraceId() traceId: string) {
+    return this.userServise.clearAvatar(userId, traceId)
   }
 
   @ApiConsumes('multipart/form-data')
@@ -111,13 +128,14 @@ export class UsersController {
     return this.userServise.updateAvatar(
       request.incomingFileName,
       request.user.id,
+      request.traceId,
     )
   }
 
   @UseGuards(AuthGuard())
   @Delete('/wallpaper')
-  clearWallpaper(@Req() request: TRequest) {
-    return this.userServise.clearWallpaper(request.user.id)
+  clearWallpaper(@UserId() userId: string, @TraceId() traceId: string) {
+    return this.userServise.clearWallpaper(userId, traceId)
   }
 
   @ApiConsumes('multipart/form-data')
@@ -146,6 +164,13 @@ export class UsersController {
     return this.userServise.updateWallpaper(
       request.incomingFileName,
       request.user.id,
+      request.traceId,
     )
+  }
+
+  @UseGuards(AuthGuard({ roles: 'admin' }))
+  @Post('/delete')
+  deleteUsers(@Body() dto: DeleteUsersDto, @TraceId() traceId: string) {
+    return this.userServise.deleteUsers(dto, traceId)
   }
 }

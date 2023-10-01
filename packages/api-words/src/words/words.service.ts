@@ -283,6 +283,7 @@ export class WordsService {
     const categories = await this.categoriesService.getCategoriesNameByIds(ids)
     return categories.map((category) => category.name)
   }
+  async deleteAllUsersInstance(userIds: string[], traceId: string) {}
 
   async getWordsCategory(categoryId: string, userId: string, traceId: string) {
     const category = await this.categoriesService.getCategoryById(categoryId)

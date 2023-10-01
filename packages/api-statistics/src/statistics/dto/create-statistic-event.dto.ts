@@ -1,9 +1,9 @@
 import { GetMessageDto } from '../../utils'
 import { IsUUID } from 'class-validator'
 
-class CRUDStatistic {
+class CreateStatistic {
   @IsUUID('4', { message: 'Должно быть в формате UUID' })
   userId!: string
 }
 
-export class CRUDStatisticEventDto extends GetMessageDto(CRUDStatistic) {}
+export class CreateStatisticEventDto extends GetMessageDto(CreateStatistic) {}

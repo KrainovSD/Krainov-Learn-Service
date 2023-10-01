@@ -1,7 +1,8 @@
 import { Controller } from '@nestjs/common'
 import { WordsService } from './words.service'
-import { MessagePattern, Payload } from '@nestjs/microservices'
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices'
 import { GetStreakMessageDto } from './dto/get-streak-message.dto'
+import { DeleteWordsEventDto } from './dto/delete-word-event.dto'
 
 @Controller()
 export class WordsController {
@@ -10,5 +11,10 @@ export class WordsController {
   @MessagePattern('get_streak')
   getStreak(@Payload() dto: GetStreakMessageDto) {
     return this.wordsService.checkStreak(dto.data.userId, dto.traceId)
+  }
+
+  @EventPattern('delete_words')
+  deleteWords(@Payload() dto: DeleteWordsEventDto) {
+    this.wordsService.deleteAllUsersInstance(dto.data.userIds, dto.traceId)
   }
 }

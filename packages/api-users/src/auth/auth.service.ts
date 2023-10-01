@@ -29,8 +29,8 @@ export class AuthService {
   ) {}
 
   async register(userDto: CreateUserDto, traceId: string) {
-    await this.userService.checkUniqueEmail(userDto.email)
-    await this.userService.checkUniqueNickName(userDto.nickName)
+    await this.userService.checkUniqueEmail(userDto.email, traceId)
+    await this.userService.checkUniqueNickName(userDto.nickName, traceId)
     const createUserDto = await this.getCreateUserDto(userDto)
     await this.userService.createUser(createUserDto, traceId)
 

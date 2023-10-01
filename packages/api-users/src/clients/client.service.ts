@@ -1,11 +1,15 @@
 import { service, services } from '../const'
-import { Inject, Injectable } from '@nestjs/common'
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { timeout } from 'rxjs'
-import { events, statistics } from './client.constants'
+import { events, statistics, words } from './client.constants'
 import { LoggerService, logger } from 'src/utils'
 
-type ClientsKeys = 'statistics'
+type ClientsKeys = 'statistics' | 'words'
 
 type MessageValue<T = unknown> = {
   traceId: string | undefined
@@ -13,18 +17,29 @@ type MessageValue<T = unknown> = {
   data: T
 }
 
-type CRUDStatisticOptions = {
+type CreateStatisticOptions = {
   userId: string
+}
+
+type DeleteStatisticsOptions = {
+  userIds: string[]
+}
+
+type DeleteWordsOptions = {
+  userIds: string[]
 }
 
 @Injectable()
 export class ClientService {
   private clients: Record<ClientsKeys, ClientProxy> = {
     statistics: this.clientStatistics,
+    words: this.clientWords,
   }
 
   constructor(
     @Inject(services.statistics.alias) private clientStatistics: ClientProxy,
+    @Inject(services.words.alias) private clientWords: ClientProxy,
+
     @Inject(logger.LOGGER_PROVIDER_MODULE)
     private readonly logger: LoggerService,
   ) {}
@@ -85,33 +100,46 @@ export class ClientService {
   }
 
   async createStatistics(userId: string, traceId: string) {
-    const args: MessageValue<CRUDStatisticOptions> = {
+    const args: MessageValue<CreateStatisticOptions> = {
       traceId,
       sendBy: service,
       data: {
         userId,
       },
     }
-    this.sendEventToMicroservice(
+
+    await this.sendEventToMicroservice(
       statistics,
       events.createStatistics,
       args,
       traceId,
     )
   }
-  async deleteStatistics(userId: string, traceId: string) {
-    const args: MessageValue<CRUDStatisticOptions> = {
+  async deleteStatistics(userIds: string[], traceId: string) {
+    const args: MessageValue<DeleteStatisticsOptions> = {
       traceId,
       sendBy: service,
       data: {
-        userId,
+        userIds,
       },
     }
-    this.sendEventToMicroservice(
+    await this.sendEventToMicroservice(
       statistics,
       events.deleteStatistics,
       args,
       traceId,
     )
+  }
+
+  async deleteWords(userIds: string[], traceId: string) {
+    const args: MessageValue<DeleteWordsOptions> = {
+      traceId,
+      sendBy: service,
+      data: {
+        userIds,
+      },
+    }
+
+    await this.sendEventToMicroservice(words, events.deleteWords, args, traceId)
   }
 }

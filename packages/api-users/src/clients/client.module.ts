@@ -10,6 +10,9 @@ import { getClientsOptions } from './client.options'
     ClientsModule.register(
       getClientsOptions(services.statistics.alias, services.statistics.queue),
     ),
+    ClientsModule.register(
+      getClientsOptions(services.words.alias, services.words.queue),
+    ),
   ],
   controllers: [],
   providers: [ClientService],
