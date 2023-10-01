@@ -40,7 +40,6 @@ export function AuthGuard(options?: AuthGuardOptions) {
       const now = new Date()
       const subscriptionDate = new Date(subscription)
 
-      //FIXME: проверить в каком формате возвращается из постгри переменные с Date
       return subscriptionDate > now
     }
 
