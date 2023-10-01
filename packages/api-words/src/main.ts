@@ -11,7 +11,7 @@ import { join } from 'path'
 import fastifyHelmet from '@fastify/helmet'
 import multipart from '@fastify/multipart'
 import { MicroserviceOptions, Transport } from '@nestjs/microservices'
-import { API_VERSION } from './const'
+import { API_VERSION, services } from './const'
 
 async function start() {
   const PORT = process.env.PORT || 3002
@@ -71,7 +71,7 @@ async function start() {
             password: process.env.RABBIT_PASSWORD ?? 'guest',
           },
         ],
-        queue: process.env.RABBIT_QUEUE_WORDS,
+        queue: services.words.queue,
         queueOptions: {
           durable: false,
         },

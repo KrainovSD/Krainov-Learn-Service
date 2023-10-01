@@ -173,7 +173,7 @@ export class LoggerService {
   answerError(options: AnswerErrorOptions) {
     const { description, name, stack } = this.getErrorInfo(options.error)
 
-    this.logger.info('answer error', {
+    this.logger.warn('answer error', {
       traceId: options.traceId,
       data: options.data,
       consumer: options.consumer,

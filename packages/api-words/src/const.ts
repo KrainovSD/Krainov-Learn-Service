@@ -9,9 +9,18 @@ export const API_VERSION = {
 export const service = 'words'
 
 export const services = {
-  users: 'USERS_SERVICE',
-  statistics: 'STATISTICS_SERVICE',
-  words: 'WORDS_SERVICE',
+  users: {
+    alias: 'USERS_SERVICE',
+    queue: 'users',
+  },
+  statistics: {
+    alias: 'STATISTICS_SERVICE',
+    queue: 'statistics',
+  },
+  words: {
+    alias: 'WORDS_SERVICE',
+    queue: 'words',
+  },
 }
 
 export const SWAGGER_DESCRIPTION = {

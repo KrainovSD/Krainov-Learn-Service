@@ -30,7 +30,7 @@ export function useWebsocket<T extends Record<string, any>>({
   function onOpen(e: Event) {
     countErrorReconecting.current = 0
     setIsLoading(false)
-    sendMessage('auth', { token: '232' })
+    sendMessage('auth', { token })
     handleOpen?.()
   }
   function onMessage(e: MessageEvent) {

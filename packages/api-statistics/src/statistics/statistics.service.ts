@@ -75,7 +75,7 @@ export class StatisticsService {
   }
   async setStreak(statistic: Statistic | null) {
     const { startNow } = utils.date.getToday()
-    if (!statistic) return null
+    if (!statistic) return false
 
     if (
       (statistic.lastStreakDate && statistic.lastStreakDate < startNow) ||
@@ -96,7 +96,7 @@ export class StatisticsService {
       return true
     }
 
-    return null
+    return false
   }
   async registerStreak(
     streakInfo: StreakInfo,
@@ -110,5 +110,6 @@ export class StatisticsService {
 
     if (Object.values(streakInfo).every((result) => result))
       return await this.setStreak(statistic)
+    return false
   }
 }

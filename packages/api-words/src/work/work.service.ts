@@ -1,3 +1,4 @@
+import { WsException } from '@nestjs/websockets'
 import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { CategoriesService } from '../categories/categories.service'
 import { KnownsService } from '../knowns/knowns.service'
@@ -52,58 +53,54 @@ export class WorkService {
     private readonly clientsService: ClientService,
   ) {}
 
-  async getUserInfoFromClient(dto: AuthWorkDto, traceId: string) {
-    try {
-      const authHeader = dto.token
-      if (!authHeader || typeof authHeader !== 'string') throw new Error()
-      const user = await this.clientsService.getUserInfo(authHeader, traceId)
-      return user
-    } catch (e) {
-      return false
-    }
-  }
-  closeClientConnection(code: number, reason: string, client: Client) {
-    client.close(code, reason)
-  }
-  sendTargetMessage(client: Client, event: string, message: any) {
+  private formateMessage(event: string, message: any) {
     if (!typings.isArray(message) && !typings.isObject(message)) {
       message = { message }
     }
+    return {
+      event,
+      data: message,
+    }
+  }
 
-    client.send(
-      JSON.stringify({
-        event,
-        data: message,
-      }),
-    )
+  closeClientConnection(code: number, reason: string, client: Client) {
+    client.close(code, reason)
   }
-  validateMessage(client: Client, dto: any, withId?: boolean) {
-    if (!this.validateClient(client, withId)) {
-      return false
-    }
+  // sendTargetMessage(client: Client, event: string, message: any) {
+  //   if (!typings.isArray(message) && !typings.isObject(message)) {
+  //     message = { message }
+  //   }
 
-    if (!dto) {
-      this.sendTargetMessage(client, 'bad_request', 'bad request')
-      return false
-    }
-    return true
-  }
-  validateClient(client: Client, withId?: boolean) {
-    if (!client.user) {
-      this.closeClientConnection(1008, 'no auth', client)
-      return false
-    }
-    if (withId && !client.user) {
-      this.sendTargetMessage(client, 'bad_request', 'bad request')
-      return false
-    }
-    return true
-  }
+  //   client.send(
+  //     JSON.stringify({
+  //       event,
+  //       data: message,
+  //     }),
+  //   )
+  // }
   async handleDisconnect(client: Client) {
+    if (!client.id) return
+
     const cache = await this.cacheService.get<CacheWords>(client.id)
     if (!cache) return
     cache.countConnection--
     await this.cacheService.set(client.id, cache)
+  }
+  async getUserInfoFromClient(dto: AuthWorkDto, client: Client) {
+    const authHeader = dto.token
+    const user = await this.clientsService.getUserInfo(
+      authHeader,
+      client.traceId,
+    )
+
+    if (!user)
+      throw new WsException({
+        status: 1008,
+        message: 'Required Authorization',
+      })
+
+    client.user = user
+    return this.formateMessage('auth', 'success')
   }
 
   async startSession(client: Client, payload: StartWorkDto) {
@@ -111,8 +108,7 @@ export class WorkService {
     const cache = await this.cacheService.get<CacheWords>(client.id)
 
     if (cache) {
-      await this.defineNextWord(client, cache)
-      return
+      return await this.defineNextWord(client, cache)
     }
 
     switch (payload.type) {
@@ -125,8 +121,7 @@ export class WorkService {
           ),
         )
 
-        await this.defineNextWord(client, cache, words)
-        break
+        return await this.defineNextWord(client, cache, words)
       }
       case 'learn': {
         const words = _.shuffle(
@@ -136,8 +131,7 @@ export class WorkService {
             client.traceId,
           ),
         )
-        await this.defineNextWord(client, cache, words)
-        break
+        return this.defineNextWord(client, cache, words)
       }
       case 'repeat': {
         const words = _.shuffle(
@@ -147,8 +141,7 @@ export class WorkService {
             client.traceId,
           ),
         )
-        await this.defineNextWord(client, cache, words)
-        break
+        return this.defineNextWord(client, cache, words)
       }
       case 'learnOff': {
         const words = _.shuffle(
@@ -159,13 +152,10 @@ export class WorkService {
             payload.categories,
           ),
         )
-        await this.defineNextWord(client, cache, words)
-        break
+        return this.defineNextWord(client, cache, words)
       }
       default: {
-        client.id = undefined
-        this.sendTargetMessage(client, 'error', 'bad request')
-        break
+        throw new WsException({ message: 'bad request', status: 1011 })
       }
     }
   }
@@ -182,8 +172,7 @@ export class WorkService {
           kind,
           client.traceId,
         )
-        await this.setWordCacheAfterCheck(client, result, payload.id)
-        break
+        return await this.setWordCacheAfterCheck(client, result, payload.id)
       }
       case 'learn': {
         const result = await this.wordsService.checkLearn(
@@ -193,8 +182,7 @@ export class WorkService {
           kind,
           client.traceId,
         )
-        await this.setWordCacheAfterCheck(client, result, payload.id)
-        break
+        return await this.setWordCacheAfterCheck(client, result, payload.id)
       }
       case 'repeat': {
         const result = await this.wordsService.checkRepeat(
@@ -204,25 +192,21 @@ export class WorkService {
           kind,
           client.traceId,
         )
-        await this.setWordCacheAfterCheck(client, result, payload.id)
-        break
+        return await this.setWordCacheAfterCheck(client, result, payload.id)
       }
       case 'learnOff': {
         const cache = await this.cacheService.get<CacheWords>(client.id)
-        if (!cache) throw new BadRequestException()
+        if (!cache)
+          throw new WsException({ message: 'bad request', status: 1011 })
 
         const result =
           cache.words[cache.currentIndex][
             kind === 'normal' ? 'word' : 'translate'
           ] === payload.option
-        await this.setWordCacheAfterCheck(client, result, payload.id)
-
-        break
+        return await this.setWordCacheAfterCheck(client, result, payload.id)
       }
       default: {
-        client.id = undefined
-        this.sendTargetMessage(client, 'error', 'bad request')
-        break
+        throw new WsException({ message: 'bad request', status: 1011 })
       }
     }
   }
@@ -232,14 +216,14 @@ export class WorkService {
     id: string,
   ) {
     const cache = await this.cacheService.get<CacheWords>(client.id)
-    if (!cache) throw new BadRequestException()
+    if (!cache) throw new WsException({ message: 'bad request', status: 1011 })
 
     if (!result) cache.errors.push(id)
     cache.currentIndex++
 
     await this.cacheService.set(client.id, cache)
 
-    this.sendTargetMessage(client, 'answer', { result })
+    return this.formateMessage('answer', { result })
   }
 
   async defineNextWord(
@@ -252,15 +236,12 @@ export class WorkService {
     /* if restore session */
     if (cache) {
       if (cache.countConnection <= 0) {
-        this.sendTargetMessage(
-          client,
+        return this.formateMessage(
           'restore',
           'do you want restore past session?',
         )
-        return
       }
-      await this.sendNextWord(client, cache, type, kind)
-      return
+      return await this.sendNextWord(client, cache, type, kind)
     }
 
     cache = await this.cacheService.get<CacheWords>(client.id)
@@ -281,17 +262,15 @@ export class WorkService {
         countConnection: 1,
       }
       await this.cacheService.set(client.id, cache)
-      await this.sendNextWord(client, cache, type, kind)
-      return
+      return await this.sendNextWord(client, cache, type, kind)
     }
 
     /* if nothing have */
-    if (!cache) throw new BadRequestException()
+    if (!cache) throw new WsException({ message: 'bad request', status: 1011 })
 
     /* if work complete */
     if (cache.currentIndex > cache.maxLength) {
-      await this.sendNextWord(client, cache, type, kind)
-      return
+      return await this.sendNextWord(client, cache, type, kind)
     }
 
     /* if work continue */
@@ -301,7 +280,7 @@ export class WorkService {
         : await this.getRandomOptions(cache.words[cache.currentIndex].translate)
     cache.options = options
     await this.cacheService.set(client.id, cache)
-    await this.sendNextWord(client, cache, type, kind)
+    return await this.sendNextWord(client, cache, type, kind)
   }
   private async sendNextWord(
     client: Client,
@@ -311,13 +290,12 @@ export class WorkService {
   ) {
     /* if work complete */
     if (cache.currentIndex > cache.maxLength) {
-      this.completeSession(client, cache, type, kind)
-      return
+      return await this.completeSession(client, cache, type, kind)
     }
 
     /* if work continue */
 
-    this.sendTargetMessage(client, 'words', {
+    return this.formateMessage('words', {
       id: cache.words[cache.currentIndex].id,
       word:
         kind === 'normal'
@@ -325,7 +303,6 @@ export class WorkService {
           : cache.words[cache.currentIndex].word,
       options: cache.options,
     })
-    return
   }
 
   async restoreSession(client: Client, dto: RestoreWorkDto) {
@@ -333,14 +310,15 @@ export class WorkService {
 
     if (dto.isRestore) {
       const cache = await this.cacheService.get<CacheWords>(client.id)
-      if (!cache) throw new BadRequestException()
+      if (!cache)
+        throw new WsException({ message: 'bad request', status: 1011 })
       cache.countConnection =
         cache.countConnection <= 0 ? 1 : cache.countConnection + 1
       await this.cacheService.set(client.id, cache)
-      await this.startSession(client, { kind, type })
+      return await this.startSession(client, { kind, type })
     } else {
       await this.cacheService.del(client.id)
-      await this.startSession(client, { kind, type })
+      return await this.startSession(client, { kind, type })
     }
   }
 
@@ -409,8 +387,8 @@ export class WorkService {
       type === 'learnOff' ? null : streakResult ?? false,
     )
 
-    this.sendTargetMessage(client, 'complete', answer)
     await this.cacheService.del(client.id)
+    return this.formateMessage('complete', answer)
   }
 
   private getFinallyAnswer(
@@ -467,9 +445,7 @@ export class WorkService {
     kind: SessionType
   } {
     if (!client.id)
-      throw new BadRequestException(
-        'Id пользователя при получении данных о сессии не обнаружено',
-      )
+      throw new WsException({ message: 'bad request', status: 1011 })
 
     const id = client.id.split(':')
     const type = id[1]

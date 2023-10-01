@@ -39,8 +39,8 @@ export class ClientService {
   }
 
   constructor(
-    @Inject(services.users) private clientUsers: ClientProxy,
-    @Inject(services.statistics) private clientStatistics: ClientProxy,
+    @Inject(services.users.alias) private clientUsers: ClientProxy,
+    @Inject(services.statistics.alias) private clientStatistics: ClientProxy,
     @Inject(logger.LOGGER_PROVIDER_MODULE)
     private readonly logger: LoggerService,
   ) {}

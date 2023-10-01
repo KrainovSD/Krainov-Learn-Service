@@ -7,15 +7,22 @@ import {
   OnGatewayDisconnect,
   MessageBody,
   ConnectedSocket,
+  WsException,
 } from '@nestjs/websockets'
 import { Server } from 'ws'
 import { WorkService } from './work.service'
 import { StartWorkDto } from './dto/start.dto'
-import { UseFilters, UseInterceptors, UsePipes } from '@nestjs/common'
+import {
+  UseFilters,
+  UseGuards,
+  UseInterceptors,
+  UsePipes,
+} from '@nestjs/common'
 import { AuthWorkDto } from './dto/auth.dto'
 import { WordsWorkDro } from './dto/words.dto'
 import { RestoreWorkDto } from './dto/restore.dto'
-import { WSValidationPipe, logger, uuid } from '../utils'
+import { TraceId, WSValidationPipe, logger, uuid } from '../utils'
+import { WsAuthGuard } from 'src/utils/guards/ws-auth.guard'
 
 @WebSocketGateway({
   cors: {
@@ -37,93 +44,61 @@ export class WorkGateway
   handleConnection(client: Client) {}
 
   async handleDisconnect(client: Client) {
-    if (this.workService.validateClient(client, true)) {
-      await this.workService.handleDisconnect(client)
-    }
-    return
+    await this.workService.handleDisconnect(client)
   }
 
   @UsePipes(WSValidationPipe)
+  @SubscribeMessage('auth')
   @UseInterceptors(logger.LoggerInterceptor)
   @UseFilters(logger.LoggerFilter)
-  @SubscribeMessage('auth')
   async authWork(
     @ConnectedSocket() client: Client,
     @MessageBody() dto: AuthWorkDto,
   ) {
-    try {
-      const user = await this.workService.getUserInfoFromClient(
-        dto,
-        client.traceId,
-      )
-      if (user) {
-        client.user = user
-        this.workService.sendTargetMessage(
-          client,
-          'auth',
-          'successfull connect',
-        )
-        return
-      }
-      this.workService.closeClientConnection(1008, 'no auth', client)
-    } catch (error) {
-      this.workService.sendTargetMessage(client, 'error', error)
-    }
+    return this.workService.getUserInfoFromClient(dto, client)
   }
 
   @UsePipes(WSValidationPipe)
+  @UseGuards(WsAuthGuard())
+  @UseInterceptors(logger.LoggerInterceptor)
+  @UseFilters(logger.LoggerFilter)
   @SubscribeMessage('start')
   async startSession(
     @ConnectedSocket() client: Client,
     @MessageBody() dto: StartWorkDto,
   ) {
-    try {
-      if (!this.workService.validateMessage(client, dto)) return
-      await this.workService.startSession(client, dto)
-    } catch (error) {
-      console.log(error)
-      this.workService.sendTargetMessage(client, 'error', error)
-    }
+    return this.workService.startSession(client, dto)
   }
 
   @UsePipes(WSValidationPipe)
+  @UseGuards(WsAuthGuard())
+  @UseInterceptors(logger.LoggerInterceptor)
+  @UseFilters(logger.LoggerFilter)
   @SubscribeMessage('words')
   async checkWord(
     @ConnectedSocket() client: Client,
     @MessageBody() dto: WordsWorkDro,
   ) {
-    try {
-      if (!this.workService.validateMessage(client, dto, true)) return
-      await this.workService.checkWord(client, dto)
-    } catch (error) {
-      console.log(error)
-      this.workService.sendTargetMessage(client, 'error', error)
-    }
+    return this.workService.checkWord(client, dto)
   }
 
+  @UseGuards(WsAuthGuard())
+  @UseInterceptors(logger.LoggerInterceptor)
+  @UseFilters(logger.LoggerFilter)
   @SubscribeMessage('next')
   async wordsNext(@ConnectedSocket() client: Client) {
-    try {
-      if (!this.workService.validateClient(client, true)) return
-      await this.workService.defineNextWord(client)
-    } catch (error) {
-      console.log(error)
-      this.workService.sendTargetMessage(client, 'error', error)
-    }
+    return this.workService.defineNextWord(client)
   }
 
   @UsePipes(WSValidationPipe)
+  @UseGuards(WsAuthGuard())
+  @UseInterceptors(logger.LoggerInterceptor)
+  @UseFilters(logger.LoggerFilter)
   @SubscribeMessage('restore')
   async restoreSession(
     @ConnectedSocket() client: Client,
     @MessageBody() dto: RestoreWorkDto,
   ) {
-    try {
-      if (!this.workService.validateMessage(client, dto, true)) return
-      await this.workService.restoreSession(client, dto)
-    } catch (error) {
-      console.log(error)
-      this.workService.sendTargetMessage(client, 'error', error)
-    }
+    return this.workService.restoreSession(client, dto)
   }
 }

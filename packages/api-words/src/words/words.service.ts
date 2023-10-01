@@ -90,7 +90,7 @@ export class WordsService {
   }
   async registerStreak(userId: string, traceId: string) {
     const streakInfo = await this.checkStreak(userId, traceId)
-    return this.clientService.registerStreak(streakInfo, userId, traceId)
+    return await this.clientService.registerStreak(streakInfo, userId, traceId)
   }
   async completeCategory(
     completedCategoryInfo: Map<string, Date>,

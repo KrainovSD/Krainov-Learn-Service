@@ -79,7 +79,7 @@ export class LoggerInterceptor implements NestInterceptor {
 
     const client = ctx.getClient<Client>()
     const pattern = ctx.getPattern()
-    const body = ctx.getData()
+    const body = JSON.stringify(ctx.getData())
 
     if (!client.traceId) {
       client.traceId = uuid()

@@ -89,7 +89,7 @@ export class LoggerFilter implements ExceptionFilter {
 
     const client = ctx.getClient<Client>()
     const pattern = ctx.getPattern()
-    const body = ctx.getData()
+    const body = JSON.stringify(ctx.getData())
 
     const { status, validationInfo, message } = this.getErrorInfo(exception)
 
@@ -106,15 +106,15 @@ export class LoggerFilter implements ExceptionFilter {
       this.loggerService.errorWsMessage({
         body,
         client,
-        pattern,
+        pattern: !typings.isString(pattern) ? JSON.stringify(pattern) : pattern,
         error: exception,
       })
     else
       this.loggerService.warnWsMessage({
         client,
         body,
-        pattern,
-        description: validationInfo,
+        pattern: !typings.isString(pattern) ? JSON.stringify(pattern) : pattern,
+        description: validationInfo ?? message,
         errorStatus: status,
       })
 
