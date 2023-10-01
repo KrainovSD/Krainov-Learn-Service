@@ -45,7 +45,9 @@ export function AuthGuard(options?: AuthGuardOptions) {
 
       const req = context.switchToHttp().getRequest<FastifyRequest>()
 
-      req.traceId = req.traceId ?? uuid()
+      if (!req.traceId) {
+        req.traceId = uuid()
+      }
 
       try {
         const authHeader = req.headers.authorization

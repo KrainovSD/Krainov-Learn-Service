@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsString } from 'class-validator'
+import { IsUUID } from 'class-validator'
 
 export class AuthWorkDto {
   @ApiProperty({
@@ -7,7 +7,6 @@ export class AuthWorkDto {
     description: 'Токен авторизации',
     required: true,
   })
-  @IsNotEmpty({ message: 'Не должно быть пустым' })
-  @IsString({ message: 'Должно быть строкой' })
+  @IsUUID('4', { message: 'Должно быть в формате UUID' })
   token!: string
 }

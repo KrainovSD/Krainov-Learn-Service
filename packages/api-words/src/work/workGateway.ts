@@ -11,11 +11,11 @@ import {
 import { Server } from 'ws'
 import { WorkService } from './work.service'
 import { StartWorkDto } from './dto/start.dto'
-import { UsePipes } from '@nestjs/common'
+import { UseFilters, UseInterceptors, UsePipes } from '@nestjs/common'
 import { AuthWorkDto } from './dto/auth.dto'
 import { WordsWorkDro } from './dto/words.dto'
 import { RestoreWorkDto } from './dto/restore.dto'
-import { WSValidationPipe, uuid } from '../utils'
+import { WSValidationPipe, logger, uuid } from '../utils'
 
 @WebSocketGateway({
   cors: {
@@ -34,9 +34,7 @@ export class WorkGateway
 
   afterInit(server: Server): void {}
 
-  handleConnection(client: Client) {
-    client.traceId = uuid()
-  }
+  handleConnection(client: Client) {}
 
   async handleDisconnect(client: Client) {
     if (this.workService.validateClient(client, true)) {
@@ -46,6 +44,8 @@ export class WorkGateway
   }
 
   @UsePipes(WSValidationPipe)
+  @UseInterceptors(logger.LoggerInterceptor)
+  @UseFilters(logger.LoggerFilter)
   @SubscribeMessage('auth')
   async authWork(
     @ConnectedSocket() client: Client,

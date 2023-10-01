@@ -1,7 +1,9 @@
+import { WsException } from '@nestjs/websockets'
 import { Injectable, PipeTransform, ArgumentMetadata } from '@nestjs/common'
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
 import { ValidationExceptionMessage } from '../exceptions/validation.exception'
+import { typings } from '@krainov/kls-utils'
 
 @Injectable()
 export class WSValidationPipe implements PipeTransform<any> {
@@ -17,15 +19,19 @@ export class WSValidationPipe implements PipeTransform<any> {
       if (errors.length) {
         const messages = errors.reduce(
           (result: ValidationExceptionMessage, err) => {
-            if (!err.constraints) return result
-            result[err.property] = [...Object.values(err.constraints)]
+            if (!err.property) return result
+            result[err.property] = typings.isObject(err.constraints)
+              ? [...Object.values(err.constraints)]
+              : ['not valid']
             return result
           },
           {},
         )
-        //FIXME: Удалить после отладки
-        console.log(messages)
-        return null
+        throw new WsException({
+          messages,
+          status: 1007,
+          message: 'bad payload',
+        })
       }
     }
     return value

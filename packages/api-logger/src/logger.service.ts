@@ -3,40 +3,54 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston'
 import { Inject, Injectable } from '@nestjs/common'
 import { Logger } from 'winston'
 import { typings } from './helpers'
+import { Client } from './typings'
+
+export type ErrorType = unknown & Record<string, unknown>
 
 export type TError = {
-  error: unknown & Record<string, unknown>
+  error: ErrorType
 }
 
-export type EndRequest = {
+export type EndRequestOptions = {
   request: FastifyRequest
   status: number
   description?: string
 }
 
-export type EventData = {
+export type EventDataOptions = {
   traceId: string | undefined
   pattern: string | undefined
   sendBy: string | undefined
 }
 
-export type EventError = {
+export type EventErrorOptions = {
   description?: string
   body?: string
 } & TError
 
-export type SendEvent = {
+export type SendEventOptions = {
   traceId: string
   pattern: string
   data: string
   consumer: string
 }
 
-export type AnswerSuccess = {
+export type AnswerSuccessOptions = {
   answer: string
-} & SendEvent
+} & SendEventOptions
 
-export type AnswerError = SendEvent & TError
+export type AnswerErrorOptions = SendEventOptions & TError
+
+export type WsDataOptions = {
+  client: Client
+  pattern: string
+  body: string
+}
+
+export type WsWarnOptions = WsDataOptions & {
+  description?: string | undefined
+  errorStatus?: number
+}
 
 @Injectable()
 export class LoggerService {
@@ -53,66 +67,93 @@ export class LoggerService {
       curl,
     })
   }
-  endRequest(options: EndRequest) {
-    const requestInfo = this.getRequestInfo(options?.request)
-    const curl = this.getCurl(options?.request)
-    this.logger.info('end request', {
-      ...requestInfo,
-      status: options?.status,
-      description: options?.description,
-      curl,
-    })
-  }
-  errorRequest(
-    request: FastifyRequest,
-    error: unknown & Record<string, unknown>,
-  ) {
+  endRequest(options: EndRequestOptions) {
+    const { request, ...rest } = options
     const requestInfo = this.getRequestInfo(request)
     const curl = this.getCurl(request)
 
-    const { description, name, stack } = this.getErrorInfo(error)
+    this.logger.info('end request', {
+      ...requestInfo,
+      ...rest,
+      curl,
+    })
+  }
+  errorRequest(request: FastifyRequest, error: ErrorType) {
+    const requestInfo = this.getRequestInfo(request)
+    const curl = this.getCurl(request)
+
+    const errorInfo = this.getErrorInfo(error)
 
     this.logger.error('error request', {
-      name,
-      stack,
       curl,
-      description,
+      ...errorInfo,
       ...requestInfo,
     })
   }
 
-  startEvent(options: EventData) {
+  startWsMessage(options: WsDataOptions) {
+    const { client, ...rest } = options
+    const clientInfo = this.getClientInfo(client)
+    this.logger.info('start ws message', {
+      ...clientInfo,
+      ...rest,
+    })
+  }
+  endWsMessage(options: WsDataOptions) {
+    const { client, ...rest } = options
+    const clientInfo = this.getClientInfo(client)
+    this.logger.info('end ws message', {
+      ...clientInfo,
+      ...rest,
+    })
+  }
+  warnWsMessage(options: WsWarnOptions) {
+    const { client, description, errorStatus, ...rest } = options
+
+    const clientInfo = this.getClientInfo(options.client)
+
+    this.logger.warn('warn ws message', {
+      status: errorStatus,
+      description,
+      ...clientInfo,
+      ...rest,
+    })
+  }
+  errorWsMessage(options: WsDataOptions & TError) {
+    const { client, error, ...rest } = options
+
+    const clientInfo = this.getClientInfo(client)
+    const errorInfo = this.getErrorInfo(error)
+
+    this.logger.error('error request', {
+      ...errorInfo,
+      ...clientInfo,
+      ...rest,
+    })
+  }
+
+  startEvent(options: EventDataOptions) {
     this.logger.info('start event', {
-      traceId: options?.traceId,
-      pattern: options?.pattern,
-      sendBy: options?.sendBy,
+      ...options,
     })
   }
-  endEvent(options: EventData) {
+  endEvent(options: EventDataOptions) {
     this.logger.info('end event', {
-      traceId: options?.traceId,
-      pattern: options?.pattern,
-      sendBy: options?.sendBy,
+      ...options,
     })
   }
-  errorEvent(options: EventData & EventError) {
-    const { description, name, stack } = this.getErrorInfo(
-      options.error,
-      options.description,
-    )
+  errorEvent(options: EventDataOptions & EventErrorOptions) {
+    const { error, description, ...rest } = options
+
+    const errorInfo = this.getErrorInfo(error, description)
 
     this.logger.error('error event', {
-      name,
-      stack,
-      description,
-      traceId: options?.traceId,
-      pattern: options?.pattern,
-      sendBy: options?.sendBy,
-      body: options?.body,
+      ...errorInfo,
+      ...rest,
     })
   }
 
-  sendEvent(options: SendEvent) {
+  sendEvent(options: SendEventOptions) {
     this.logger.info('send event', {
       traceId: options.traceId,
       data: options.data,
@@ -120,7 +161,7 @@ export class LoggerService {
       pattern: options.pattern,
     })
   }
-  answerSuccess(options: AnswerSuccess) {
+  answerSuccess(options: AnswerSuccessOptions) {
     this.logger.info('answer success', {
       traceId: options.traceId,
       data: options.data,
@@ -129,7 +170,7 @@ export class LoggerService {
       answer: options.answer,
     })
   }
-  answerError(options: AnswerError) {
+  answerError(options: AnswerErrorOptions) {
     const { description, name, stack } = this.getErrorInfo(options.error)
 
     this.logger.info('answer error', {
@@ -146,13 +187,17 @@ export class LoggerService {
   info(message: string, traceId: string) {
     this.logger.info(message, { traceId })
   }
-  error(error: unknown & Record<string, unknown>, message: string) {
-    const description = typings.isString(error?.message)
-      ? error.message
-      : 'unknown description'
-    const name = typings.isString(error?.name) ? error.name : 'unknown name'
-    const stack = typings.isString(error?.stack) ? error.stack : 'unknown stack'
+  error(error: ErrorType, message: string) {
+    const { description, name, stack } = this.getErrorInfo(error)
     this.logger.error(message, {
+      name,
+      stack,
+      description,
+    })
+  }
+  warn(error: ErrorType, message: string) {
+    const { description, name, stack } = this.getErrorInfo(error)
+    this.logger.warn(message, {
       name,
       stack,
       description,
@@ -185,10 +230,7 @@ export class LoggerService {
     const protocol = request.protocol
     return { ip, host, userId, traceId, protocol }
   }
-  private getErrorInfo(
-    error: unknown & Record<string, unknown>,
-    errorDescription?: string,
-  ) {
+  private getErrorInfo(error: ErrorType, errorDescription?: string) {
     const description = errorDescription
       ? errorDescription
       : typings.isString(error?.message)
@@ -198,5 +240,12 @@ export class LoggerService {
     const stack = typings.isString(error?.stack) ? error.stack : 'unknown stack'
 
     return { description, name, stack }
+  }
+  private getClientInfo(client: Client) {
+    return {
+      userId: client.user?.id,
+      traceId: client.traceId,
+      sessionId: client.id,
+    }
   }
 }

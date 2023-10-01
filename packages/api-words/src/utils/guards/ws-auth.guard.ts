@@ -1,12 +1,10 @@
-import { FastifyRequest } from 'fastify'
+import { WsException } from '@nestjs/websockets'
 import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
-  HttpException,
   Inject,
   Type,
-  UnauthorizedException,
   mixin,
 } from '@nestjs/common'
 import { ClientService } from 'src/clients/client.service'
@@ -18,7 +16,7 @@ type AuthGuardOptions = {
   subscription?: boolean
 }
 
-export function AuthGuard(options?: AuthGuardOptions) {
+export function WsAuthGuard(options?: AuthGuardOptions) {
   class AuthGuardClass implements CanActivate {
     constructor(
       @Inject(ClientService) private readonly clientService: ClientService,
@@ -39,47 +37,39 @@ export function AuthGuard(options?: AuthGuardOptions) {
       if (!subscription) return false
       const now = new Date()
       const subscriptionDate = new Date(subscription)
-
-      //FIXME: проверить в каком формате возвращается из постгри переменные с Date
       return subscriptionDate > now
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-      const requiredRoles = options?.roles
-      const isRequiredSub = options?.subscription
-      const req = context.switchToHttp().getRequest<FastifyRequest>()
-
-      if (!req.traceId) {
-        req.traceId = uuid()
-      }
-
       try {
-        const authHeader = req.headers.authorization
-        if (!authHeader || typeof authHeader !== 'string') throw new Error()
+        const requiredRoles = options?.roles
+        const isRequiredSub = options?.subscription
+        const client = context.switchToWs().getClient<Client>()
 
-        const user = await this.clientService.getUserInfo(
-          authHeader,
-          req.traceId,
-        )
-
-        if (!user) throw new Error()
-
-        if (requiredRoles && !this.checkRole(requiredRoles, user.role)) {
-          throw new ForbiddenException()
+        if (!client.traceId) {
+          client.traceId = uuid()
         }
-        if (isRequiredSub && !this.checkSubscription(user.subscription)) {
+
+        if (!client.user) {
           throw new ForbiddenException()
         }
 
-        req.user = user
+        if (requiredRoles && !this.checkRole(requiredRoles, client.user.role)) {
+          throw new ForbiddenException()
+        }
+        if (
+          isRequiredSub &&
+          !this.checkSubscription(client.user.subscription)
+        ) {
+          throw new ForbiddenException()
+        }
+
         return true
       } catch (e: unknown) {
-        const error = e as HttpException
-        const status = error?.getStatus?.()
-        if (status === 403) {
-          throw new ForbiddenException()
-        }
-        throw new UnauthorizedException()
+        throw new WsException({
+          status: 1008,
+          message: 'Required Authorization',
+        })
       }
     }
   }

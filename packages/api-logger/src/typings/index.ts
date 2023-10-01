@@ -1,5 +1,11 @@
 export {}
 
+export interface Client extends Record<string, any> {
+  user?: UserInfo
+  id?: string
+  traceId?: string
+}
+
 declare global {
   namespace Storage {
     interface MultipartFile {
