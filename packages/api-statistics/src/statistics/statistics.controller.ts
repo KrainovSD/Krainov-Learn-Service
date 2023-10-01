@@ -22,13 +22,13 @@ export class StatisticsController {
   constructor(private readonly statisticsService: StatisticsService) {}
 
   @EventPattern('delete_statistics')
-  delete(@Payload() dto: DeleteStatisticsDto, @Ctx() context: RmqContext) {
-    this.statisticsService.deleteStatistics(dto.data.userIds, dto.traceId)
+  async delete(@Payload() dto: DeleteStatisticsDto) {
+    await this.statisticsService.deleteStatistics(dto.data.userIds, dto.traceId)
   }
 
   @EventPattern('create_statistics')
-  create(@Payload() dto: CreateStatisticEventDto, @Ctx() context: RmqContext) {
-    this.statisticsService.createStatistic(dto.data.userId, dto.traceId)
+  async create(@Payload() dto: CreateStatisticEventDto) {
+    await this.statisticsService.createStatistic(dto.data.userId, dto.traceId)
   }
 
   @MessagePattern('register_streak')

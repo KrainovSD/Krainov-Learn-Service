@@ -70,6 +70,9 @@ export class LoggerInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap(() => {
+        const channel = rpcContext?.getChannelRef()
+        const originalMsg = rpcContext?.getMessage()
+        channel?.ack?.(originalMsg)
         this.loggerService.endEvent(eventData)
       }),
     )

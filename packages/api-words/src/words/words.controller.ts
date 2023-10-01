@@ -14,7 +14,10 @@ export class WordsController {
   }
 
   @EventPattern('delete_words')
-  deleteWords(@Payload() dto: DeleteWordsEventDto) {
-    this.wordsService.deleteAllUsersInstance(dto.data.userIds, dto.traceId)
+  async deleteWords(@Payload() dto: DeleteWordsEventDto) {
+    await this.wordsService.deleteAllUsersInstance(
+      dto.data.userIds,
+      dto.traceId,
+    )
   }
 }

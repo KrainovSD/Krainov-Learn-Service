@@ -59,6 +59,7 @@ async function start() {
             password: process.env.RABBIT_PASSWORD ?? 'guest',
           },
         ],
+        noAck: false,
         queue: services.statistics.queue,
         queueOptions: {
           durable: false,
