@@ -66,6 +66,10 @@ export class KnownsService {
 
     return RESPONSE_MESSAGES.success
   }
+  async deleteKnownsByUserIds(userIds: string[], traceId: string) {
+    await this.knownRepo.destroy({ where: { userId: userIds } })
+  }
+
   async updateKnown(dto: FullKnownsDto, userId: string, traceId: string) {
     const known = await this.getKnownById(dto.id)
     if (!known || (known && known.userId !== userId))

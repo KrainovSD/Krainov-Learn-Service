@@ -134,6 +134,9 @@ export class CategoriesService {
       this.wordsService.completeCategory(completedCategoryInfo, userId, traceId)
     }
   }
+  async deleteCategoriesByUserIds(userIds: string[], traceId: string) {
+    await this.categoryRepo.destroy({ where: { userId: userIds } })
+  }
 
   async getCategoryByNameAndUserId(name: string, userId: string) {
     return await this.categoryRepo.findOne({

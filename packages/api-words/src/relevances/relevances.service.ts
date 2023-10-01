@@ -64,6 +64,10 @@ export class RelevancesService {
 
     return RESPONSE_MESSAGES.success
   }
+  async deleteRelevancesByUserIds(userIds: string[], traceId: string) {
+    await this.relevanceRepo.destroy({ where: { userId: userIds } })
+  }
+
   async updateRelevance(words: string[], userId: string, traceId: string) {
     const updatedRelevances: RelevanceCreationArgs[] = (
       await this.getAllRelevancesByWordAndUserId(words, userId)

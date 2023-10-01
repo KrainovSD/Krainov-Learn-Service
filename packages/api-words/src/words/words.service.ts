@@ -283,7 +283,24 @@ export class WordsService {
     const categories = await this.categoriesService.getCategoriesNameByIds(ids)
     return categories.map((category) => category.name)
   }
-  async deleteAllUsersInstance(userIds: string[], traceId: string) {}
+  async deleteAllUsersInstance(userIds: string[], traceId: string) {
+    const categories = this.categoriesService.deleteCategoriesByUserIds(
+      userIds,
+      traceId,
+    )
+    const knowns = this.knownsService.deleteKnownsByUserIds(userIds, traceId)
+    const relevances = this.relevancesService.deleteRelevancesByUserIds(
+      userIds,
+      traceId,
+    )
+    const repeats = this.repeatsService.deleteRepeatsByUserIds(userIds, traceId)
+    const sessions = this.sessionsService.deleteSessionsByUserIds(
+      userIds,
+      traceId,
+    )
+
+    await Promise.all([categories, knowns, relevances, repeats, sessions])
+  }
 
   async getWordsCategory(categoryId: string, userId: string, traceId: string) {
     const category = await this.categoriesService.getCategoryById(categoryId)

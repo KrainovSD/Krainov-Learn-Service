@@ -21,6 +21,9 @@ export class SessionsService {
     })
     return RESPONSE_MESSAGES.success
   }
+  async deleteSessionsByUserIds(userIds: string[], traceId: string) {
+    await this.sessionsRepo.destroy({ where: { userId: userIds } })
+  }
 
   async getNormalKnownSessionForStreak(userId: string) {
     const { startNow, endNow } = utils.date.getToday()

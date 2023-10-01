@@ -63,6 +63,10 @@ export class RepeatsService {
 
     return RESPONSE_MESSAGES.success
   }
+  async deleteRepeatsByUserIds(userIds: string[], traceId: string) {
+    await this.repeatRepo.destroy({ where: { userId: userIds } })
+  }
+
   async studyRepeat(
     id: string,
     userId: string,
