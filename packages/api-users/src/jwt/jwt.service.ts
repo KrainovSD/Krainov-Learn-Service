@@ -14,9 +14,9 @@ export class JwtService {
     const token = authInfo[1]
 
     if (
+      process.env.SWAGGER_ACCOUNT_ID &&
       bearer === 'Basic' &&
-      token === process.env.SWAGGER_BASIC_AUTH &&
-      process.env.SWAGGER_ACCOUNT_ID
+      token === process.env.SWAGGER_BASIC_AUTH
     ) {
       const user: UserInfo = {
         id: process.env.SWAGGER_ACCOUNT_ID,

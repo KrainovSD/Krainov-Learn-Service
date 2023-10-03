@@ -44,7 +44,7 @@ async function start() {
     customSiteTitle: 'Swagger KLS Statistics',
   })
 
-  const microservice = app.connectMicroservice<MicroserviceOptions>(
+  app.connectMicroservice<MicroserviceOptions>(
     {
       transport: Transport.RMQ,
       options: {

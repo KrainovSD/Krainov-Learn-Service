@@ -65,6 +65,8 @@ export class Statistic extends Model<Statistic, StatisticCreationArgs> {
   @ApiProperty({
     example: '2004-10-19 10:23:54+02',
     description: 'Дата последнего повторения необходимых слов',
+    nullable: true,
+    type: Date,
   })
   @Column({
     type: DataType.DATE,
