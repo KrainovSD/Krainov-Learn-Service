@@ -4,9 +4,9 @@ import {
   BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common'
-import { CreateUserDto } from 'src/users/dto/create-user.dto'
-import { UsersService } from 'src/users/users.service'
-import { utils, node, uuid } from 'src/utils/helpers'
+import { CreateUserDto } from '../users/dto/create-user.dto'
+import { UsersService } from '../users/users.service'
+import { utils, node, uuid } from '../utils/helpers'
 import { ConfirmDto } from './dto/confirm.dto'
 import { MailerService } from '@nestjs-modules/mailer'
 import { LoginDto } from './dto/login.dto'
@@ -16,7 +16,7 @@ import {
   RESPONSE_MESSAGES,
   SALT_ROUNDS,
 } from '../const'
-import { JwtService } from 'src/jwt/jwt.service'
+import { JwtService } from '../jwt/jwt.service'
 
 export type TRequest = FastifyRequest
 

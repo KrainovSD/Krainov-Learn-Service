@@ -1,9 +1,9 @@
-import { AuthGuard, TraceId, UserId } from 'src/utils'
+import { AuthGuard, TraceId, UserId } from '../utils'
 import { FastifyRequest } from 'fastify'
 import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common'
 import { RepeatsService } from './repeats.service'
 import { CreateRepeatDto } from './dto/create-repeat-dto'
-import { API_VERSION } from 'src/const'
+import { API_VERSION } from '../const'
 import { RepeatMultipleIdDto } from './dto/repeat-multiple-id-dto'
 import { ApiTags } from '@nestjs/swagger'
 

@@ -4,9 +4,9 @@ import { Relevance, RelevanceCreationArgs } from './relevances.model'
 import { CreateRelevanceDto } from './dto/create-relevance-dto'
 import { KnownsService } from '../knowns/knowns.service'
 import { LearnsService } from '../learns/learns.service'
-import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { utils, uuid } from 'src/utils/helpers'
-import { WordsService } from 'src/words/words.service'
+import { ERROR_MESSAGES, RESPONSE_MESSAGES } from '../const'
+import { utils, uuid } from '../utils/helpers'
+import { WordsService } from '../words/words.service'
 
 @Injectable()
 export class RelevancesService {

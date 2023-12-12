@@ -7,12 +7,12 @@ import {
 import { Learns } from './learns.model'
 import { InjectModel } from '@nestjs/sequelize'
 import { CreateLearnDto } from './dto/create-learns-dto'
-import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { utils, uuid } from 'src/utils/helpers'
+import { ERROR_MESSAGES, RESPONSE_MESSAGES } from '../const'
+import { utils, uuid } from '../utils/helpers'
 import { UpdateLearnsDto } from './dto/update-learns.dto'
 import { Category } from '../categories/categories.model'
 import { Op } from 'sequelize'
-import { WordsService } from 'src/words/words.service'
+import { WordsService } from '../words/words.service'
 import { ALLOW_WORDS_AFTER_DELETE_FROM_START_CATEGORY } from './learns.constants'
 
 @Injectable()

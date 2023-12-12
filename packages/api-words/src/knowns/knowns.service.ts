@@ -6,13 +6,13 @@ import {
   forwardRef,
 } from '@nestjs/common'
 import { Knowns, KnownsCreationArgs } from './knowns.model'
-import { utils, uuid } from 'src/utils/helpers'
-import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
+import { utils, uuid } from '../utils/helpers'
+import { ERROR_MESSAGES, RESPONSE_MESSAGES } from '../const'
 import { UpdateKnownsDto } from './dto/update-knowns-dto'
 import { KnownsDto } from './dto/knowns-dto'
 import { FullKnownsDto } from './dto/full-known-dto'
 import { Op } from 'sequelize'
-import { WordsService } from 'src/words/words.service'
+import { WordsService } from '../words/words.service'
 
 @Injectable()
 export class KnownsService {

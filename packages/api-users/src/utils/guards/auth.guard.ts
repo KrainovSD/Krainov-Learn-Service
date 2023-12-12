@@ -10,7 +10,7 @@ import {
   mixin,
 } from '@nestjs/common'
 import { typings } from '@krainov/kls-utils'
-import { JwtService } from 'src/jwt/jwt.service'
+import { JwtService } from '../../jwt/jwt.service'
 import { uuid } from '../helpers'
 
 type AuthGuardOptions = {

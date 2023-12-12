@@ -9,7 +9,7 @@ import {
   UnauthorizedException,
   mixin,
 } from '@nestjs/common'
-import { ClientService } from 'src/clients/client.service'
+import { ClientService } from '../../clients/client.service'
 import { typings } from '@krainov/kls-utils'
 import { uuid } from '../helpers'
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { User } from 'src/users/users.model'
+import { User } from '../users/users.model'
 import { EXPIRES_ACCESS_TOKEN, EXPIRES_REFRESH_TOKEN } from './jwt.constants'
 import { JwtService as JWT } from '@nestjs/jwt'
 

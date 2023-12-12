@@ -3,7 +3,7 @@ import { RelevancesService } from './relevances.service'
 import { Module, forwardRef } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { Relevance } from './relevances.model'
-import { WordsModule } from 'src/words/words.module'
+import { WordsModule } from '../words/words.module'
 
 @Module({
   imports: [

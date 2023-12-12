@@ -12,13 +12,13 @@ import {
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { GetUserDto } from './dto/get-user.dto'
-import { AuthGuard } from 'src/utils/guards/auth.guard'
-import { TRequest } from 'src/auth/auth.service'
+import { AuthGuard } from '../utils/guards/auth.guard'
+import { TRequest } from '../auth/auth.service'
 import { CallChangePassDto } from './dto/call-change-pass.dto'
 import { ChangePassDto } from './dto/change-pass.dto'
 import { ChangeEmailDto } from './dto/change-email.dto'
 import { ChangeNickNameDto } from './dto/change-nick-name.dto'
-import { API_VERSION } from 'src/const'
+import { API_VERSION } from '../const'
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger'
 import {
   MAX_SIZE_AVATAR,

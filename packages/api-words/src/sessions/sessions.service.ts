@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common'
 import { CreateSessionDto } from './dto/create-session.dto'
 import { InjectModel } from '@nestjs/sequelize'
 import { Sessions } from './sessions.model'
-import { utils, uuid } from 'src/utils/helpers'
-import { RESPONSE_MESSAGES } from 'src/const'
+import { utils, uuid } from '../utils/helpers'
+import { RESPONSE_MESSAGES } from '../const'
 import { Op, Transaction } from 'sequelize'
 
 @Injectable()

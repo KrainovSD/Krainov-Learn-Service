@@ -2,9 +2,9 @@ import { AuthService } from './auth.service'
 import { AuthController } from './auth.controller'
 
 import { Module } from '@nestjs/common'
-import { UsersModule } from 'src/users/users.module'
+import { UsersModule } from '../users/users.module'
 import { MailerModule } from '@nestjs-modules/mailer'
-import { JwtModule } from 'src/jwt/jwt.module'
+import { JwtModule } from '../jwt/jwt.module'
 
 @Module({
   imports: [

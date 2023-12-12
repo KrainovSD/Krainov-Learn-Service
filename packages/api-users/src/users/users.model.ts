@@ -7,7 +7,7 @@ import {
   Sequelize,
   Table,
 } from 'sequelize-typescript'
-import { Settings } from 'src/settings/settings.model'
+import { Settings } from '../settings/settings.model'
 
 export interface UserCreationArgs {
   id: string

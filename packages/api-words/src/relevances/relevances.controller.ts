@@ -1,8 +1,8 @@
 import { FastifyRequest } from 'fastify'
 import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common'
-import { API_VERSION, SWAGGER_DESCRIPTION } from 'src/const'
+import { API_VERSION, SWAGGER_DESCRIPTION } from '../const'
 import { RelevancesService } from './relevances.service'
-import { AuthGuard } from 'src/utils/guards/auth.guard'
+import { AuthGuard } from '../utils/guards/auth.guard'
 import { CreateRelevanceDto } from './dto/create-relevance-dto'
 import { RelevanceMultipleIdDto } from './dto/relevance-multiple-id-dto'
 import {

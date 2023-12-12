@@ -7,7 +7,7 @@ import {
 import { ClientProxy } from '@nestjs/microservices'
 import { timeout } from 'rxjs'
 import { events, statistics, words } from './client.constants'
-import { LoggerService, logger } from 'src/utils'
+import { LoggerService, logger } from '../utils'
 
 type ClientsKeys = 'statistics' | 'words'
 

@@ -4,10 +4,10 @@ import { UsersController } from './users.controller'
 import { Module } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { User } from './users.model'
-import { Settings } from 'src/settings/settings.model'
-import { SettingsModule } from 'src/settings/settings.module'
-import { ClientModule } from 'src/clients/client.module'
-import { JwtModule } from 'src/jwt/jwt.module'
+import { Settings } from '../settings/settings.model'
+import { SettingsModule } from '../settings/settings.module'
+import { ClientModule } from '../clients/client.module'
+import { JwtModule } from '../jwt/jwt.module'
 
 @Module({
   imports: [

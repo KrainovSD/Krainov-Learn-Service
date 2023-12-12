@@ -9,12 +9,12 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { AuthService, TRequest } from './auth.service'
-import { CreateUserDto } from 'src/users/dto/create-user.dto'
+import { CreateUserDto } from '../users/dto/create-user.dto'
 import { ConfirmDto } from './dto/confirm.dto'
 import { ApiTags } from '@nestjs/swagger'
 import { LoginDto } from './dto/login.dto'
-import { API_VERSION, EXPIRES_COOKIES, RESPONSE_MESSAGES } from 'src/const'
-import { AuthGuard } from 'src/utils/guards/auth.guard'
+import { API_VERSION, EXPIRES_COOKIES, RESPONSE_MESSAGES } from '../const'
+import { AuthGuard } from '../utils/guards/auth.guard'
 import { FastifyReply } from 'fastify'
 
 type CookieOptions = {

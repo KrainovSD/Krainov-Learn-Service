@@ -9,9 +9,9 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { CategoriesService } from './categories.service'
-import { API_VERSION } from 'src/const'
+import { API_VERSION } from '../const'
 import { CreateCategoryDto } from './dto/create-category-dto'
-import { AuthGuard } from 'src/utils/guards/auth.guard'
+import { AuthGuard } from '../utils/guards/auth.guard'
 import { UpdateCategoryDto } from './dto/update-category-dro'
 import { CategoryIdDto } from './dto/category-id-dto'
 import { CategoryMultipleIdDto } from './dto/category-multiple-id-dto'

@@ -2,20 +2,20 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { User, UserCreationArgs } from './users.model'
 import { Op } from 'sequelize'
-import { SettingsService } from 'src/settings/settings.service'
-import { Settings } from 'src/settings/settings.model'
+import { SettingsService } from '../settings/settings.service'
+import { Settings } from '../settings/settings.model'
 import { MailerService } from '@nestjs-modules/mailer'
-import { fsOperation, utils, node, logger } from 'src/utils/helpers'
+import { fsOperation, utils, node, logger } from '../utils/helpers'
 import type { LoggerService } from '../utils/helpers'
 import {
   ERROR_MESSAGES,
   MAIL_MESSAGES_OPTION,
   RESPONSE_MESSAGES,
   SALT_ROUNDS,
-} from 'src/const'
+} from '../const'
 import { ChangePassDto } from './dto/change-pass.dto'
 import { ChangeEmailDto } from './dto/change-email.dto'
-import { ClientService } from 'src/clients/client.service'
+import { ClientService } from '../clients/client.service'
 import { UPLOAD_PATH_AVATAR, UPLOAD_PATH_WALLPAPER } from './users.constants'
 import { DeleteUsersDto } from './dto/delete-users.dto'
 

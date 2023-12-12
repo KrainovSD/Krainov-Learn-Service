@@ -22,7 +22,7 @@ import { AuthWorkDto } from './dto/auth.dto'
 import { WordsWorkDro } from './dto/words.dto'
 import { RestoreWorkDto } from './dto/restore.dto'
 import { TraceId, WSValidationPipe, logger, uuid } from '../utils'
-import { WsAuthGuard } from 'src/utils/guards/ws-auth.guard'
+import { WsAuthGuard } from '../utils/guards/ws-auth.guard'
 
 @WebSocketGateway({
   cors: {

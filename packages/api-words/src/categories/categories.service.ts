@@ -9,13 +9,13 @@ import { InjectModel } from '@nestjs/sequelize'
 import { Category, CategoryCreationArgs } from './categories.model'
 import { CreateCategoryDto } from './dto/create-category-dto'
 import { UpdateCategoryDto } from './dto/update-category-dro'
-import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { _, utils, uuid } from 'src/utils/helpers'
+import { ERROR_MESSAGES, RESPONSE_MESSAGES } from '../const'
+import { _, utils, uuid } from '../utils/helpers'
 import { CategoryIdDto } from './dto/category-id-dto'
 import { Learns } from '../learns/learns.model'
 import { Op } from 'sequelize'
 import { ALLOW_WORDS_TO_START_CATEGORY } from './categories.constants'
-import { WordsService } from 'src/words/words.service'
+import { WordsService } from '../words/words.service'
 
 @Injectable()
 export class CategoriesService {

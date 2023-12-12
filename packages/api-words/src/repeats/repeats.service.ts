@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Repeats, RepeatsCreationArgs } from './repeats.model'
-import { utils, uuid } from 'src/utils/helpers'
-import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
+import { utils, uuid } from '../utils/helpers'
+import { ERROR_MESSAGES, RESPONSE_MESSAGES } from '../const'
 import { RepeatDto } from './dto/repeat-dto'
 import { Op } from 'sequelize'
-import { WordsService } from 'src/words/words.service'
+import { WordsService } from '../words/words.service'
 
 @Injectable()
 export class RepeatsService {

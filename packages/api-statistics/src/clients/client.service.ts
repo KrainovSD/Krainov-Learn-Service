@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { timeout } from 'rxjs'
-import { service, services } from 'src/const'
+import { service, services } from '../const'
 import { messages, users, words } from './client.constants'
-import { LoggerService, logger } from 'src/utils/helpers'
+import { LoggerService, logger } from '../utils/helpers'
 
 type ClientsKeys = 'users' | 'words'
 

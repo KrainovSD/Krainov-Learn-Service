@@ -6,15 +6,15 @@ import {
   Injectable,
   forwardRef,
 } from '@nestjs/common'
-import { CategoriesService } from 'src/categories/categories.service'
-import { ClientService } from 'src/clients/client.service'
-import { ERROR_MESSAGES } from 'src/const'
-import { KnownsService } from 'src/knowns/knowns.service'
-import { LearnsService } from 'src/learns/learns.service'
-import { RelevancesService } from 'src/relevances/relevances.service'
-import { RepeatDto } from 'src/repeats/dto/repeat-dto'
-import { RepeatsService } from 'src/repeats/repeats.service'
-import { SessionsService } from 'src/sessions/sessions.service'
+import { CategoriesService } from '../categories/categories.service'
+import { ClientService } from '../clients/client.service'
+import { ERROR_MESSAGES } from '../const'
+import { KnownsService } from '../knowns/knowns.service'
+import { LearnsService } from '../learns/learns.service'
+import { RelevancesService } from '../relevances/relevances.service'
+import { RepeatDto } from '../repeats/dto/repeat-dto'
+import { RepeatsService } from '../repeats/repeats.service'
+import { SessionsService } from '../sessions/sessions.service'
 
 type CheckHasWordsOptions = {
   currentWord: string

@@ -1,5 +1,5 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common'
-import { API_VERSION, SWAGGER_DESCRIPTION } from 'src/const'
+import { API_VERSION, SWAGGER_DESCRIPTION } from '../const'
 import { StatisticsService } from './statistics.service'
 import { GetBestDto } from './dto/get-best-dto'
 import {
@@ -11,13 +11,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices'
-import { AuthGuard } from 'src/utils/guards/auth.guard'
-import {
-  BadRequestEntity,
-  TraceId,
-  UnauthorizedEntity,
-  UserId,
-} from 'src/utils'
+import { AuthGuard } from '../utils/guards/auth.guard'
+import { BadRequestEntity, TraceId, UnauthorizedEntity, UserId } from '../utils'
 import { RegisterStreakMessageDto } from './dto/register-streak-message.dto'
 import { CreateStatisticEventDto } from './dto/create-statistic-event.dto'
 import { DeleteStatisticsDto } from './dto/delete-statistics-event'

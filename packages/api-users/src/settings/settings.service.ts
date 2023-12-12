@@ -2,8 +2,8 @@ import { Injectable, BadRequestException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Settings } from './settings.model'
 import { UpdateSettingsDto } from './dto/update-settings.dto'
-import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { _, utils, uuid } from 'src/utils/helpers'
+import { ERROR_MESSAGES, RESPONSE_MESSAGES } from '../const'
+import { _, utils, uuid } from '../utils/helpers'
 
 @Injectable()
 export class SettingsService {

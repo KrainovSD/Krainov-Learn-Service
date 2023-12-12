@@ -7,12 +7,12 @@ import { LearnsService } from '../learns/learns.service'
 import { JwtService } from '@nestjs/jwt'
 import { StartWorkDto } from './dto/start.dto'
 import { AuthWorkDto } from './dto/auth.dto'
-import { typings, utils, _, cache, CacheService } from 'src/utils/helpers'
+import { typings, utils, _, cache, CacheService } from '../utils/helpers'
 import { WordsWorkDro } from './dto/words.dto'
 import { RestoreWorkDto } from './dto/restore.dto'
 import { SessionsService } from '../sessions/sessions.service'
-import { WordsService } from 'src/words/words.service'
-import { ClientService } from 'src/clients/client.service'
+import { WordsService } from '../words/words.service'
+import { ClientService } from '../clients/client.service'
 
 type WordItem = {
   id: string

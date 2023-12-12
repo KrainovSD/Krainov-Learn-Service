@@ -2,7 +2,7 @@ import { ClientsModule } from '@nestjs/microservices'
 import { ClientService } from './client.service'
 
 import { Module } from '@nestjs/common'
-import { services } from 'src/const'
+import { services } from '../const'
 import { getClientsOptions } from './client.options'
 
 @Module({

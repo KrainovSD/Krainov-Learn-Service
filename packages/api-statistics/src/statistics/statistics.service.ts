@@ -6,10 +6,10 @@ import {
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Statistic } from './statistics.model'
-import { CacheService, cache, utils, uuid } from 'src/utils/helpers'
+import { CacheService, cache, utils, uuid } from '../utils/helpers'
 import { UpdateStatisticDto } from './dto/update-statistic.dto'
-import { ERROR_MESSAGES, RESPONSE_MESSAGES } from 'src/const'
-import { ClientService } from 'src/clients/client.service'
+import { ERROR_MESSAGES, RESPONSE_MESSAGES } from '../const'
+import { ClientService } from '../clients/client.service'
 
 @Injectable()
 export class StatisticsService {
@@ -114,5 +114,9 @@ export class StatisticsService {
     if (Object.values(streakInfo).every((result) => result))
       return await this.setStreak(statistic)
     return false
+  }
+
+  test() {
+    return 'lol'
   }
 }

@@ -3,7 +3,7 @@ import { SequelizeModule } from '@nestjs/sequelize'
 import { Category } from './categories.model'
 import { CategoriesController } from './categories.controller'
 import { CategoriesService } from './categories.service'
-import { WordsModule } from 'src/words/words.module'
+import { WordsModule } from '../words/words.module'
 
 @Module({
   imports: [

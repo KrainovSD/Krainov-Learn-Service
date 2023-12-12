@@ -4,7 +4,7 @@ import { Module, forwardRef } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { Learns } from './learns.model'
 import { Category } from '../categories/categories.model'
-import { WordsModule } from 'src/words/words.module'
+import { WordsModule } from '../words/words.module'
 
 @Module({
   imports: [

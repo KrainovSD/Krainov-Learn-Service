@@ -8,9 +8,9 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { KnownsService } from './knowns.service'
-import { API_VERSION } from 'src/const'
+import { API_VERSION } from '../const'
 import { CreateKnownsDto } from './dto/create-knowns-dto'
-import { AuthGuard } from 'src/utils/guards/auth.guard'
+import { AuthGuard } from '../utils/guards/auth.guard'
 import { KnownMultipleIdDto } from './dto/known-multiple-id-dto'
 import { FullKnownsDto } from './dto/full-known-dto'
 import { ApiTags } from '@nestjs/swagger'
