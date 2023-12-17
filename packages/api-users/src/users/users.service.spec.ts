@@ -11,7 +11,7 @@ import { SettingsService } from '../settings/settings.service'
 import { ChangePassDto } from './dto/change-pass.dto'
 import { ChangeEmailDto } from './dto/change-email.dto'
 
-describe('Statistic Service', () => {
+describe('Users Service', () => {
   let usersService: UsersService
   let usersModel: typeof User
 

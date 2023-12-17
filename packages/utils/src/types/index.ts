@@ -7,3 +7,7 @@ export type DateType =
   | 'seconds'
   | 'minutes'
   | 'hours'
+export type DateGetterRule = {
+  increment: number
+  type: DateType
+}

@@ -1,1 +1,1 @@
-export const ALLOW_WORDS_TO_START_CATEGORY = 0
+export const ALLOW_WORDS_TO_START_CATEGORY = 2

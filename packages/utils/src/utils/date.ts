@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import today from 'dayjs/plugin/isToday'
 import yesterday from 'dayjs/plugin/isYesterday'
 import tomorrow from 'dayjs/plugin/isTomorrow'
-import { DateType, Maybe } from '../types'
+import { DateGetterRule, DateType, Maybe } from '../types'
 
 dayjs.extend(today)
 dayjs.extend(yesterday)
@@ -30,8 +30,8 @@ function isTomorrow(date: Maybe<string | Date>) {
   }
 }
 
-function getDate(increment: number, type: DateType) {
-  const result = new Date()
+function getDate(increment: number, type: DateType, date: Date = new Date()) {
+  const result = date
   switch (type) {
     case 'days': {
       result.setDate(result.getDate() + increment)
@@ -62,6 +62,24 @@ function getDate(increment: number, type: DateType) {
   }
 }
 
+function getDateByMultipleRule(rules: DateGetterRule[]) {
+  let result = new Date()
+  for (const rule of rules) {
+    getDate(rule.increment, rule.type, result)
+  }
+  return result
+}
+
+function differenceDate(
+  type: DateType,
+  firstDate: Date,
+  secondDate: Date = new Date(),
+  float: boolean = false,
+) {
+  const first = dayjs(firstDate)
+  return first.diff(secondDate, type, float)
+}
+
 function getTomorrow() {
   const tomorrow = new Date()
   tomorrow.setHours(0, 0, 0, 0)
@@ -87,6 +105,8 @@ export default {
   isTomorrow,
   isYesterday,
   getDate,
+  getDateByMultipleRule,
+  differenceDate,
   getToday,
   getYesterday,
   getTomorrow,

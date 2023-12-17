@@ -8,7 +8,7 @@ import { ConfirmDto } from './dto/confirm.dto'
 import { UsersService } from '../users/users.service'
 import { utils } from '@krainov/kls-utils'
 
-describe('Statistic Service', () => {
+describe('Auth Service', () => {
   let authService: AuthService
   let usersService: UsersService
 
