@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  forwardRef,
-} from '@nestjs/common'
+import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Statistic } from './statistics.model'
 import { CacheService, cache, utils, uuid } from '../utils/helpers'
@@ -89,10 +84,10 @@ export class StatisticsService {
       if (isYesterdayStreak) {
         statistic.currentStreak++
       } else {
-        statistic.bestSteak =
-          statistic.bestSteak < statistic.currentStreak
+        statistic.bestStreak =
+          statistic.bestStreak < statistic.currentStreak
             ? statistic.currentStreak
-            : statistic.bestSteak
+            : statistic.bestStreak
         statistic.currentStreak = 1
       }
       await statistic.save()
@@ -114,9 +109,5 @@ export class StatisticsService {
     if (Object.values(streakInfo).every((result) => result))
       return await this.setStreak(statistic)
     return false
-  }
-
-  test() {
-    return 'lol'
   }
 }

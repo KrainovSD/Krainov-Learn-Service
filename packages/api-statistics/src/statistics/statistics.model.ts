@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import {
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  Sequelize,
-  Table,
-} from 'sequelize-typescript'
+import { Column, DataType, Model, Sequelize, Table } from 'sequelize-typescript'
 
 type StatisticCreationArgs = {
   id: string
@@ -48,7 +41,7 @@ export class Statistic extends Model<Statistic, StatisticCreationArgs> {
     defaultValue: 0,
     allowNull: false,
   })
-  bestSteak!: number
+  bestStreak!: number
 
   @ApiProperty({
     example: 10,

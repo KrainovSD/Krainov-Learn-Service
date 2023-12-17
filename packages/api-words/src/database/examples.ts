@@ -21,7 +21,7 @@ const examples = {
         key: 'id',
       },
     },
-    bestSteak: {
+    bestStreak: {
       type: Sequelize.INTEGER,
       defaultValue: null,
       allowNull: true,

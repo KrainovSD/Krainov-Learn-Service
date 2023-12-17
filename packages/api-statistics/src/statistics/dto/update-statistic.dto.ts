@@ -9,7 +9,7 @@ export class UpdateStatisticDto {
   })
   @IsOptional()
   @IsInt({ message: 'Должно быть числом' })
-  bestSteak!: number | null
+  bestStreak!: number | null
 
   @ApiProperty({
     example: 10,
