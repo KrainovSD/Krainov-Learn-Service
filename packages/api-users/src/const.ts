@@ -52,6 +52,7 @@ export const ERROR_MESSAGES = {
   changeNickName: 'Менять псевдоним можно не чаще, чем раз в месяц',
   userNotFound: 'Информация о пользователе не найдена',
   infoNotFound: 'Служебная информация не найдена',
+  badEmail: 'Неверный адрес электронной почты',
 }
 export const MAIL_MESSAGES_OPTION = {
   changePassword: {

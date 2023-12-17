@@ -20,7 +20,10 @@
     "build:api-utils": "yarn workspace @krainov/kls-api-utils build",
     "build:api-logger": "yarn workspace @krainov/kls-api-logger build",
     "build:api-cache": "yarn workspace @krainov/kls-api-cache build",
-    "test:api": "yarn workspace @krainov/kls-api-statistics test && yarn workspace @krainov/kls-api-users test && yarn workspace @krainov/kls-api-words test"
+    "test:api": "yarn workspace @krainov/kls-api-statistics test && yarn workspace @krainov/kls-api-users test && yarn workspace @krainov/kls-api-words test",
+    "test:api-statistics": "yarn workspace @krainov/kls-api-statistics test",
+    "test:api-users": "yarn workspace @krainov/kls-api-users test",
+    "test:api-words": "yarn workspace @krainov/kls-api-words test"
   },
   "workspaces": [
     "packages/*"

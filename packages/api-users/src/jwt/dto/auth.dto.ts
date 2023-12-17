@@ -1,5 +1,5 @@
 import { GetMessageDto } from '../../utils'
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator'
+import { IsNotEmpty, IsString } from 'class-validator'
 
 class Auth {
   @IsNotEmpty({ message: 'Не должен быть пустым' })

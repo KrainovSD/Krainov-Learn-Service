@@ -1,12 +1,11 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { User, UserCreationArgs } from './users.model'
 import { Op } from 'sequelize'
 import { SettingsService } from '../settings/settings.service'
 import { Settings } from '../settings/settings.model'
 import { MailerService } from '@nestjs-modules/mailer'
-import { fsOperation, utils, node, logger } from '../utils/helpers'
-import type { LoggerService } from '../utils/helpers'
+import { fsOperation, utils, node } from '../utils/helpers'
 import {
   ERROR_MESSAGES,
   MAIL_MESSAGES_OPTION,
@@ -47,8 +46,7 @@ export class UsersService {
 
   async callChangePass(email: string, userId: string, traceId: string) {
     const user = await this.getUserByEmail(email)
-
-    if (!user) throw new BadRequestException('Неверный адрес электронной почты')
+    if (!user) throw new BadRequestException(ERROR_MESSAGES.badEmail)
 
     if (user.passwordChangeDate) {
       const lastDateChange = user.passwordChangeDate
@@ -128,6 +126,7 @@ export class UsersService {
   }
   async changeEmail(dto: ChangeEmailDto, userId: string, traceId: string) {
     const user = await this.getUserByEmailChangeKey(dto.key)
+
     if (
       !user ||
       (user && user.emailChangeTime && user.emailChangeTime < new Date()) ||

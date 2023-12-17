@@ -1,9 +1,5 @@
 import { service, services } from '../const'
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { timeout } from 'rxjs'
 import { events, statistics, words } from './client.constants'

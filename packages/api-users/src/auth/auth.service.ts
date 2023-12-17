@@ -46,6 +46,7 @@ export class AuthService {
 
   async confirm(confirmDto: ConfirmDto, traceId: string) {
     const user = await this.userService.getUserByEmailChangeKey(confirmDto.key)
+    console.log(user)
     if (
       !user ||
       (user && user?.emailChangeTime && user.emailChangeTime < new Date()) ||

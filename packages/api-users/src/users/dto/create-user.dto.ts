@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { Transform, TransformFnParams } from 'class-transformer'
 import { IsNotEmpty, IsString, Length, Matches, IsEmail } from 'class-validator'
 
 export class CreateUserDto {
